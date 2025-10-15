@@ -516,8 +516,9 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                                   </div>
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </td>
                   </tr>
