@@ -131,7 +131,7 @@ export default function AdminDashboard() {
 
   // Combine tours and ungrouped requests for filtering
   // Each ungrouped date shows as ONE row with all requests for that date
-  const allItems = [
+  const allItems: any[] = [
     ...tours,
     ...ungroupedRequests.map(ug => ({
       id: `ungrouped-${ug.requested_date}`,
@@ -141,6 +141,8 @@ export default function AdminDashboard() {
       guide: null,
       guide_id: null,
       confirmed_datetime: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       _isUngrouped: true,
       _totalPeople: ug.totalPeople,
       _requestCount: ug.requestCount
