@@ -62,7 +62,7 @@ async function importCSV() {
 
   console.log(`Found ${data.length} rows in CSV`)
 
-  const today = new Date('2025-10-14')
+  const today = new Date('2025-10-15')
   const futureBookings: any[] = []
   const guideNamesSet = new Set<string>()
 
@@ -76,6 +76,9 @@ async function importCSV() {
     const phone = row['Contact telephone (optional)']?.trim() || ''
 
     if (!email || !name || !partySize || !dateField) {
+      if (dateField) {
+        console.log(`Row ${index + 1}: Skipping - missing data (email:${!!email}, name:${!!name}, party:${!!partySize})`)
+      }
       return // Skip invalid rows
     }
 

@@ -196,3 +196,129 @@ export function tourConfirmedEmail(params: {
   `
 }
 
+
+export function adminNewRequestEmail(params: {
+  contactName: string
+  contactEmail: string
+  contactPhone: string
+  tourDate: string
+  groupSize: number
+  preferredGuide?: string
+  totalRequestsForDate: number
+  totalPeopleForDate: number
+}) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: 'Georgia', serif; color: #292524; line-height: 1.6; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #fafaf9; padding: 30px; border-radius: 0 0 8px 8px; }
+    .info-box { background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid #d6d3d1; }
+    .highlight { background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 style="margin: 0; font-weight: 300; font-size: 28px;">🔔 New Tour Request</h1>
+      <p style="margin: 10px 0 0 0; opacity: 0.9;">Action may be needed</p>
+    </div>
+    <div class="content">
+      <p>A new tour request has been submitted:</p>
+
+      <div class="info-box">
+        <h3 style="margin-top: 0; color: #1c1917;">Request Details:</h3>
+        <p style="margin: 5px 0;"><strong>Date:</strong> \${params.tourDate}</p>
+        <p style="margin: 5px 0;"><strong>Party Size:</strong> \${params.groupSize} \${params.groupSize === 1 ? 'person' : 'people'}</p>
+        <p style="margin: 5px 0;"><strong>Contact:</strong> \${params.contactName}</p>
+        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:\${params.contactEmail}" style="color: #2563eb;">\${params.contactEmail}</a></p>
+        <p style="margin: 5px 0;"><strong>Phone:</strong> \${params.contactPhone || 'Not provided'}</p>
+        \${params.preferredGuide ? \`<p style="margin: 5px 0;"><strong>Preferred Guide:</strong> <span style="color: #7c3aed;">\${params.preferredGuide}</span></p>\` : ''}
+      </div>
+
+      <div class="highlight">
+        <p style="margin: 0; font-weight: 600; color: #1e40af;">This Date Summary:</p>
+        <p style="margin: 5px 0 0 0; color: #1e40af; font-size: 14px;">
+          <strong>\${params.totalRequestsForDate} total \${params.totalRequestsForDate === 1 ? 'request' : 'requests'}</strong> for \${params.totalPeopleForDate} \${params.totalPeopleForDate === 1 ? 'person' : 'people'} on \${params.tourDate}
+        </p>
+      </div>
+
+      <p style="margin-top: 20px; font-size: 14px; color: #78716c;">
+        You can group requests, assign guides, and manage this tour in the admin dashboard.
+      </p>
+    </div>
+    <div style="text-align: center; padding: 20px; color: #78716c; font-size: 14px;">
+      <p>Shine Tours - Admin Notification</p>
+    </div>
+  </div>
+</body>
+</html>
+  \`
+}
+
+export function guidePreferredRequestEmail(params: {
+  guideName: string
+  contactName: string
+  tourDate: string
+  groupSize: number
+  contactEmail: string
+  contactPhone: string
+}) {
+  return \`
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: 'Georgia', serif; color: #292524; line-height: 1.6; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #fafaf9; padding: 30px; border-radius: 0 0 8px 8px; }
+    .info-box { background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid #d6d3d1; }
+    .success-box { background: #dbeafe; border: 2px solid #3b82f6; padding: 15px; border-radius: 6px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 style="margin: 0; font-weight: 300; font-size: 28px;">👋 You've Been Requested!</h1>
+      <p style="margin: 10px 0 0 0; opacity: 0.9;">Someone wants you as their tour guide</p>
+    </div>
+    <div class="content">
+      <p>Dear \${params.guideName},</p>
+      
+      <div class="success-box">
+        <p style="margin: 0; font-weight: 600; color: #1e40af;">
+          \${params.contactName} has requested a tour and specifically asked for you!
+        </p>
+      </div>
+
+      <div class="info-box">
+        <h3 style="margin-top: 0; color: #1c1917;">Tour Request Details:</h3>
+        <p style="margin: 5px 0;"><strong>Requested Date:</strong> \${params.tourDate}</p>
+        <p style="margin: 5px 0;"><strong>Party Size:</strong> \${params.groupSize} \${params.groupSize === 1 ? 'person' : 'people'}</p>
+        <p style="margin: 5px 0;"><strong>Contact:</strong> \${params.contactName}</p>
+        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:\${params.contactEmail}" style="color: #2563eb;">\${params.contactEmail}</a></p>
+        <p style="margin: 5px 0;"><strong>Phone:</strong> \${params.contactPhone || 'Not provided'}</p>
+      </div>
+
+      <p style="margin-top: 20px;">
+        This request is currently ungrouped. Once an admin creates a tour group for this date and assigns you, 
+        you'll be able to manage the tour and submit it to Yale.
+      </p>
+
+      <p style="margin-top: 20px;">
+        <em>"And those having insight will shine"</em><br>
+        <small>— Daniel 12:3</small>
+      </p>
+    </div>
+    <div style="text-align: center; padding: 20px; color: #78716c; font-size: 14px;">
+      <p>Shine Tours - Guide Notification</p>
+    </div>
+  </div>
+</body>
+</html>
+  \`
+}

@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
-    // Send confirmation email (don't wait for it - fire and forget)
+    // Send confirmation email to customer (fire and forget)
     fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/emails/booking-confirmation`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -51,6 +51,36 @@ export async function POST(request: NextRequest) {
         groupSize: group_size
       })
     }).catch(err => console.error('Failed to send confirmation email:', err))
+
+    // Send notification to admins (fire and forget)
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/emails/admin-notification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contactName: contact_name,
+        contactEmail: contact_email,
+        contactPhone: contact_phone,
+        tourDate: requested_date,
+        groupSize: group_size,
+        preferredGuideId: preferred_guide_id
+      })
+    }).catch(err => console.error('Failed to send admin notification:', err))
+
+    // If they selected a preferred guide, notify that guide (fire and forget)
+    if (preferred_guide_id) {
+      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/emails/guide-notification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guideId: preferred_guide_id,
+          contactName: contact_name,
+          contactEmail: contact_email,
+          contactPhone: contact_phone,
+          tourDate: requested_date,
+          groupSize: group_size
+        })
+      }).catch(err => console.error('Failed to send guide notification:', err))
+    }
 
     return NextResponse.json({ 
       success: true, 
