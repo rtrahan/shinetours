@@ -19,6 +19,7 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
   const [sortColumn, setSortColumn] = useState<string>('requested_date')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+  const [selectedByTour, setSelectedByTour] = useState<Record<string, Set<string>>>({})
 
   const toggleRow = (tourId: string) => {
     const newExpanded = new Set(expandedRows)
@@ -28,6 +29,63 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
       newExpanded.add(tourId)
     }
     setExpandedRows(newExpanded)
+  }
+
+  const toggleParticipant = (tourId: string, participantId: string) => {
+    const newSelected = { ...selectedByTour }
+    if (!newSelected[tourId]) {
+      newSelected[tourId] = new Set()
+    }
+    if (newSelected[tourId].has(participantId)) {
+      newSelected[tourId].delete(participantId)
+    } else {
+      newSelected[tourId].add(participantId)
+    }
+    setSelectedByTour(newSelected)
+  }
+
+  const createGroupFromSelected = async (tourId: string, tourDate: string) => {
+    const selected = selectedByTour[tourId]
+    if (!selected || selected.size === 0) return
+
+    try {
+      const response = await fetch('/api/tours/create-from-selection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalTourGroupId: tourId,
+          selectedBookingIds: Array.from(selected),
+          tourDate,
+          isUngrouped: true
+        })
+      })
+
+      if (response.ok) {
+        // Clear selection and refresh
+        const newSelected = { ...selectedByTour }
+        delete newSelected[tourId]
+        setSelectedByTour(newSelected)
+        window.location.reload() // Simple refresh for now
+      }
+    } catch (error) {
+      console.error('Error creating group:', error)
+    }
+  }
+
+  const deleteRequest = async (requestId: string) => {
+    if (!confirm('Are you sure you want to delete this booking request?')) return
+    
+    try {
+      const response = await fetch(`/api/bookings/${requestId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Error deleting request:', error)
+    }
   }
 
   const handleSort = (column: string) => {
@@ -210,21 +268,6 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                       <span className="text-stone-300">—</span>
                     )}
                   </td>
-                  <td className="py-5 px-4 text-center">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onViewDetails(tour.id)
-                      }}
-                      className="px-4 py-2 bg-stone-600 hover:bg-stone-700 text-white text-xs font-bold rounded transition-all inline-flex items-center justify-center"
-                    >
-                      <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                      </svg>
-                      Manage
-                    </button>
-                  </td>
                   <td className="py-5 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                     {/* Admin Workflow Actions */}
                     {isAdmin && (
@@ -357,25 +400,88 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                 {/* Expanded Details Row */}
                 {isExpanded && (
                   <tr key={`${tour.id}-details`} className="bg-stone-50">
-                    <td colSpan={7} className="p-0">
-                      <div className="p-6 space-y-4">
+                    <td colSpan={6} className="p-0">
+                      <div className="p-4 md:p-6">
+                        {/* Info Boxes */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                          <div className="bg-white p-3 rounded border border-stone-200">
+                            <p className="text-xs text-stone-600 uppercase">Total People</p>
+                            <p className="text-2xl font-bold text-stone-900">{people}</p>
+                          </div>
+                          <div className="bg-white p-3 rounded border border-stone-200">
+                            <p className="text-xs text-stone-600 uppercase">Requests</p>
+                            <p className="text-2xl font-bold text-stone-900">{requestCount}</p>
+                          </div>
+                          <div className="bg-white p-3 rounded border border-stone-200">
+                            <p className="text-xs text-stone-600 uppercase">Status</p>
+                            <p className="text-sm font-bold text-stone-900">{tour.status}</p>
+                          </div>
+                          {tour.confirmed_datetime && (
+                            <div className="bg-emerald-50 p-3 rounded border border-emerald-200">
+                              <p className="text-xs text-emerald-700 uppercase">Time</p>
+                              <p className="text-sm font-bold text-emerald-900">
+                                {format(new Date(tour.confirmed_datetime), 'h:mm a')}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
                         {/* Participants List */}
                         <div>
-                          <h4 className="font-bold text-stone-900 mb-3 text-sm uppercase tracking-wide">
-                            Participants ({tour.booking_requests?.length || 0})
-                          </h4>
-                          <div className="grid gap-3">
-                            {tour.booking_requests?.map((participant, idx) => (
-                              <div key={idx} className="bg-white p-4 rounded-lg border border-stone-200 flex items-center justify-between">
-                                <div className="flex-1">
-                                  <p className="font-semibold text-stone-900">{participant.contact_name}</p>
-                                  <div className="flex gap-4 mt-1 text-xs text-stone-600">
-                                    <a href={`mailto:${participant.contact_email}`} className="hover:text-blue-600">
-                                      📧 {participant.contact_email}
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-bold text-stone-900 text-sm uppercase tracking-wide">
+                              Participants
+                            </h4>
+                            {isAdmin && tour.booking_requests && tour.booking_requests.length > 0 && (
+                              <div className="flex gap-2">
+                                {tour.status === 'Ungrouped' && onAutoGroup && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      onAutoGroup(tour.requested_date)
+                                    }}
+                                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded"
+                                  >
+                                    Auto-Group All
+                                  </button>
+                                )}
+                                {(selectedByTour[tour.id]?.size || 0) > 0 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      createGroupFromSelected(tour.id, tour.requested_date)
+                                    }}
+                                    className="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded"
+                                  >
+                                    Create Group ({selectedByTour[tour.id].size})
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="grid gap-2">
+                            {tour.booking_requests?.map((participant) => (
+                              <div key={participant.id} className="bg-white p-3 rounded border border-stone-200 flex items-center gap-3">
+                                {isAdmin && (
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedByTour[tour.id]?.has(participant.id) || false}
+                                    onChange={(e) => {
+                                      e.stopPropagation()
+                                      toggleParticipant(tour.id, participant.id)
+                                    }}
+                                    className="w-4 h-4"
+                                  />
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-stone-900 truncate">{participant.contact_name}</p>
+                                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-stone-600">
+                                    <a href={`mailto:${participant.contact_email}`} className="hover:text-blue-600 truncate">
+                                      {participant.contact_email}
                                     </a>
                                     {participant.contact_phone && (
                                       <a href={`tel:${participant.contact_phone}`} className="hover:text-blue-600">
-                                        📱 {participant.contact_phone}
+                                        {participant.contact_phone}
                                       </a>
                                     )}
                                   </div>
@@ -385,22 +491,27 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                                     </p>
                                   )}
                                 </div>
-                                <div className="bg-stone-800 text-white px-4 py-2 rounded text-sm font-bold">
+                                <div className="bg-stone-800 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap">
                                   {participant.group_size} {participant.group_size === 1 ? 'person' : 'people'}
                                 </div>
+                                {isAdmin && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      deleteRequest(participant.id)
+                                    }}
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded"
+                                    title="Delete request"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                  </button>
+                                )}
                               </div>
                             ))}
                           </div>
                         </div>
-
-                        {/* Tour Info */}
-                        {tour.confirmed_datetime && (
-                          <div className="bg-emerald-50 border-l-4 border-emerald-600 p-4 rounded-r">
-                            <p className="text-sm font-semibold text-emerald-900">
-                              ✓ Confirmed Time: {format(new Date(tour.confirmed_datetime), 'h:mm a')}
-                            </p>
-                          </div>
-                        )}
                       </div>
                     </td>
                   </tr>
