@@ -269,14 +269,11 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                     {/* Admin Workflow Actions */}
                     {isAdmin && (
                       <>
-                        {/* Ungrouped requests - show Auto-Group button */}
-                        {tour.status === 'Ungrouped' && onAutoGroup && (
-                          <button
-                            onClick={() => onAutoGroup(tour.requested_date)}
-                            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded transition-all"
-                          >
-                            Auto-Group
-                          </button>
+                        {/* Ungrouped - expand to manage */}
+                        {tour.status === 'Ungrouped' && (
+                          <span className="text-xs text-amber-600 italic">
+                            ← Click to manage
+                          </span>
                         )}
 
                         {/* Step 1: Assign Guide (if not assigned yet) */}
