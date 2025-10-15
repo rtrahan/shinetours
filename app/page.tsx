@@ -115,16 +115,16 @@ export default function Home() {
           
           {/* Success Modal */}
           {showSuccess && (
-            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in">
+            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 overflow-y-auto">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full my-8 overflow-hidden animate-in">
                 {/* Header with checkmark */}
-                <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-8 text-center">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 shadow-lg">
-                    <svg className="w-12 h-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-6 md:p-8 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-full mb-3 md:mb-4 shadow-lg">
+                    <svg className="w-10 h-10 md:w-12 md:h-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/>
                     </svg>
                   </div>
-                  <h2 className="heading-font text-3xl font-light text-white mb-2">
+                  <h2 className="heading-font text-2xl md:text-3xl font-light text-white mb-2">
                     Request Received!
                   </h2>
                   <p className="text-emerald-50 text-sm">
@@ -133,42 +133,42 @@ export default function Home() {
                 </div>
 
                 {/* Content */}
-                <div className="p-8">
-                  <div className="space-y-4">
+                <div className="p-6 md:p-8 max-h-[60vh] md:max-h-none overflow-y-auto">
+                  <div className="space-y-3 md:space-y-4">
                     {/* Step 1 */}
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-blue-700 font-bold text-sm">1</span>
+                    <div className="flex items-start gap-3 md:gap-4">
+                      <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span className="text-blue-700 font-bold text-xs md:text-sm">1</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-stone-900 mb-1">Email Confirmation</h3>
-                        <p className="text-sm text-stone-600 leading-relaxed">
+                        <h3 className="font-bold text-stone-900 mb-1 text-sm md:text-base">Email Confirmation</h3>
+                        <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
                           You'll receive an email confirmation shortly with your tour request details.
                         </p>
                       </div>
                     </div>
 
                     {/* Step 2 */}
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                        <span className="text-amber-700 font-bold text-sm">2</span>
+                    <div className="flex items-start gap-3 md:gap-4">
+                      <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                        <span className="text-amber-700 font-bold text-xs md:text-sm">2</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-stone-900 mb-1">Yale Review Process</h3>
-                        <p className="text-sm text-stone-600 leading-relaxed">
+                        <h3 className="font-bold text-stone-900 mb-1 text-sm md:text-base">Yale Review Process</h3>
+                        <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
                           We will submit your group's tour request to Yale University Art Gallery for approval.
                         </p>
                       </div>
                     </div>
 
                     {/* Step 3 */}
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <span className="text-emerald-700 font-bold text-sm">3</span>
+                    <div className="flex items-start gap-3 md:gap-4">
+                      <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <span className="text-emerald-700 font-bold text-xs md:text-sm">3</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-stone-900 mb-1">Time Confirmation</h3>
-                        <p className="text-sm text-stone-600 leading-relaxed">
+                        <h3 className="font-bold text-stone-900 mb-1 text-sm md:text-base">Time Confirmation</h3>
+                        <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
                           Once Yale assigns a time slot (between 11am-3pm), we'll send you a confirmation email with the exact time and meeting details.
                         </p>
                       </div>
@@ -176,14 +176,14 @@ export default function Home() {
                   </div>
 
                   {/* Important Note */}
-                  <div className="mt-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r">
-                    <div className="flex items-start gap-3">
-                      <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mt-4 md:mt-6 bg-amber-50 border-l-4 border-amber-500 p-3 md:p-4 rounded-r">
+                    <div className="flex items-start gap-2 md:gap-3">
+                      <svg className="w-4 h-4 md:w-5 md:h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                       </svg>
                       <div>
-                        <p className="text-sm font-semibold text-amber-900 mb-1">Important</p>
-                        <p className="text-sm text-amber-800">
+                        <p className="text-xs md:text-sm font-semibold text-amber-900 mb-1">Important</p>
+                        <p className="text-xs md:text-sm text-amber-800">
                           Your tour is <strong>not confirmed</strong> until you receive our confirmation email with the approved time from Yale.
                         </p>
                       </div>
@@ -193,7 +193,7 @@ export default function Home() {
                   {/* Close Button */}
                   <button
                     onClick={handleCloseSuccessModal}
-                    className="mt-6 w-full py-4 px-6 bg-stone-800 text-white font-semibold rounded-lg hover:bg-stone-900 transition-colors shadow-md hover:shadow-lg"
+                    className="mt-4 md:mt-6 w-full py-3 md:py-4 px-6 bg-stone-800 text-white font-semibold rounded-lg hover:bg-stone-900 transition-colors shadow-md hover:shadow-lg text-sm md:text-base"
                   >
                     Got it, thanks!
                   </button>
