@@ -183,9 +183,6 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                 Confirmed Time
               </th>
               <th className="text-center py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600 bg-stone-100">
-                View Details
-              </th>
-              <th className="text-center py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600 bg-stone-100">
                 Next Action
               </th>
             </tr>
@@ -401,65 +398,37 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                 {isExpanded && (
                   <tr key={`${tour.id}-details`} className="bg-stone-50">
                     <td colSpan={6} className="p-0">
-                      <div className="p-4 md:p-6">
-                        {/* Info Boxes */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                          <div className="bg-white p-3 rounded border border-stone-200">
-                            <p className="text-xs text-stone-600 uppercase">Total People</p>
-                            <p className="text-2xl font-bold text-stone-900">{people}</p>
-                          </div>
-                          <div className="bg-white p-3 rounded border border-stone-200">
-                            <p className="text-xs text-stone-600 uppercase">Requests</p>
-                            <p className="text-2xl font-bold text-stone-900">{requestCount}</p>
-                          </div>
-                          <div className="bg-white p-3 rounded border border-stone-200">
-                            <p className="text-xs text-stone-600 uppercase">Status</p>
-                            <p className="text-sm font-bold text-stone-900">{tour.status}</p>
-                          </div>
-                          {tour.confirmed_datetime && (
-                            <div className="bg-emerald-50 p-3 rounded border border-emerald-200">
-                              <p className="text-xs text-emerald-700 uppercase">Time</p>
-                              <p className="text-sm font-bold text-emerald-900">
-                                {format(new Date(tour.confirmed_datetime), 'h:mm a')}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Participants List */}
-                        <div>
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="font-bold text-stone-900 text-sm uppercase tracking-wide">
-                              Participants
-                            </h4>
-                            {isAdmin && tour.booking_requests && tour.booking_requests.length > 0 && (
-                              <div className="flex gap-2">
-                                {tour.status === 'Ungrouped' && onAutoGroup && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      onAutoGroup(tour.requested_date)
-                                    }}
-                                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded"
-                                  >
-                                    Auto-Group All
-                                  </button>
-                                )}
-                                {(selectedByTour[tour.id]?.size || 0) > 0 && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      createGroupFromSelected(tour.id, tour.requested_date)
-                                    }}
-                                    className="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded"
-                                  >
-                                    Create Group ({selectedByTour[tour.id].size})
-                                  </button>
-                                )}
-                              </div>
+                      <div className="px-4 md:px-6 py-4">
+                        {/* Management Actions */}
+                        {isAdmin && tour.booking_requests && tour.booking_requests.length > 0 && (
+                          <div className="flex items-center justify-end gap-2 mb-3">
+                            {tour.status === 'Ungrouped' && onAutoGroup && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  onAutoGroup(tour.requested_date)
+                                }}
+                                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded"
+                              >
+                                Auto-Group All
+                              </button>
+                            )}
+                            {(selectedByTour[tour.id]?.size || 0) > 0 && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  createGroupFromSelected(tour.id, tour.requested_date)
+                                }}
+                                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded"
+                              >
+                                Create Group from Selected ({selectedByTour[tour.id].size})
+                              </button>
                             )}
                           </div>
-                          <div className="grid gap-2">
+                        )}
+
+                        {/* Participants List */}
+                        <div className="grid gap-2">
                             {tour.booking_requests?.map((participant) => (
                               <div key={participant.id} className="bg-white p-3 rounded border border-stone-200 flex items-center gap-3">
                                 {isAdmin && (
