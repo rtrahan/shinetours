@@ -65,6 +65,11 @@ export default function GuideDashboard() {
     if (action === 'claim') {
       await fetch(`/api/tours/${tourId}/claim`, { method: 'POST' })
       fetchTours()
+    } else if (action === 'unclaim') {
+      if (confirm('Are you sure you want to unclaim this tour?')) {
+        await fetch(`/api/tours/${tourId}/unclaim`, { method: 'POST' })
+        fetchTours()
+      }
     } else if (action === 'submit-yale') {
       setSelectedTour(tour)
       setShowYaleModal(true)

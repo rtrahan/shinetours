@@ -18,6 +18,17 @@ interface TourTableProps {
 export default function TourTable({ tours, currentUserId, isAdmin, guides = [], onViewDetails, onAssignGuide, onAction, onAutoGroup }: TourTableProps) {
   const [sortColumn, setSortColumn] = useState<string>('requested_date')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+
+  const toggleRow = (tourId: string) => {
+    const newExpanded = new Set(expandedRows)
+    if (newExpanded.has(tourId)) {
+      newExpanded.delete(tourId)
+    } else {
+      newExpanded.add(tourId)
+    }
+    setExpandedRows(newExpanded)
+  }
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -127,15 +138,29 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
               const isUngrouped = (tour as any)._isUngrouped
               const people = isUngrouped ? (tour as any)._totalPeople : totalPeople(tour)
               const requestCount = isUngrouped ? (tour as any)._requestCount : (tour.booking_requests?.length || 0)
+              const isExpanded = expandedRows.has(tour.id)
 
               return (
-                <tr key={tour.id} className="hover:bg-stone-50 transition-colors">
+                <>
+                <tr key={tour.id} className="hover:bg-stone-50 transition-colors cursor-pointer" onClick={() => toggleRow(tour.id)}>
                   <td className="py-5 px-6">
-                    <div className="font-semibold text-stone-900 text-sm">
-                      {format(new Date(tour.requested_date + 'T00:00:00'), 'MMM d, yyyy')}
-                    </div>
-                    <div className="text-xs text-stone-500 mt-0.5">
-                      {format(new Date(tour.requested_date + 'T00:00:00'), 'EEEE')}
+                    <div className="flex items-center gap-2">
+                      <svg 
+                        className={`w-4 h-4 text-stone-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                      </svg>
+                      <div>
+                        <div className="font-semibold text-stone-900 text-sm">
+                          {format(new Date(tour.requested_date + 'T00:00:00'), 'MMM d, yyyy')}
+                        </div>
+                        <div className="text-xs text-stone-500 mt-0.5">
+                          {format(new Date(tour.requested_date + 'T00:00:00'), 'EEEE')}
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td className="py-5 px-6">
@@ -187,17 +212,20 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                   </td>
                   <td className="py-5 px-4 text-center">
                     <button
-                      onClick={() => onViewDetails(tour.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onViewDetails(tour.id)
+                      }}
                       className="px-4 py-2 bg-stone-600 hover:bg-stone-700 text-white text-xs font-bold rounded transition-all inline-flex items-center justify-center"
                     >
                       <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                       </svg>
-                      Details
+                      Manage
                     </button>
                   </td>
-                  <td className="py-5 px-4 text-center">
+                  <td className="py-5 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                     {/* Admin Workflow Actions */}
                     {isAdmin && (
                       <>
@@ -278,13 +306,31 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                           </button>
                         )}
 
-                        {/* Only show actions if this is your tour */}
+                        {/* Unclaim if it's yours and not yet submitted to Yale */}
                         {isMine && tour.status === 'Ready' && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => onAction(tour.id, 'unclaim')}
+                              className="px-4 py-2 bg-stone-300 hover:bg-stone-400 text-stone-700 text-xs font-bold rounded transition-all"
+                            >
+                              Unclaim
+                            </button>
+                            <button
+                              onClick={() => onAction(tour.id, 'submit-yale')}
+                              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition-all"
+                            >
+                              Submit to Yale
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Show other actions */}
+                        {isMine && tour.status === 'Pending' && (
                           <button
-                            onClick={() => onAction(tour.id, 'submit-yale')}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition-all"
+                            onClick={() => onAction(tour.id, 'unclaim')}
+                            className="px-4 py-2 bg-stone-300 hover:bg-stone-400 text-stone-700 text-xs font-bold rounded transition-all"
                           >
-                            Submit to Yale
+                            Unclaim
                           </button>
                         )}
                         {isMine && tour.status === 'PendingYale' && (
@@ -307,6 +353,59 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                     )}
                   </td>
                 </tr>
+
+                {/* Expanded Details Row */}
+                {isExpanded && (
+                  <tr key={`${tour.id}-details`} className="bg-stone-50">
+                    <td colSpan={7} className="p-0">
+                      <div className="p-6 space-y-4">
+                        {/* Participants List */}
+                        <div>
+                          <h4 className="font-bold text-stone-900 mb-3 text-sm uppercase tracking-wide">
+                            Participants ({tour.booking_requests?.length || 0})
+                          </h4>
+                          <div className="grid gap-3">
+                            {tour.booking_requests?.map((participant, idx) => (
+                              <div key={idx} className="bg-white p-4 rounded-lg border border-stone-200 flex items-center justify-between">
+                                <div className="flex-1">
+                                  <p className="font-semibold text-stone-900">{participant.contact_name}</p>
+                                  <div className="flex gap-4 mt-1 text-xs text-stone-600">
+                                    <a href={`mailto:${participant.contact_email}`} className="hover:text-blue-600">
+                                      📧 {participant.contact_email}
+                                    </a>
+                                    {participant.contact_phone && (
+                                      <a href={`tel:${participant.contact_phone}`} className="hover:text-blue-600">
+                                        📱 {participant.contact_phone}
+                                      </a>
+                                    )}
+                                  </div>
+                                  {participant.preferred_guide && (
+                                    <p className="text-xs text-purple-700 mt-1">
+                                      Prefers: {participant.preferred_guide.first_name} {participant.preferred_guide.last_name}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="bg-stone-800 text-white px-4 py-2 rounded text-sm font-bold">
+                                  {participant.group_size} {participant.group_size === 1 ? 'person' : 'people'}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Tour Info */}
+                        {tour.confirmed_datetime && (
+                          <div className="bg-emerald-50 border-l-4 border-emerald-600 p-4 rounded-r">
+                            <p className="text-sm font-semibold text-emerald-900">
+                              ✓ Confirmed Time: {format(new Date(tour.confirmed_datetime), 'h:mm a')}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </>
               )
             })}
           </tbody>
