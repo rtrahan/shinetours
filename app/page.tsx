@@ -377,7 +377,7 @@ export default function Home() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-stone-600">Availability:</span>
-                        <span className="font-semibold text-stone-900">Fri-Sun only</span>
+                        <span className="font-semibold text-stone-900">Museum open Tue-Sun</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-stone-600">Approval:</span>

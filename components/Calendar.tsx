@@ -185,7 +185,7 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
                 <span className="text-[10px] md:text-xs text-stone-600 uppercase tracking-wide">Selected</span>
               </div>
             </div>
-            <p className="text-[10px] md:text-xs text-amber-700 font-medium">Tours: Fri-Sun Only</p>
+            <p className="text-[10px] md:text-xs text-amber-700 font-medium">Museum Open: Tue-Sun</p>
           </div>
         </div>
       </div>
