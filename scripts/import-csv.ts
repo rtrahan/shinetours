@@ -25,6 +25,8 @@ interface CSVRow {
   'Select Your Tour Date & Time': string
   'Request A Specific Date (Optional) \n3 weeks minimum notice is preferred in order to register with Yale. \nClosed Mondays. \nPlease note that requests are not confirmed until an available guide contacts you. ': string
   'Contact telephone (optional)': string
+  'How did you hear about us? ': string
+  'Alternate Preferred Date (Optional) \nClosed Mondays. \nPlease note that requests are not confirmed until an available guide contacts you. ': string
 }
 
 function extractGuideName(dateTimeField: string): string | null {
@@ -73,12 +75,13 @@ async function importCSV() {
     const partySize = parseInt(row['How Many Are In Your Party? ']?.trim() || '0')
     const dateTimeField = row['Select Your Tour Date & Time']?.trim() || ''
     const dateField = row['Request A Specific Date (Optional) \n3 weeks minimum notice is preferred in order to register with Yale. \nClosed Mondays. \nPlease note that requests are not confirmed until an available guide contacts you. ']?.trim()
+    const alternateDateField = row['Alternate Preferred Date (Optional) \nClosed Mondays. \nPlease note that requests are not confirmed until an available guide contacts you. ']?.trim()
     const phone = row['Contact telephone (optional)']?.trim() || ''
 
-    if (!email || !name || !partySize || !dateField) {
-      if (dateField) {
-        console.log(`Row ${index + 1}: Skipping - missing data (email:${!!email}, name:${!!name}, party:${!!partySize})`)
-      }
+    // Use main date field, or fall back to alternate date field
+    const dateToUse = dateField || alternateDateField
+
+    if (!email || !name || !partySize || !dateToUse) {
       return // Skip invalid rows
     }
 
@@ -93,14 +96,14 @@ async function importCSV() {
 
     try {
       // Try parsing as MM/DD/YYYY HH:MM:SS
-      if (dateField.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
-        const parts = dateField.split(' ')
+      if (dateToUse.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
+        const parts = dateToUse.split(' ')
         const datePart = parts[0]
         const [month, day, year] = datePart.split('/').map(Number)
         tourDate = new Date(year, month - 1, day)
       }
     } catch (e) {
-      console.log(`Row ${index + 1}: Could not parse date "${dateField}"`)
+      // Skip silently
     }
 
     if (tourDate && tourDate > today) {
