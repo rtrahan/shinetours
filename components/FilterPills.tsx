@@ -46,7 +46,8 @@ export default function FilterPills({ pills, activeFilter, onFilterChange }: Fil
   }
 
   return (
-    <div className="flex items-center gap-3 mb-6 flex-wrap">
+    <div className="mb-4 md:mb-6 -mx-4 md:mx-0 px-4 md:px-0">
+      <div className="flex items-center gap-2 md:gap-3 overflow-x-auto pb-2 md:pb-0 md:flex-wrap scrollbar-hide">
       {pills.map(pill => {
         const isActive = activeFilter === pill.id
         
@@ -54,7 +55,7 @@ export default function FilterPills({ pills, activeFilter, onFilterChange }: Fil
           <button
             key={pill.id}
             onClick={() => onFilterChange(pill.id)}
-            className={`px-6 py-3 rounded-full font-semibold text-sm transition-all ${getColorClasses(pill.color, isActive)}`}
+            className={`px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold text-xs md:text-sm transition-all whitespace-nowrap ${getColorClasses(pill.color, isActive)}`}
           >
             {!isActive && pill.color !== 'none' && (
               <span className={`inline-block w-2 h-2 rounded-full ${getDotColor(pill.color)} mr-2`}></span>
@@ -63,6 +64,7 @@ export default function FilterPills({ pills, activeFilter, onFilterChange }: Fil
           </button>
         )
       })}
+      </div>
     </div>
   )
 }

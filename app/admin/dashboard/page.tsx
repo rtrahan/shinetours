@@ -23,6 +23,7 @@ export default function AdminDashboard() {
   const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [showYaleModal, setShowYaleModal] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   useEffect(() => {
     fetchTours()
@@ -190,22 +191,62 @@ export default function AdminDashboard() {
               <p className="text-[10px] md:text-xs text-stone-500 uppercase tracking-widest">Shine Tours</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 md:gap-6 text-xs md:text-sm">
-            <a href="/admin/users" className="text-sm text-stone-600 hover:text-stone-800 uppercase tracking-wide flex items-center gap-1">
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-6 text-sm">
+            <a href="/admin/users" className="text-stone-600 hover:text-stone-800 uppercase tracking-wide flex items-center gap-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
               </svg>
               Users
             </a>
-            <a href="/" className="text-sm text-stone-600 hover:text-stone-800 uppercase tracking-wide">← Home</a>
+            <a href="/" className="text-stone-600 hover:text-stone-800 uppercase tracking-wide">← Home</a>
             <button 
               onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
-              className="text-sm text-stone-600 hover:text-stone-800 uppercase tracking-wide"
+              className="text-stone-600 hover:text-stone-800 uppercase tracking-wide"
             >
               Logout
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="md:hidden p-2 hover:bg-stone-100 rounded transition-colors"
+          >
+            <svg className="w-6 h-6 text-stone-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {showMobileMenu && (
+          <div className="md:hidden border-t border-stone-200 bg-white">
+            <div className="px-4 py-3 space-y-3">
+              <a href="/admin/users" className="flex items-center gap-2 text-stone-700 hover:text-stone-900 font-medium">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                Users
+              </a>
+              <a href="/" className="flex items-center gap-2 text-stone-700 hover:text-stone-900 font-medium">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Home
+              </a>
+              <button 
+                onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
+                className="flex items-center gap-2 text-stone-700 hover:text-stone-900 font-medium w-full text-left"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                Logout
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
