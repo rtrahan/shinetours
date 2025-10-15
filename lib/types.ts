@@ -1,4 +1,4 @@
-export type TourStatus = 'Pending' | 'Ready' | 'PendingYale' | 'Confirmed' | 'Completed'
+export type TourStatus = 'Ungrouped' | 'Pending' | 'Ready' | 'PendingYale' | 'Confirmed' | 'Completed'
 
 export interface Guide {
   id: string
