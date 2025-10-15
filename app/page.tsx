@@ -11,6 +11,18 @@ export default function Home() {
   const [isLoadingGuides, setIsLoadingGuides] = useState(true)
   const [showSuccess, setShowSuccess] = useState(false)
 
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date)
+    
+    // On mobile, scroll to the booking form after selecting a date
+    setTimeout(() => {
+      const bookingForm = document.getElementById('booking-form')
+      if (bookingForm && window.innerWidth < 768) { // 768px is the md breakpoint
+        bookingForm.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
+  }
+
   // Fetch available guides
   useEffect(() => {
     const fetchGuides = async () => {
@@ -246,13 +258,13 @@ export default function Home() {
             <div className="md:col-span-3">
               <Calendar 
                 selectedDate={selectedDate}
-                onDateSelect={setSelectedDate}
+                onDateSelect={handleDateSelect}
                 bookingsData={bookingsData}
               />
             </div>
 
             {/* Booking Form - Takes 2 columns on desktop, full width on mobile */}
-            <div className="md:col-span-2">
+            <div id="booking-form" className="md:col-span-2">
               {selectedDate ? (
                 <BookingForm 
                   selectedDate={selectedDate}
