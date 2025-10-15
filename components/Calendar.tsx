@@ -66,13 +66,12 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
   const getDayClasses = (date: Date) => {
     const dayOfWeek = getDay(date)
     const isPast = isBefore(date, today)
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6
+    const isMuseumOpen = dayOfWeek !== 1 // Museum closed Mondays only (day 1)
     const isToday = isSameDay(date, today)
     const isSelected = selectedDate && isSameDay(date, selectedDate)
     const dateKey = format(date, 'yyyy-MM-dd')
     const hasBookings = bookingsByDate[dateKey]
-    const isFull = hasBookings && hasBookings.remainingSlots === 0
-    const isAvailable = !isPast && isWeekend && !isFull
+    const isAvailable = !isPast && isMuseumOpen
 
     let classes = 'relative h-16 md:h-20 lg:h-24 flex flex-col items-center justify-center transition-all duration-200 rounded '
     
@@ -137,8 +136,8 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
           {daysInMonth.map(date => {
             const dayOfWeek = getDay(date)
             const isPast = isBefore(date, today)
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6
-            const isAvailable = !isPast && isWeekend
+            const isMuseumOpen = dayOfWeek !== 1 // Museum closed Mondays only
+            const isAvailable = !isPast && isMuseumOpen
             const dateKey = format(date, 'yyyy-MM-dd')
             const hasBookings = bookingsByDate[dateKey]
             const isToday = isSameDay(date, today)
