@@ -54,11 +54,12 @@ export async function GET(request: NextRequest) {
           currentGroupPeople = groupTotal
         } else if (groupTotal > 0) {
           // Show ALL other groups (whether 15, 11, or any size)
+          const guideData = Array.isArray(group.guide) ? group.guide[0] : group.guide
           groups.push({
             id: group.id,
             status: group.status,
-            guideName: group.guide ? `${group.guide.first_name} ${group.guide.last_name}` : null,
-            participants: group.booking_requests?.map(b => ({
+            guideName: guideData ? `${guideData.first_name} ${guideData.last_name}` : null,
+            participants: group.booking_requests?.map((b: any) => ({
               name: b.contact_name,
               groupSize: b.group_size
             })) || [],
