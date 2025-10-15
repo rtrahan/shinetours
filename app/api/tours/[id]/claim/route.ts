@@ -16,9 +16,23 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Get guide record for this user
+    const { data: guide } = await supabase
+      .from('guides')
+      .select('id')
+      .eq('email', user.email)
+      .single()
+
+    if (!guide) {
+      return NextResponse.json({ error: 'Guide not found' }, { status: 404 })
+    }
+
     const { data, error } = await supabase
       .from('tour_groups')
-      .update({ guide_id: user.id })
+      .update({ 
+        guide_id: guide.id,
+        status: 'Ready' // Set to Ready when guide claims it
+      })
       .eq('id', id)
       .is('guide_id', null) // Only claim if not already claimed
       .select()
