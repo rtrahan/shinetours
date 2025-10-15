@@ -188,17 +188,17 @@ export default function UsersPage() {
     <div className="min-h-screen bg-stone-50">
       {/* Header */}
       <div className="bg-white border-b border-stone-200 shadow-sm">
-        <div className="max-w-[1800px] mx-auto px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <svg className="w-8 h-8 text-stone-700" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+        <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            <svg className="w-6 h-6 md:w-8 md:h-8 text-stone-700" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
             <div>
-              <h1 className="heading-font text-2xl font-light text-stone-800">User Management</h1>
-              <p className="text-xs text-stone-500 uppercase tracking-widest">Guides & Admins</p>
+              <h1 className="heading-font text-lg md:text-2xl font-light text-stone-800">User Management</h1>
+              <p className="text-[10px] md:text-xs text-stone-500 uppercase tracking-widest">Guides & Admins</p>
             </div>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 md:gap-6 text-xs md:text-sm">
             <a href="/admin/dashboard" className="text-sm text-stone-600 hover:text-stone-800 uppercase tracking-wide">← Dashboard</a>
             <button 
               onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
@@ -211,14 +211,14 @@ export default function UsersPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-[1400px] mx-auto px-8 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-stone-900">All Users ({guides.length})</h2>
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 md:py-6">
+        <div className="flex justify-between items-center mb-4 md:mb-6 flex-wrap gap-3">
+          <h2 className="text-xl md:text-2xl font-bold text-stone-900">All Users ({guides.length})</h2>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-6 py-3 bg-stone-900 text-white font-semibold rounded-lg hover:bg-stone-800 transition-colors shadow-md flex items-center gap-2"
+            className="px-4 md:px-6 py-2 md:py-3 bg-stone-900 text-white font-semibold rounded-lg hover:bg-stone-800 transition-colors shadow-md flex items-center gap-2 text-sm md:text-base"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/>
             </svg>
             Add User
@@ -227,7 +227,8 @@ export default function UsersPage() {
 
         {/* Users Table */}
         <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[800px]">
             <thead className="bg-stone-50 border-b-2 border-stone-200">
               <tr>
                 <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Name</th>
@@ -297,8 +298,9 @@ export default function UsersPage() {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
+          </tbody>
+        </table>
+          </div>
         </div>
       </div>
 

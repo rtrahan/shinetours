@@ -90,7 +90,7 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
   return (
     <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[900px]">
           <thead className="bg-stone-50 border-b-2 border-stone-200">
             <tr>
               <th 

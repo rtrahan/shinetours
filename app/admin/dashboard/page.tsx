@@ -180,17 +180,17 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-stone-50">
       {/* Header */}
       <div className="bg-white border-b border-stone-200 shadow-sm">
-        <div className="max-w-[1800px] mx-auto px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <svg className="w-8 h-8 text-stone-700" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+        <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            <svg className="w-6 h-6 md:w-8 md:h-8 text-stone-700" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
             <div>
-              <h1 className="heading-font text-2xl font-light text-stone-800">Admin Dashboard</h1>
-              <p className="text-xs text-stone-500 uppercase tracking-widest">Shine Tours</p>
+              <h1 className="heading-font text-lg md:text-2xl font-light text-stone-800">Admin Dashboard</h1>
+              <p className="text-[10px] md:text-xs text-stone-500 uppercase tracking-widest">Shine Tours</p>
             </div>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 md:gap-6 text-xs md:text-sm">
             <a href="/admin/users" className="text-sm text-stone-600 hover:text-stone-800 uppercase tracking-wide flex items-center gap-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-[1800px] mx-auto px-8 py-6">
+      <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-4 md:py-6">
         <FilterPills 
           pills={filterPills}
           activeFilter={activeFilter}
