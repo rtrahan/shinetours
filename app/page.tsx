@@ -456,7 +456,7 @@ export default function Home() {
       <footer className="bg-white border-t border-stone-200 mt-12">
         <div className="max-w-[1800px] mx-auto px-8 py-8">
           <div className="text-center">
-            <p className="text-sm text-stone-500">© 2025 Yale University Art Gallery Tours. All rights reserved.</p>
+            <p className="text-sm text-stone-500">© 2025 Shine Tours. All rights reserved.</p>
           </div>
         </div>
       </footer>
