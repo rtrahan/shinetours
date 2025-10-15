@@ -38,6 +38,8 @@ export async function POST(request: NextRequest) {
     const guideName = tourGroup.guide 
       ? `${tourGroup.guide.first_name} ${tourGroup.guide.last_name}`
       : 'TBD'
+    const guideEmail = tourGroup.guide?.email || 'tours@shinetours.com'
+    const guidePhone = tourGroup.guide?.phone || 'N/A'
     const totalPeople = tourGroup.booking_requests?.reduce((sum: number, b: any) => sum + b.group_size, 0) || 0
     
     // Format the requested date properly
@@ -54,6 +56,8 @@ export async function POST(request: NextRequest) {
           tourDate: tourGroup.requested_date,
           confirmedTime,
           guideName,
+          guideEmail,
+          guidePhone,
           totalPeople
         })
       })
