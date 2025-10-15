@@ -10,8 +10,10 @@ interface BookingFormProps {
 }
 
 interface DateDetails {
+  totalPeople: number
   currentGroupPeople: number
   spotsLeft: number
+  requestCount: number
   groupsCount: number
   currentFormingGroup: {
     participants: Array<{ name: string; groupSize: number }>
