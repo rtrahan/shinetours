@@ -397,8 +397,8 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                 {/* Expanded Details Row */}
                 {isExpanded && (
                   <tr key={`${tour.id}-details`} className="bg-stone-50">
-                    <td colSpan={6} className="p-0">
-                      <div className="px-4 md:px-6 py-4">
+                    <td colSpan={100} className="p-0">
+                      <div className="px-6 py-5">
                         {/* Management Actions */}
                         {isAdmin && tour.booking_requests && tour.booking_requests.length > 0 && (
                           <div className="flex items-center justify-end gap-2 mb-3">
@@ -428,9 +428,9 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                         )}
 
                         {/* Participants List */}
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {tour.booking_requests?.map((participant) => (
-                            <div key={participant.id} className="group bg-white hover:bg-stone-50 p-4 rounded-lg border border-stone-200 hover:border-stone-300 transition-all">
+                            <div key={participant.id} className="group bg-white hover:bg-stone-50 p-5 rounded-xl border border-stone-200 hover:border-stone-300 hover:shadow-md transition-all">
                               <div className="flex items-start gap-4">
                                 {/* Checkbox */}
                                 {isAdmin && (
