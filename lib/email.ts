@@ -231,18 +231,18 @@ export function adminNewRequestEmail(params: {
 
       <div class="info-box">
         <h3 style="margin-top: 0; color: #1c1917;">Request Details:</h3>
-        <p style="margin: 5px 0;"><strong>Date:</strong> \${params.tourDate}</p>
-        <p style="margin: 5px 0;"><strong>Party Size:</strong> \${params.groupSize} \${params.groupSize === 1 ? 'person' : 'people'}</p>
-        <p style="margin: 5px 0;"><strong>Contact:</strong> \${params.contactName}</p>
-        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:\${params.contactEmail}" style="color: #2563eb;">\${params.contactEmail}</a></p>
-        <p style="margin: 5px 0;"><strong>Phone:</strong> \${params.contactPhone || 'Not provided'}</p>
-        \${params.preferredGuide ? \`<p style="margin: 5px 0;"><strong>Preferred Guide:</strong> <span style="color: #7c3aed;">\${params.preferredGuide}</span></p>\` : ''}
+        <p style="margin: 5px 0;"><strong>Date:</strong> ${params.tourDate}</p>
+        <p style="margin: 5px 0;"><strong>Party Size:</strong> ${params.groupSize} ${params.groupSize === 1 ? 'person' : 'people'}</p>
+        <p style="margin: 5px 0;"><strong>Contact:</strong> ${params.contactName}</p>
+        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${params.contactEmail}" style="color: #2563eb;">${params.contactEmail}</a></p>
+        <p style="margin: 5px 0;"><strong>Phone:</strong> ${params.contactPhone || 'Not provided'}</p>
+        ${params.preferredGuide ? `<p style="margin: 5px 0;"><strong>Preferred Guide:</strong> <span style="color: #7c3aed;">${params.preferredGuide}</span></p>` : ''}
       </div>
 
       <div class="highlight">
         <p style="margin: 0; font-weight: 600; color: #1e40af;">This Date Summary:</p>
         <p style="margin: 5px 0 0 0; color: #1e40af; font-size: 14px;">
-          <strong>\${params.totalRequestsForDate} total \${params.totalRequestsForDate === 1 ? 'request' : 'requests'}</strong> for \${params.totalPeopleForDate} \${params.totalPeopleForDate === 1 ? 'person' : 'people'} on \${params.tourDate}
+          <strong>${params.totalRequestsForDate} total ${params.totalRequestsForDate === 1 ? 'request' : 'requests'}</strong> for ${params.totalPeopleForDate} ${params.totalPeopleForDate === 1 ? 'person' : 'people'} on ${params.tourDate}
         </p>
       </div>
 
@@ -256,7 +256,7 @@ export function adminNewRequestEmail(params: {
   </div>
 </body>
 </html>
-  \`
+  `
 }
 
 export function guidePreferredRequestEmail(params: {
@@ -267,7 +267,7 @@ export function guidePreferredRequestEmail(params: {
   contactEmail: string
   contactPhone: string
 }) {
-  return \`
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -287,21 +287,21 @@ export function guidePreferredRequestEmail(params: {
       <p style="margin: 10px 0 0 0; opacity: 0.9;">Someone wants you as their tour guide</p>
     </div>
     <div class="content">
-      <p>Dear \${params.guideName},</p>
+      <p>Dear ${params.guideName},</p>
       
       <div class="success-box">
         <p style="margin: 0; font-weight: 600; color: #1e40af;">
-          \${params.contactName} has requested a tour and specifically asked for you!
+          ${params.contactName} has requested a tour and specifically asked for you!
         </p>
       </div>
 
       <div class="info-box">
         <h3 style="margin-top: 0; color: #1c1917;">Tour Request Details:</h3>
-        <p style="margin: 5px 0;"><strong>Requested Date:</strong> \${params.tourDate}</p>
-        <p style="margin: 5px 0;"><strong>Party Size:</strong> \${params.groupSize} \${params.groupSize === 1 ? 'person' : 'people'}</p>
-        <p style="margin: 5px 0;"><strong>Contact:</strong> \${params.contactName}</p>
-        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:\${params.contactEmail}" style="color: #2563eb;">\${params.contactEmail}</a></p>
-        <p style="margin: 5px 0;"><strong>Phone:</strong> \${params.contactPhone || 'Not provided'}</p>
+        <p style="margin: 5px 0;"><strong>Requested Date:</strong> ${params.tourDate}</p>
+        <p style="margin: 5px 0;"><strong>Party Size:</strong> ${params.groupSize} ${params.groupSize === 1 ? 'person' : 'people'}</p>
+        <p style="margin: 5px 0;"><strong>Contact:</strong> ${params.contactName}</p>
+        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${params.contactEmail}" style="color: #2563eb;">${params.contactEmail}</a></p>
+        <p style="margin: 5px 0;"><strong>Phone:</strong> ${params.contactPhone || 'Not provided'}</p>
       </div>
 
       <p style="margin-top: 20px;">
@@ -320,5 +320,5 @@ export function guidePreferredRequestEmail(params: {
   </div>
 </body>
 </html>
-  \`
+  `
 }
