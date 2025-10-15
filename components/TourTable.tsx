@@ -428,7 +428,8 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                         )}
 
                         {/* Participants List */}
-                        <div className="grid gap-2">
+                        <div>
+                          <div className="grid gap-2">
                             {tour.booking_requests?.map((participant) => (
                               <div key={participant.id} className="bg-white p-3 rounded border border-stone-200 flex items-center gap-3">
                                 {isAdmin && (
