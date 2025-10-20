@@ -73,7 +73,9 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
     const hasBookings = bookingsByDate[dateKey]
     const isAvailable = !isPast && isMuseumOpen
 
-    let classes = 'relative h-16 md:h-20 lg:h-24 flex flex-col items-center justify-center transition-all duration-200 rounded '
+    // Mobile: iOS-style taller days with top alignment, Desktop: centered compact style
+    let classes = 'relative h-28 md:h-20 lg:h-24 flex flex-col transition-all duration-200 rounded '
+    classes += 'items-start justify-start p-1.5 md:items-center md:justify-center md:p-0 '
     
     if (!isAvailable) {
       classes += 'bg-stone-100 text-stone-300 cursor-not-allowed opacity-40'
@@ -149,25 +151,52 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
                 disabled={!isAvailable}
                 className={getDayClasses(date)}
               >
+                {/* Day Number - top on mobile, centered on desktop */}
+                <div className="w-full mb-auto md:mb-0">
+                  <span className="heading-font text-lg md:text-2xl lg:text-3xl font-light">
+                    {format(date, 'd')}
+                  </span>
+                </div>
+
+                {/* Today Badge */}
                 {isToday && (
-                  <span className="absolute top-0.5 right-0.5 md:top-1 md:right-1 text-[7px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 bg-amber-500 text-white rounded-full uppercase tracking-wider shadow-sm">
+                  <span className="absolute top-1 right-1 text-[7px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 bg-amber-500 text-white rounded-full uppercase tracking-wider shadow-sm">
                     Today
                   </span>
                 )}
-                
-                <span className="heading-font text-xl md:text-2xl lg:text-3xl font-light">
-                  {format(date, 'd')}
-                </span>
 
+                {/* Request Indicators */}
                 {isAvailable && hasBookings && (
-                  <div className="absolute bottom-0.5 right-0.5 md:bottom-1 md:right-1">
-                    <span className="px-1.5 py-0.5 md:px-2 md:py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 text-[9px] md:text-xs font-medium rounded shadow-sm flex items-center gap-0.5">
-                      <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                      </svg>
-                      <span>{hasBookings.requestCount}</span>
-                    </span>
-                  </div>
+                  <>
+                    {/* Mobile: iOS-style request bars */}
+                    <div className="md:hidden w-full space-y-1 mt-auto">
+                      {Array.from({ length: Math.min(hasBookings.requestCount, 4) }).map((_, i) => (
+                        <div key={i} className="w-full flex items-center gap-1">
+                          <div className="flex-1 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full shadow-sm" />
+                          {i === 0 && (
+                            <span className="text-[8px] font-bold text-emerald-700">
+                              {hasBookings.requestCount}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                      {hasBookings.requestCount > 4 && (
+                        <div className="text-[8px] text-emerald-700 font-bold">
+                          +{hasBookings.requestCount - 4} more
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Desktop: Badge with icon */}
+                    <div className="hidden md:block absolute bottom-1 right-1">
+                      <span className="px-2 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-medium rounded shadow-sm flex items-center gap-0.5">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span>{hasBookings.requestCount}</span>
+                      </span>
+                    </div>
+                  </>
                 )}
               </button>
             )
