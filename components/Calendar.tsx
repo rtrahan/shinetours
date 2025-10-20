@@ -168,23 +168,14 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
                 {/* Request Indicators */}
                 {isAvailable && hasBookings && (
                   <>
-                    {/* Mobile: iOS-style request bars */}
-                    <div className="md:hidden w-full space-y-1 mt-auto">
-                      {Array.from({ length: Math.min(hasBookings.requestCount, 4) }).map((_, i) => (
-                        <div key={i} className="w-full flex items-center gap-1">
-                          <div className="flex-1 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full shadow-sm" />
-                          {i === 0 && (
-                            <span className="text-[8px] font-bold text-emerald-700">
-                              {hasBookings.requestCount}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                      {hasBookings.requestCount > 4 && (
-                        <div className="text-[8px] text-emerald-700 font-bold">
-                          +{hasBookings.requestCount - 4} more
-                        </div>
-                      )}
+                    {/* Mobile: CTA with count */}
+                    <div className="md:hidden w-full mt-auto">
+                      <div className="bg-emerald-600 text-white text-center py-1 px-2 rounded text-[10px] font-bold">
+                        SELECT
+                      </div>
+                      <div className="text-center text-[9px] text-emerald-700 font-semibold mt-0.5">
+                        {hasBookings.requestCount} already
+                      </div>
                     </div>
 
                     {/* Desktop: Badge with icon */}
