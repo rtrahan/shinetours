@@ -169,7 +169,7 @@ export default function Home() {
                       <div>
                         <h3 className="font-bold text-stone-900 mb-1 text-sm md:text-base">Time Confirmation</h3>
                         <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
-                          Once Yale assigns a time slot (between 11am-3pm), we'll send you a confirmation email with the exact time and meeting details.
+                          Once Yale agrees to a time slot (between 11am-3pm), we'll send you a confirmation email with the exact time and meeting details.
                         </p>
                       </div>
                     </div>

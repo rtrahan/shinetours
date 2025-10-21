@@ -94,9 +94,9 @@ export function bookingConfirmationEmail(params: {
       <h3 style="color: #1c1917;">What Happens Next:</h3>
       
       <ol style="padding-left: 20px;">
-        <li style="margin: 10px 0;"><strong>Grouping:</strong> You'll be grouped with other visitors requesting the same date (groups of 10-15 people).</li>
+        <li style="margin: 10px 0;"><strong>Grouping:</strong> You may be grouped with other visitors requesting the same date (groups of 10-15 people).</li>
         <li style="margin: 10px 0;"><strong>Yale Submission:</strong> We'll submit your group's tour request to Yale University Art Gallery for approval.</li>
-        <li style="margin: 10px 0;"><strong>Confirmation:</strong> Once Yale assigns a time slot (between 11am-3pm), we'll send you a confirmation email with the exact time and meeting details.</li>
+        <li style="margin: 10px 0;"><strong>Confirmation:</strong> Once Yale agrees to a time slot (between 11am-3pm), we'll send you a confirmation email with the exact time and meeting details.</li>
       </ol>
 
       <p style="margin-top: 30px;">Please wait for our confirmation email before making any travel arrangements.</p>
