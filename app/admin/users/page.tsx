@@ -530,10 +530,11 @@ export default function UsersPage() {
                     type="password"
                     value={editFormData.password}
                     onChange={(e) => setEditFormData({...editFormData, password: e.target.value})}
+                    minLength={6}
                     className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
                     placeholder="Leave blank to keep current password"
                   />
-                  <p className="text-xs text-stone-500 mt-1">Only fill this in if you want to change the user's password</p>
+                  <p className="text-xs text-stone-500 mt-1">Only fill this in if you want to change the user's password (minimum 6 characters)</p>
                 </div>
 
                 <div className="flex items-center gap-3 p-4 bg-stone-50 rounded-lg">

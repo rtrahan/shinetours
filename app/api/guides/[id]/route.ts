@@ -38,7 +38,14 @@ export async function PATCH(
     }
 
     // Update password in Supabase Auth if provided
-    if (body.password && data) {
+    if (body.password && body.password.trim() !== '' && data) {
+      // Validate password length
+      if (body.password.length < 6) {
+        return NextResponse.json({ 
+          error: 'Password must be at least 6 characters long' 
+        }, { status: 400 })
+      }
+
       try {
         const adminClient = createAdminClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,17 +53,45 @@ export async function PATCH(
         )
 
         // Find auth user by email
-        const { data: authUsers } = await adminClient.auth.admin.listUsers()
+        const { data: authUsers, error: listError } = await adminClient.auth.admin.listUsers()
+        
+        if (listError) {
+          console.error('Error listing users:', listError)
+          return NextResponse.json({ 
+            error: 'Failed to update password: Could not list users' 
+          }, { status: 500 })
+        }
+
         const authUser = authUsers.users.find(u => u.email === data.email)
         
-        if (authUser) {
-          await adminClient.auth.admin.updateUserById(authUser.id, {
-            password: body.password
-          })
+        if (!authUser) {
+          return NextResponse.json({ 
+            error: 'Failed to update password: Auth user not found' 
+          }, { status: 404 })
         }
-      } catch (authError) {
+
+        const { error: updateError } = await adminClient.auth.admin.updateUserById(authUser.id, {
+          password: body.password
+        })
+
+        if (updateError) {
+          console.error('Error updating password:', updateError)
+          return NextResponse.json({ 
+            error: `Failed to update password: ${updateError.message}` 
+          }, { status: 500 })
+        }
+
+        return NextResponse.json({ 
+          success: true, 
+          data, 
+          passwordUpdated: true 
+        })
+
+      } catch (authError: any) {
         console.error('Error updating password:', authError)
-        // Don't fail the whole request if password update fails
+        return NextResponse.json({ 
+          error: `Failed to update password: ${authError.message || 'Unknown error'}` 
+        }, { status: 500 })
       }
     }
 
