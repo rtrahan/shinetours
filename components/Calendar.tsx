@@ -73,9 +73,9 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
     const hasBookings = bookingsByDate[dateKey]
     const isAvailable = !isPast && isMuseumOpen
 
-    // Mobile: iOS-style taller days with top alignment, Desktop: centered compact style
-    let classes = 'relative h-28 md:h-20 lg:h-24 flex flex-col transition-all duration-200 rounded '
-    classes += 'items-start justify-start p-1.5 md:items-center md:justify-center md:p-0 '
+    // iOS-style for both mobile and desktop - date at top, plus at bottom
+    let classes = 'relative h-28 md:h-24 lg:h-28 flex flex-col transition-all duration-200 rounded '
+    classes += 'items-start justify-start p-1.5 md:p-2 '
     
     if (!isAvailable) {
       classes += 'bg-stone-100 text-stone-300 cursor-not-allowed opacity-40'
@@ -151,9 +151,9 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
                 disabled={!isAvailable}
                 className={getDayClasses(date)}
               >
-                {/* Day Number - top on mobile, centered on desktop */}
-                <div className="w-full mb-auto md:mb-0">
-                  <span className="heading-font text-lg md:text-2xl lg:text-3xl font-light">
+                {/* Day Number - always at top */}
+                <div className="w-full mb-auto">
+                  <span className="heading-font text-lg md:text-xl lg:text-2xl font-light">
                     {format(date, 'd')}
                   </span>
                 </div>
@@ -165,35 +165,20 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
                   </span>
                 )}
 
-                {/* Booking Indicators */}
+                {/* Booking Indicators - same on mobile and desktop */}
                 {isAvailable && (
-                  <>
-                    {/* Mobile: Plus button for all available days */}
-                    <div className="md:hidden w-full mt-auto flex flex-col items-center">
-                      <div className="w-8 h-8 bg-stone-200 border-2 border-stone-300 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/>
-                        </svg>
-                      </div>
-                      {hasBookings && (
-                        <div className="text-center text-[9px] text-emerald-700 font-semibold mt-1">
-                          {hasBookings.requestCount} already
-                        </div>
-                      )}
+                  <div className="w-full mt-auto flex flex-col items-center">
+                    <div className="w-7 h-7 md:w-8 md:h-8 bg-stone-200 border-2 border-stone-300 rounded-full flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/>
+                      </svg>
                     </div>
-
-                    {/* Desktop: Badge with icon (only if has bookings) */}
                     {hasBookings && (
-                      <div className="hidden md:block absolute bottom-1 right-1">
-                        <span className="px-2 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-medium rounded shadow-sm flex items-center gap-0.5">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                          </svg>
-                          <span>{hasBookings.requestCount}</span>
-                        </span>
+                      <div className="text-center text-[9px] md:text-[10px] text-emerald-700 font-semibold mt-1">
+                        {hasBookings.requestCount} already
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
               </button>
             )
