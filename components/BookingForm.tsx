@@ -263,19 +263,29 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
             </div>
             
             <div className="p-6 overflow-y-auto max-h-[60vh] space-y-4">
-              {/* Current Forming Group */}
+              {/* Current Forming Group or Ungrouped Requests */}
               {dateDetails.currentFormingGroup && dateDetails.currentFormingGroup.participants.length > 0 && (
                 <div className="bg-stone-50 border border-stone-200 rounded-lg p-5">
                   <h4 className="font-bold text-stone-900 mb-3">
-                    Current Group (Not Yet Confirmed)
+                    {dateDetails.groupsCount === 0 ? 'Ungrouped Requests' : 'Current Group (Not Yet Confirmed)'}
                   </h4>
+                  <p className="text-xs text-stone-600 mb-3">
+                    {dateDetails.currentFormingGroup.totalPeople} {dateDetails.currentFormingGroup.totalPeople === 1 ? 'person' : 'people'} total
+                  </p>
                   <div className="space-y-2">
-                    {dateDetails.currentFormingGroup.participants.map((participant, idx) => (
-                      <div key={idx} className="flex items-center justify-between">
-                        <span className="text-stone-800">{participant.name}</span>
-                        <span className="text-sm text-stone-600 font-medium">
-                          {participant.groupSize} {participant.groupSize === 1 ? 'person' : 'people'}
-                        </span>
+                    {dateDetails.currentFormingGroup.participants.map((participant: any, idx) => (
+                      <div key={idx} className="bg-white p-3 rounded border border-stone-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-stone-900 font-semibold">{participant.name}</span>
+                          <span className="text-sm text-stone-600 font-medium bg-stone-100 px-2 py-1 rounded">
+                            {participant.groupSize} {participant.groupSize === 1 ? 'person' : 'people'}
+                          </span>
+                        </div>
+                        {participant.preferredGuide && (
+                          <div className="mt-1 text-xs text-purple-700">
+                            Prefers: {participant.preferredGuide}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

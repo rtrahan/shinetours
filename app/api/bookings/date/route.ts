@@ -80,13 +80,30 @@ export async function GET(request: NextRequest) {
     const requestCount = allRequests?.length || 0
     const totalPeopleAllRequests = allRequests?.reduce((sum, r) => sum + r.group_size, 0) || 0
 
+    // Get ungrouped requests for this date
+    const { data: ungroupedRequests } = await supabase
+      .from('booking_requests')
+      .select('id, contact_name, group_size, preferred_guide:guides(first_name, last_name)')
+      .eq('requested_date', date)
+      .is('tour_group_id', null)
+      .order('created_at')
+
+    const ungroupedGroup = ungroupedRequests && ungroupedRequests.length > 0 ? {
+      participants: ungroupedRequests.map(r => ({
+        name: r.contact_name,
+        groupSize: r.group_size,
+        preferredGuide: r.preferred_guide ? `${r.preferred_guide.first_name} ${r.preferred_guide.last_name}` : null
+      })),
+      totalPeople: ungroupedRequests.reduce((sum, r) => sum + r.group_size, 0)
+    } : null
+
     return NextResponse.json({
       date,
-      totalPeople: totalPeopleAllRequests, // Use actual total from all requests
+      totalPeople: totalPeopleAllRequests,
       currentGroupPeople,
       spotsLeft: Math.max(0, spotsLeft),
       requestCount,
-      currentFormingGroup,
+      currentFormingGroup: ungroupedGroup || currentFormingGroup, // Show ungrouped first
       confirmedGroups: groups,
       groupsCount: groups.length
     })
