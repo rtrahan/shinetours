@@ -89,12 +89,15 @@ export async function GET(request: NextRequest) {
       .order('created_at')
 
     const ungroupedGroup = ungroupedRequests && ungroupedRequests.length > 0 ? {
-      participants: ungroupedRequests.map(r => ({
-        name: r.contact_name,
-        groupSize: r.group_size,
-        preferredGuide: r.preferred_guide ? `${r.preferred_guide.first_name} ${r.preferred_guide.last_name}` : null
-      })),
-      totalPeople: ungroupedRequests.reduce((sum, r) => sum + r.group_size, 0)
+      participants: ungroupedRequests.map((r: any) => {
+        const preferredGuide = Array.isArray(r.preferred_guide) ? r.preferred_guide[0] : r.preferred_guide
+        return {
+          name: r.contact_name,
+          groupSize: r.group_size,
+          preferredGuide: preferredGuide ? `${preferredGuide.first_name} ${preferredGuide.last_name}` : null
+        }
+      }),
+      totalPeople: ungroupedRequests.reduce((sum: number, r: any) => sum + r.group_size, 0)
     } : null
 
     return NextResponse.json({
