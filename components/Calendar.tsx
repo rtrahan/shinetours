@@ -175,7 +175,7 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
                     </div>
                     {hasBookings && (
                       <div className="text-center text-[9px] md:text-[10px] text-emerald-700 font-semibold mt-1">
-                        {hasBookings.requestCount} already
+                        {hasBookings.requestCount} {hasBookings.requestCount === 1 ? 'request' : 'requests'}
                       </div>
                     )}
                   </div>
