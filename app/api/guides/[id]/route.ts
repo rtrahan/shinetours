@@ -11,7 +11,7 @@ export async function PATCH(
     const { id } = await context.params
     const body = await request.json()
 
-    // Allow updating: is_active, email, first_name, last_name, phone, is_admin
+    // Allow updating: is_active, email, first_name, last_name, phone, is_admin, password
     const updateData: any = {}
     
     if (body.is_active !== undefined) updateData.is_active = body.is_active
@@ -21,10 +21,11 @@ export async function PATCH(
     if (body.phone !== undefined) updateData.phone = body.phone || null
     if (body.is_admin !== undefined) updateData.is_admin = body.is_admin
 
-    if (Object.keys(updateData).length === 0) {
+    if (Object.keys(updateData).length === 0 && !body.password) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
     }
 
+    // Update guide record in database
     const { data, error } = await supabase
       .from('guides')
       .update(updateData)
@@ -34,6 +35,29 @@ export async function PATCH(
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Update password in Supabase Auth if provided
+    if (body.password && data) {
+      try {
+        const adminClient = createAdminClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+
+        // Find auth user by email
+        const { data: authUsers } = await adminClient.auth.admin.listUsers()
+        const authUser = authUsers.users.find(u => u.email === data.email)
+        
+        if (authUser) {
+          await adminClient.auth.admin.updateUserById(authUser.id, {
+            password: body.password
+          })
+        }
+      } catch (authError) {
+        console.error('Error updating password:', authError)
+        // Don't fail the whole request if password update fails
+      }
     }
 
     return NextResponse.json({ success: true, data })

@@ -37,7 +37,8 @@ export default function UsersPage() {
     first_name: '',
     last_name: '',
     phone: '',
-    is_admin: false
+    is_admin: false,
+    password: ''
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -117,7 +118,8 @@ export default function UsersPage() {
       first_name: guide.first_name,
       last_name: guide.last_name,
       phone: guide.phone || '',
-      is_admin: guide.is_admin
+      is_admin: guide.is_admin,
+      password: ''
     })
     setShowEditModal(true)
     setError('')
@@ -518,6 +520,20 @@ export default function UsersPage() {
                     onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
                     className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                    New Password (optional)
+                  </label>
+                  <input
+                    type="password"
+                    value={editFormData.password}
+                    onChange={(e) => setEditFormData({...editFormData, password: e.target.value})}
+                    className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                    placeholder="Leave blank to keep current password"
+                  />
+                  <p className="text-xs text-stone-500 mt-1">Only fill this in if you want to change the user's password</p>
                 </div>
 
                 <div className="flex items-center gap-3 p-4 bg-stone-50 rounded-lg">
