@@ -8,6 +8,7 @@ interface TourTableProps {
   tours: TourGroup[]
   currentUserId?: string
   isAdmin?: boolean
+  isGuide?: boolean
   guides?: any[]
   onViewDetails: (tourId: string) => void
   onAssignGuide?: (tourId: string, guideId: string) => void
@@ -15,7 +16,7 @@ interface TourTableProps {
   onAutoGroup?: (date: string) => void
 }
 
-export default function TourTable({ tours, currentUserId, isAdmin, guides = [], onViewDetails, onAssignGuide, onAction, onAutoGroup }: TourTableProps) {
+export default function TourTable({ tours, currentUserId, isAdmin, isGuide, guides = [], onViewDetails, onAssignGuide, onAction, onAutoGroup }: TourTableProps) {
   const [sortColumn, setSortColumn] = useState<string>('requested_date')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
@@ -396,8 +397,8 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                   <tr key={`${tour.id}-details`} className="bg-stone-50">
                     <td colSpan={100} className="p-0">
                       <div className="px-6 py-3">
-                        {/* Management Actions */}
-                        {isAdmin && tour.booking_requests && tour.booking_requests.length > 0 && (
+                        {/* Management Actions - for both admins and guides */}
+                        {(isAdmin || isGuide) && tour.booking_requests && tour.booking_requests.length > 0 && (
                           <div className="flex items-center justify-end gap-2 mb-2">
                             {tour.status === 'Ungrouped' && onAutoGroup && (
                               <button
@@ -429,8 +430,8 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                           {tour.booking_requests?.map((participant) => (
                             <div key={participant.id} className="group bg-white hover:bg-stone-50 p-3 rounded-lg border border-stone-200 hover:border-stone-300 transition-all">
                               <div className="flex items-center gap-3">
-                                {/* Checkbox */}
-                                {isAdmin && (
+                                {/* Checkbox - for both admins and guides */}
+                                {(isAdmin || isGuide) && (
                                   <input
                                     type="checkbox"
                                     checked={selectedByTour[tour.id]?.has(participant.id) || false}
@@ -489,7 +490,7 @@ export default function TourTable({ tours, currentUserId, isAdmin, guides = [], 
                                         {participant.group_size} {participant.group_size === 1 ? 'person' : 'people'}
                                       </div>
 
-                                      {/* Delete Button */}
+                                            {/* Delete Button - admins only */}
                                       {isAdmin && (
                                         <button
                                           onClick={(e) => {

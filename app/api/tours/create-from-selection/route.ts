@@ -11,12 +11,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Check if the current user is a guide (not admin)
+    const { data: { user } } = await supabase.auth.getUser()
+    let assignedGuideId = null
+    
+    if (user) {
+      const { data: guide } = await supabase
+        .from('guides')
+        .select('id, is_admin')
+        .eq('email', user.email)
+        .single()
+      
+      // If user is a guide (not admin), assign them to the new group
+      if (guide && !guide.is_admin) {
+        assignedGuideId = guide.id
+      }
+    }
+
     // 1. Create a new tour group for the same date
     const { data: newTourGroup, error: groupError } = await supabase
       .from('tour_groups')
       .insert({
         requested_date: tourDate,
-        status: 'Pending'
+        status: assignedGuideId ? 'Ready' : 'Pending', // Ready if guide assigned
+        guide_id: assignedGuideId
       })
       .select()
       .single()

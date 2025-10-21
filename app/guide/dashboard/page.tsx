@@ -45,6 +45,7 @@ export default function GuideDashboard() {
       setCurrentUserId(guide.id)
     }
     fetchTours()
+    fetchUngrouped()
   }
 
   const fetchTours = async () => {
@@ -56,6 +57,27 @@ export default function GuideDashboard() {
     )
     setTours(toursWithBookings)
     setLoading(false)
+  }
+
+  const fetchUngrouped = async () => {
+    const response = await fetch('/api/bookings/ungrouped')
+    if (response.ok) {
+      const data = await response.json()
+      setUngroupedRequests(data)
+    }
+  }
+
+  const handleAutoGroup = async (date: string) => {
+    const response = await fetch('/api/tours/auto-group', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date })
+    })
+
+    if (response.ok) {
+      fetchTours()
+      fetchUngrouped()
+    }
   }
 
   const handleAction = async (tourId: string, action: string) => {
@@ -100,24 +122,45 @@ export default function GuideDashboard() {
     fetchTours()
   }
 
+  // Combine tours and ungrouped
+  const allItems: any[] = [
+    ...tours,
+    ...ungroupedRequests.map(ug => ({
+      id: `ungrouped-${ug.requested_date}`,
+      requested_date: ug.requested_date,
+      status: 'Ungrouped',
+      booking_requests: ug.booking_requests,
+      guide: null,
+      guide_id: null,
+      confirmed_datetime: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      _isUngrouped: true,
+      _totalPeople: ug.totalPeople,
+      _requestCount: ug.requestCount
+    }))
+  ]
+
   const myTours = tours.filter(t => t.guide_id === currentUserId)
   const availableTours = tours.filter(t => !t.guide_id)
   const otherTours = tours.filter(t => t.guide_id && t.guide_id !== currentUserId)
 
-  const filteredTours = tours.filter(tour => {
+  const filteredTours = allItems.filter(tour => {
     if (activeFilter === 'all') return true
+    if (activeFilter === 'ungrouped') return tour.status === 'Ungrouped'
     if (activeFilter === 'mine') return tour.guide_id === currentUserId
-    if (activeFilter === 'available') return !tour.guide_id
+    if (activeFilter === 'available') return !tour.guide_id && tour.status !== 'Ungrouped'
     if (activeFilter === 'others') return tour.guide_id && tour.guide_id !== currentUserId
     return true
   })
 
   const filterPills = [
-    { id: 'all', label: 'All', count: tours.length, color: 'none' },
+    { id: 'all', label: 'All', count: allItems.length, color: 'none' },
+    { id: 'ungrouped', label: 'Ungrouped Requests', count: ungroupedRequests.length, color: 'amber' },
     { id: 'mine', label: 'My Tours', count: myTours.length, color: 'purple' },
     { id: 'available', label: 'Available to Claim', count: availableTours.length, color: 'emerald' },
     { id: 'others', label: "Other Guides' Tours", count: otherTours.length, color: 'stone' },
-  ].filter(p => p.count > 0 || p.id === 'all')
+  ].filter(p => p.count > 0 || p.id === 'all' || p.id === 'ungrouped')
 
   if (loading) {
     return <div className="min-h-screen bg-stone-50 flex items-center justify-center">
@@ -163,11 +206,14 @@ export default function GuideDashboard() {
           tours={filteredTours}
           currentUserId={currentUserId}
           isAdmin={false}
+          isGuide={true}
           onViewDetails={(id) => {
-            setSelectedTour(tours.find(t => t.id === id) || null)
+            const tour = allItems.find(t => t.id === id)
+            setSelectedTour(tour || null)
             setShowDetailsModal(true)
           }}
           onAction={handleAction}
+          onAutoGroup={handleAutoGroup}
         />
       </div>
 
