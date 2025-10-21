@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,8 +42,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Create admin client with service role key for auth operations
+    const adminClient = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     // 1. Create Supabase Auth user
-    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+    const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true, // Auto-confirm email
@@ -73,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     if (guideError) {
       // Rollback - delete the auth user we just created
-      await supabase.auth.admin.deleteUser(authUser.user.id)
+      await adminClient.auth.admin.deleteUser(authUser.user.id)
       return NextResponse.json({ error: guideError.message }, { status: 500 })
     }
 

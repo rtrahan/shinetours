@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export async function PATCH(
   request: NextRequest,
@@ -71,12 +72,18 @@ export async function DELETE(
     // Try to delete from Supabase Auth (if email exists)
     if (guide?.email) {
       try {
+        // Create admin client for auth operations
+        const adminClient = createAdminClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+
         // Get auth user by email
-        const { data: authUsers } = await supabase.auth.admin.listUsers()
+        const { data: authUsers } = await adminClient.auth.admin.listUsers()
         const authUser = authUsers.users.find(u => u.email === guide.email)
         
         if (authUser) {
-          await supabase.auth.admin.deleteUser(authUser.id)
+          await adminClient.auth.admin.deleteUser(authUser.id)
         }
       } catch (authError) {
         console.error('Error deleting auth user:', authError)
