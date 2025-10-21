@@ -71,17 +71,18 @@ export async function GET(request: NextRequest) {
 
     const spotsLeft = 15 - currentGroupPeople
 
-    // Count total requests (including ungrouped)
+    // Count total requests AND total people (including ungrouped)
     const { data: allRequests } = await supabase
       .from('booking_requests')
-      .select('id')
+      .select('id, group_size')
       .eq('requested_date', date)
     
     const requestCount = allRequests?.length || 0
+    const totalPeopleAllRequests = allRequests?.reduce((sum, r) => sum + r.group_size, 0) || 0
 
     return NextResponse.json({
       date,
-      totalPeople,
+      totalPeople: totalPeopleAllRequests, // Use actual total from all requests
       currentGroupPeople,
       spotsLeft: Math.max(0, spotsLeft),
       requestCount,
