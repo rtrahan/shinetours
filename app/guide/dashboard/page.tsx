@@ -15,6 +15,7 @@ export default function GuideDashboard() {
   const supabase = createClient()
   
   const [tours, setTours] = useState<TourGroup[]>([])
+  const [ungroupedRequests, setUngroupedRequests] = useState<any[]>([])
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
@@ -183,10 +184,16 @@ export default function GuideDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3 md:gap-6 text-xs md:text-sm">
-            <a href="/" className="text-sm text-stone-600 hover:text-stone-800 uppercase tracking-wide">← Home</a>
+            <a href="/guide/profile" className="text-stone-600 hover:text-stone-800 uppercase tracking-wide flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              Profile
+            </a>
+            <a href="/" className="text-stone-600 hover:text-stone-800 uppercase tracking-wide">← Home</a>
             <button 
               onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
-              className="text-sm text-stone-600 hover:text-stone-800 uppercase tracking-wide"
+              className="text-stone-600 hover:text-stone-800 uppercase tracking-wide"
             >
               Logout
             </button>
