@@ -168,24 +168,16 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
                 {/* Booking Indicators */}
                 {isAvailable && (
                   <>
-                    {/* Mobile Indicators */}
-                    <div className="md:hidden w-full mt-auto">
-                      {hasBookings ? (
-                        <>
-                          <div className="bg-emerald-600 text-white text-center py-1 px-2 rounded text-[10px] font-bold">
-                            SELECT
-                          </div>
-                          <div className="text-center text-[9px] text-emerald-700 font-semibold mt-0.5">
-                            {hasBookings.requestCount} already
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex items-center justify-center">
-                          <div className="w-8 h-8 bg-stone-200 hover:bg-emerald-500 border-2 border-stone-300 rounded-full flex items-center justify-center transition-colors">
-                            <svg className="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/>
-                            </svg>
-                          </div>
+                    {/* Mobile: Plus button for all available days */}
+                    <div className="md:hidden w-full mt-auto flex flex-col items-center">
+                      <div className="w-8 h-8 bg-stone-200 border-2 border-stone-300 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                      </div>
+                      {hasBookings && (
+                        <div className="text-center text-[9px] text-emerald-700 font-semibold mt-1">
+                          {hasBookings.requestCount} already
                         </div>
                       )}
                     </div>
