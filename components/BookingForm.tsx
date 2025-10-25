@@ -41,7 +41,7 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
   const [showParticipants, setShowParticipants] = useState(false)
 
   // Available languages
-  const availableLanguages = ['English', 'Spanish']
+  const availableLanguages = ['English', 'Spanish', 'Italian']
   
   // Filter guides by selected language
   const filteredGuides = availableGuides.filter(guide => 

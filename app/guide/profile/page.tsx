@@ -22,7 +22,7 @@ export default function GuideProfile() {
   })
 
   // Available languages
-  const availableLanguages = ['English', 'Spanish']
+  const availableLanguages = ['English', 'Spanish', 'Italian']
 
   useEffect(() => {
     fetchProfile()

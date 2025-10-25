@@ -47,7 +47,7 @@ export default function UsersPage() {
   const [error, setError] = useState('')
 
   // Available languages
-  const availableLanguages = ['English', 'Spanish']
+  const availableLanguages = ['English', 'Spanish', 'Italian']
 
   useEffect(() => {
     checkAuth()
