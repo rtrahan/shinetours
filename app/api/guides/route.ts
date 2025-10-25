@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
     const body = await request.json()
-    const { email, password, first_name, last_name, phone, is_admin } = body
+    const { email, password, first_name, last_name, phone, languages, is_admin } = body
 
     if (!email || !password || !first_name || !last_name) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
         first_name,
         last_name,
         phone: phone || null,
+        languages: languages || ['English'],
         is_admin: is_admin || false,
         is_active: true,
         password_hash: '' // Using Supabase Auth, not custom passwords

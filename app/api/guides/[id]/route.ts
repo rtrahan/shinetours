@@ -11,7 +11,7 @@ export async function PATCH(
     const { id } = await context.params
     const body = await request.json()
 
-    // Allow updating: is_active, email, first_name, last_name, phone, is_admin, password
+    // Allow updating: is_active, email, first_name, last_name, phone, is_admin, languages, password
     const updateData: any = {}
     
     if (body.is_active !== undefined) updateData.is_active = body.is_active
@@ -20,21 +20,38 @@ export async function PATCH(
     if (body.last_name) updateData.last_name = body.last_name
     if (body.phone !== undefined) updateData.phone = body.phone || null
     if (body.is_admin !== undefined) updateData.is_admin = body.is_admin
+    if (body.languages !== undefined) updateData.languages = body.languages
 
     if (Object.keys(updateData).length === 0 && !body.password) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
     }
 
-    // Update guide record in database
-    const { data, error } = await supabase
-      .from('guides')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single()
+    // Update guide record in database (only if there are fields to update)
+    let data: any = null
+    if (Object.keys(updateData).length > 0) {
+      const { data: updatedData, error } = await supabase
+        .from('guides')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single()
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      data = updatedData
+    } else {
+      // If only updating password, fetch current guide data
+      const { data: currentData, error } = await supabase
+        .from('guides')
+        .select()
+        .eq('id', id)
+        .single()
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      data = currentData
     }
 
     // Update password in Supabase Auth if provided

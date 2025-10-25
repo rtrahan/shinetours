@@ -10,6 +10,7 @@ interface Guide {
   first_name: string
   last_name: string
   phone: string | null
+  languages: string[]
   is_admin: boolean
   is_active: boolean
   created_at: string
@@ -30,6 +31,7 @@ export default function UsersPage() {
     first_name: '',
     last_name: '',
     phone: '',
+    languages: ['English'] as string[],
     is_admin: false
   })
   const [editFormData, setEditFormData] = useState({
@@ -37,11 +39,15 @@ export default function UsersPage() {
     first_name: '',
     last_name: '',
     phone: '',
+    languages: [] as string[],
     is_admin: false,
     password: ''
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Available languages
+  const availableLanguages = ['English', 'Spanish']
 
   useEffect(() => {
     checkAuth()
@@ -91,6 +97,7 @@ export default function UsersPage() {
         first_name: '',
         last_name: '',
         phone: '',
+        languages: ['English'],
         is_admin: false
       })
       setShowAddModal(false)
@@ -118,6 +125,7 @@ export default function UsersPage() {
       first_name: guide.first_name,
       last_name: guide.last_name,
       phone: guide.phone || '',
+      languages: guide.languages || ['English'],
       is_admin: guide.is_admin,
       password: ''
     })
@@ -236,6 +244,7 @@ export default function UsersPage() {
                 <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Name</th>
                 <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Email</th>
                 <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Phone</th>
+                <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Languages</th>
                 <th className="text-center py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Role</th>
                 <th className="text-center py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Status</th>
                 <th className="text-center py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600 bg-stone-100">Actions</th>
@@ -252,6 +261,19 @@ export default function UsersPage() {
                   </td>
                   <td className="py-4 px-6">
                     <p className="text-stone-700 text-sm">{guide.phone || '—'}</p>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex flex-wrap gap-1">
+                      {guide.languages && guide.languages.length > 0 ? (
+                        guide.languages.map((lang) => (
+                          <span key={lang} className="inline-flex items-center px-2 py-0.5 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 font-medium">
+                            {lang}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-stone-400 text-sm italic">None</span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-4 px-6 text-center">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
@@ -272,22 +294,12 @@ export default function UsersPage() {
                     </span>
                   </td>
                   <td className="py-4 px-6 text-center">
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
                       <button
                         onClick={() => openEditModal(guide)}
                         className="px-4 py-2 text-xs font-bold rounded transition-all bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         Edit
-                      </button>
-                      <button
-                        onClick={() => toggleActive(guide.id, guide.is_active)}
-                        className={`px-4 py-2 text-xs font-bold rounded transition-all ${
-                          guide.is_active
-                            ? 'bg-stone-200 hover:bg-stone-300 text-stone-700'
-                            : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                        }`}
-                      >
-                        {guide.is_active ? 'Deactivate' : 'Activate'}
                       </button>
                       <button
                         onClick={() => handleDeleteUser(guide.id, `${guide.first_name} ${guide.last_name}`)}
@@ -400,6 +412,32 @@ export default function UsersPage() {
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
                     className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                    Languages
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {availableLanguages.map((lang) => (
+                      <label key={lang} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.languages.includes(lang)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({...formData, languages: [...formData.languages, lang]})
+                            } else {
+                              setFormData({...formData, languages: formData.languages.filter(l => l !== lang)})
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 border-stone-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="text-xs text-stone-700">{lang}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-stone-500 mt-2">Select all languages this guide can conduct tours in</p>
                 </div>
 
                 <div className="flex items-center gap-3 p-4 bg-stone-50 rounded-lg">
@@ -520,6 +558,32 @@ export default function UsersPage() {
                     onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
                     className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                    Languages
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {availableLanguages.map((lang) => (
+                      <label key={lang} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editFormData.languages.includes(lang)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setEditFormData({...editFormData, languages: [...editFormData.languages, lang]})
+                            } else {
+                              setEditFormData({...editFormData, languages: editFormData.languages.filter(l => l !== lang)})
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 border-stone-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="text-xs text-stone-700">{lang}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-stone-500 mt-2">Select all languages this guide can conduct tours in</p>
                 </div>
 
                 <div>

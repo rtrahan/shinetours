@@ -33,11 +33,20 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [preferredLanguage, setPreferredLanguage] = useState('English')
   const [preferredGuideId, setPreferredGuideId] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [dateDetails, setDateDetails] = useState<DateDetails | null>(null)
   const [showParticipants, setShowParticipants] = useState(false)
+
+  // Available languages
+  const availableLanguages = ['English', 'Spanish']
+  
+  // Filter guides by selected language
+  const filteredGuides = availableGuides.filter(guide => 
+    guide.languages && guide.languages.includes(preferredLanguage)
+  )
 
   // Fetch date details when date changes
   useEffect(() => {
@@ -72,6 +81,7 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
           contact_name: name,
           contact_email: email,
           contact_phone: phone,
+          preferred_language: preferredLanguage,
           preferred_guide_id: preferredGuideId || null
         })
       })
@@ -89,6 +99,7 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
       setName('')
       setEmail('')
       setPhone('')
+      setPreferredLanguage('English')
       setPreferredGuideId('')
       
       // Refresh date details to show updated count
@@ -210,6 +221,28 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
 
       <div>
         <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+          Preferred Language
+        </label>
+        <select
+          value={preferredLanguage}
+          onChange={(e) => {
+            setPreferredLanguage(e.target.value)
+            setPreferredGuideId('') // Reset guide selection when language changes
+          }}
+          required
+          className="w-full px-4 py-3 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+        >
+          {availableLanguages.map(lang => (
+            <option key={lang} value={lang}>
+              {lang}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-[10px] text-stone-500">Select your preferred tour language</p>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
           Preferred Tour Guide <span className="text-stone-400 font-normal text-[10px]">(Optional)</span>
         </label>
         <select
@@ -218,13 +251,17 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
           className="w-full px-4 py-3 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
         >
           <option value="">No Preference</option>
-          {availableGuides.map(guide => (
+          {filteredGuides.map(guide => (
             <option key={guide.id} value={guide.id}>
               {guide.first_name} {guide.last_name}
             </option>
           ))}
         </select>
-        <p className="mt-1 text-[10px] text-stone-500">We'll try to schedule your preferred guide if available</p>
+        <p className="mt-1 text-[10px] text-stone-500">
+          {filteredGuides.length === 0 
+            ? `No guides available for ${preferredLanguage} tours` 
+            : `Showing guides who speak ${preferredLanguage}`}
+        </p>
       </div>
 
       {error && (

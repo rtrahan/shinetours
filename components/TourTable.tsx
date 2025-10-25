@@ -127,6 +127,11 @@ export default function TourTable({ tours, currentUserId, isAdmin, isGuide, guid
     return tour.booking_requests?.reduce((sum, b) => sum + b.group_size, 0) || 0
   }
 
+  const getLanguages = (tour: TourGroup) => {
+    const languages = tour.booking_requests?.map(b => b.preferred_language).filter(Boolean) || []
+    return [...new Set(languages)] // Get unique languages
+  }
+
   // Empty state when no tours
   if (tours.length === 0) {
     return (
@@ -160,7 +165,7 @@ export default function TourTable({ tours, currentUserId, isAdmin, isGuide, guid
   return (
     <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px]">
+        <table className="w-full min-w-[1000px]">
           <thead className="bg-stone-50 border-b-2 border-stone-200">
             <tr>
               <th 
@@ -176,6 +181,9 @@ export default function TourTable({ tours, currentUserId, isAdmin, isGuide, guid
               </th>
               <th className="text-center py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">
                 Requests
+              </th>
+              <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">
+                Language
               </th>
               <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">
                 Assigned Guide
@@ -231,6 +239,19 @@ export default function TourTable({ tours, currentUserId, isAdmin, isGuide, guid
                     <span className="text-sm font-medium text-stone-700">
                       {requestCount}
                     </span>
+                  </td>
+                  <td className="py-5 px-6">
+                    <div className="flex flex-wrap gap-1">
+                      {getLanguages(tour).length > 0 ? (
+                        getLanguages(tour).map((lang) => (
+                          <span key={lang} className="inline-flex items-center px-2 py-1 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 font-medium">
+                            {lang}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-stone-400 text-sm italic">—</span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-5 px-6">
                     {isAdmin && onAssignGuide && !isUngrouped ? (
@@ -445,7 +466,7 @@ export default function TourTable({ tours, currentUserId, isAdmin, isGuide, guid
 
                                 {/* Participant Info */}
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between gap-4">
+                                      <div className="flex items-center justify-between gap-4">
                                     <div className="flex-1">
                                       <h5 className="font-semibold text-stone-900 text-sm mb-0.5">
                                         {participant.contact_name}
@@ -472,6 +493,14 @@ export default function TourTable({ tours, currentUserId, isAdmin, isGuide, guid
                                             </svg>
                                             {participant.contact_phone}
                                           </a>
+                                        )}
+                                        {participant.preferred_language && (
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-blue-700 font-medium">
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+                                            </svg>
+                                            {participant.preferred_language}
+                                          </span>
                                         )}
                                         {participant.preferred_guide && (
                                           <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 border border-purple-200 rounded-full text-purple-700 font-medium">

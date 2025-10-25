@@ -17,8 +17,12 @@ export default function GuideProfile() {
     last_name: '',
     email: '',
     phone: '',
+    languages: [] as string[],
     password: ''
   })
+
+  // Available languages
+  const availableLanguages = ['English', 'Spanish']
 
   useEffect(() => {
     fetchProfile()
@@ -44,6 +48,7 @@ export default function GuideProfile() {
         last_name: guide.last_name,
         email: guide.email,
         phone: guide.phone || '',
+        languages: guide.languages || ['English'],
         password: ''
       })
     }
@@ -80,6 +85,7 @@ export default function GuideProfile() {
           last_name: formData.last_name,
           email: formData.email,
           phone: formData.phone,
+          languages: formData.languages,
           password: formData.password || undefined
         })
       })
@@ -209,6 +215,32 @@ export default function GuideProfile() {
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 className="w-full px-4 py-3 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
               />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                Languages I Can Guide In
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {availableLanguages.map((lang) => (
+                  <label key={lang} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.languages.includes(lang)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData({...formData, languages: [...formData.languages, lang]})
+                        } else {
+                          setFormData({...formData, languages: formData.languages.filter(l => l !== lang)})
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 border-stone-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-stone-700">{lang}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-stone-500 mt-2">Select all languages you can conduct tours in</p>
             </div>
 
             <div>

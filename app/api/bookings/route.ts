@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const body = await request.json()
 
-    const { requested_date, group_size, contact_name, contact_email, contact_phone, preferred_guide_id } = body
+    const { requested_date, group_size, contact_name, contact_email, contact_phone, preferred_language, preferred_guide_id } = body
 
     // Validate input
     if (!requested_date || !group_size || !contact_name || !contact_email || !contact_phone) {
@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
         contact_name,
         contact_email,
         contact_phone,
+        preferred_language: preferred_language || 'English',
         preferred_guide_id: preferred_guide_id || null,
         tour_group_id: null  // Leave ungrouped initially
       })

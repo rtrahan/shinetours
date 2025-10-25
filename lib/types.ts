@@ -8,6 +8,7 @@ export interface Guide {
   phone: string | null
   is_admin: boolean
   is_active: boolean
+  languages: string[]
   created_at: string
   updated_at: string
 }
@@ -32,6 +33,7 @@ export interface BookingRequest {
   contact_email: string
   contact_phone: string
   preferred_guide_id: string | null
+  preferred_language: string
   tour_group_id: string | null
   created_at: string
   updated_at: string
