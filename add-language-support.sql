@@ -22,3 +22,4 @@ UPDATE booking_requests
 SET preferred_language = 'English' 
 WHERE preferred_language IS NULL;
 
+

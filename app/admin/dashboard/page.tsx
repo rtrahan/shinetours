@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import TourTable from '@/components/TourTable'
-import FilterPills from '@/components/FilterPills'
+import TourBoard from '@/components/TourBoard'
 import DetailsModal from '@/components/DetailsModal'
 import YaleSubmissionModal from '@/components/YaleSubmissionModal'
 import ConfirmationModal from '@/components/ConfirmationModal'
@@ -18,7 +17,6 @@ export default function AdminDashboard() {
   const [ungroupedRequests, setUngroupedRequests] = useState<any[]>([])
   const [guides, setGuides] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeFilter, setActiveFilter] = useState('all')
   const [selectedTour, setSelectedTour] = useState<TourGroup | null>(null)
   const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [showYaleModal, setShowYaleModal] = useState(false)
@@ -134,41 +132,28 @@ export default function AdminDashboard() {
   // Each ungrouped date shows as ONE row with all requests for that date
   const allItems: any[] = [
     ...tours,
-    ...ungroupedRequests.map(ug => ({
-      id: `ungrouped-${ug.requested_date}`,
-      requested_date: ug.requested_date,
-      status: 'Ungrouped',
-      booking_requests: ug.booking_requests,
-      guide: null,
-      guide_id: null,
-      confirmed_datetime: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      _isUngrouped: true,
-      _totalPeople: ug.totalPeople,
-      _requestCount: ug.requestCount
-    }))
-  ]
-
-  const filteredTours = allItems.filter(item => {
-    if (activeFilter === 'all') return true
-    if (activeFilter === 'ungrouped') return item.status === 'Ungrouped'
-    if (activeFilter === 'needs-guide') return !item.guide_id && item.status !== 'Ungrouped'
-    if (activeFilter === 'ready') return item.status === 'Ready'
-    if (activeFilter === 'pending-yale') return item.status === 'PendingYale'
-    if (activeFilter === 'confirmed') return item.status === 'Confirmed'
-    if (activeFilter === 'completed') return item.status === 'Completed'
-    return true
-  })
-
-  const filterPills = [
-    { id: 'all', label: 'All', count: allItems.length, color: 'none' },
-    { id: 'ungrouped', label: 'Ungrouped Requests', count: ungroupedRequests.length, color: 'amber' },
-    { id: 'needs-guide', label: 'Needs Tour Guide', count: tours.filter(t => !t.guide_id).length, color: 'orange' },
-    { id: 'ready', label: 'Need Yale Request', count: tours.filter(t => t.status === 'Ready').length, color: 'red' },
-    { id: 'pending-yale', label: 'Waiting for Yale', count: tours.filter(t => t.status === 'PendingYale').length, color: 'blue' },
-    { id: 'confirmed', label: 'Confirmed', count: tours.filter(t => t.status === 'Confirmed').length, color: 'emerald' },
-    { id: 'completed', label: 'Completed', count: tours.filter(t => t.status === 'Completed').length, color: 'stone' },
+    ...ungroupedRequests.map(ug => {
+      const latestCreated = ug.booking_requests?.length
+        ? ug.booking_requests.reduce((latest: string | null, b: any) =>
+            !latest || (b.created_at && new Date(b.created_at) > new Date(latest)) ? b.created_at ?? latest : latest,
+            null as string | null
+          )
+        : null
+      return {
+        id: `ungrouped-${ug.requested_date}`,
+        requested_date: ug.requested_date,
+        status: 'Ungrouped',
+        booking_requests: ug.booking_requests,
+        guide: null,
+        guide_id: null,
+        confirmed_datetime: null,
+        created_at: latestCreated ?? new Date(0).toISOString(),
+        updated_at: latestCreated ?? new Date(0).toISOString(),
+        _isUngrouped: true,
+        _totalPeople: ug.totalPeople,
+        _requestCount: ug.requestCount
+      }
+    })
   ]
 
   if (loading) {
@@ -251,17 +236,11 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-4 md:py-6">
-        <FilterPills 
-          pills={filterPills}
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-        />
-
-        <TourTable
-          tours={filteredTours}
+        <TourBoard
+          tours={allItems}
           guides={guides}
           isAdmin={true}
-          onViewDetails={(id) => {
+          onViewDetails={(id: string) => {
             const tour = allItems.find(t => t.id === id)
             setSelectedTour(tour || null)
             setShowDetailsModal(true)

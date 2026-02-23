@@ -106,6 +106,26 @@ export default function DetailsModal({
       console.error('Error canceling booking:', error)
     }
   }
+
+  const handleRemoveFromGroup = async (bookingId: string) => {
+    if (!confirm('Are you sure you want to remove this request from the group? It will go back to the Ungrouped list.')) return
+    
+    try {
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tour_group_id: null })
+      })
+
+      if (response.ok) {
+        if (onRefresh) onRefresh()
+        onClose()
+      }
+    } catch (error) {
+      console.error('Error removing from group:', error)
+    }
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Tour Participants" maxWidth="max-w-4xl">
       <div className="mb-4">
@@ -120,12 +140,17 @@ export default function DetailsModal({
 
       {isAdmin && status === 'Ungrouped' && (
         <div className="mb-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r">
-          <p className="text-sm text-blue-900 font-semibold mb-2">
-            📋 Ungrouped Requests - These need to be formed into tour groups
-          </p>
-          <p className="text-sm text-blue-800">
-            Select participants below and click "Create New Group" to manually form a tour group, or use the "Auto-Group" button to let the system create optimal groups automatically.
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-blue-900 font-semibold mb-2">
+                📋 Ungrouped Requests - These need to be formed into tour groups
+              </p>
+              <p className="text-sm text-blue-800">
+                Select participants below and click "Create New Group" to manually form a tour group, or use the "Auto-Group" button to let the system create optimal groups automatically.
+              </p>
+            </div>
+            {/* If we have an onAutoGroup prop we'd render it here, but since DetailsModal doesn't have it we rely on the parent */}
+          </div>
         </div>
       )}
       
@@ -199,16 +224,29 @@ export default function DetailsModal({
                 </td>
                 <td className="py-3 px-4 text-center font-bold">{p.group_size}</td>
                 {isAdmin && p.id && (
-                  <td className="py-3 px-4 text-center">
-                    <button
-                      onClick={() => handleCancelRequest(p.id!)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
-                      title="Cancel this booking request"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                      </svg>
-                    </button>
+                  <td className="py-3 px-4 text-right">
+                    <div className="flex justify-end gap-1">
+                      {status !== 'Ungrouped' && (
+                        <button
+                          onClick={() => handleRemoveFromGroup(p.id!)}
+                          className="p-2 text-orange-600 hover:bg-orange-50 rounded transition-colors flex items-center justify-center"
+                          title="Remove from group (send back to Ungrouped)"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                          </svg>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleCancelRequest(p.id!)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors flex items-center justify-center"
+                        title="Cancel this booking request"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 )}
               </tr>
