@@ -15,6 +15,7 @@ export default function GuideDashboard() {
   
   const [tours, setTours] = useState<TourGroup[]>([])
   const [ungroupedRequests, setUngroupedRequests] = useState<any[]>([])
+  const [guides, setGuides] = useState<any[]>([])
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [selectedTour, setSelectedTour] = useState<TourGroup | null>(null)
@@ -45,6 +46,15 @@ export default function GuideDashboard() {
     }
     fetchTours()
     fetchUngrouped()
+    fetchGuides()
+  }
+
+  const fetchGuides = async () => {
+    const response = await fetch('/api/guides')
+    if (response.ok) {
+      const data = await response.json()
+      setGuides(data)
+    }
   }
 
   const fetchTours = async () => {
@@ -64,6 +74,15 @@ export default function GuideDashboard() {
       const data = await response.json()
       setUngroupedRequests(data)
     }
+  }
+
+  const handleAssignGuide = async (tourId: string, guideId: string) => {
+    await fetch(`/api/tours/${tourId}/assign-guide`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guide_id: guideId })
+    })
+    fetchTours()
   }
 
   const handleAutoGroup = async (date: string) => {
@@ -193,11 +212,13 @@ export default function GuideDashboard() {
           currentUserId={currentUserId}
           isAdmin={false}
           isGuide={true}
+          guides={guides}
           onViewDetails={(id: string) => {
             const tour = allItems.find(t => t.id === id)
             setSelectedTour(tour || null)
             setShowDetailsModal(true)
           }}
+          onAssignGuide={handleAssignGuide}
           onAction={handleAction}
           onAutoGroup={handleAutoGroup}
         />
@@ -215,6 +236,9 @@ export default function GuideDashboard() {
             totalPeople={selectedTour.booking_requests?.reduce((sum, b) => sum + b.group_size, 0) || 0}
             guideName={selectedTour.guide ? `${selectedTour.guide.first_name} ${selectedTour.guide.last_name}` : undefined}
             confirmedTime={selectedTour.confirmed_datetime || undefined}
+            tourGroupId={selectedTour.id}
+            isGuide={true}
+            onRefresh={() => { fetchTours(); fetchUngrouped(); }}
           />
 
           <YaleSubmissionModal

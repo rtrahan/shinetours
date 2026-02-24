@@ -170,7 +170,7 @@ export default function TourBoard({
                           <div className="text-[10px] uppercase font-bold text-stone-500 tracking-wider mb-1.5">
                             Guide
                           </div>
-                          {isAdmin && onAssignGuide && !isUngrouped ? (
+                          {(isAdmin || isGuide) && onAssignGuide && !isUngrouped ? (
                             <select
                               value={tour.guide_id || ''}
                               onChange={(e) => onAssignGuide(tour.id, e.target.value)}
@@ -198,18 +198,19 @@ export default function TourBoard({
 
                       {/* Card Footer Actions */}
                       <div className="p-3 bg-stone-50 border-t border-stone-100 flex flex-col gap-2">
+                        {/* Ungrouped auto-group - available to both admins and guides */}
+                        {(isAdmin || isGuide) && tour.status === 'Ungrouped' && onAutoGroup && (
+                          <button
+                            onClick={() => onAutoGroup(tour.requested_date)}
+                            className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded transition-colors"
+                          >
+                            Auto-Group All
+                          </button>
+                        )}
+
                         {/* Admin Workflow Actions */}
                         {isAdmin && (
                           <>
-                            {tour.status === 'Ungrouped' && onAutoGroup && (
-                              <button
-                                onClick={() => onAutoGroup(tour.requested_date)}
-                                className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded transition-colors"
-                              >
-                                Auto-Group All
-                              </button>
-                            )}
-
                             {tour.guide_id && (tour.status === 'Ready' || tour.status === 'Pending') && (
                               <button
                                 onClick={() => onAction(tour.id, 'submit-yale')}
