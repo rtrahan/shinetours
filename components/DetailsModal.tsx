@@ -23,6 +23,7 @@ interface DetailsModalProps {
   confirmedTime?: string
   tourGroupId?: string
   isAdmin?: boolean
+  isGuide?: boolean
   onRefresh?: () => void
 }
 
@@ -37,6 +38,7 @@ export default function DetailsModal({
   confirmedTime,
   tourGroupId,
   isAdmin,
+  isGuide,
   onRefresh
 }: DetailsModalProps) {
   const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(new Set())
@@ -154,7 +156,7 @@ export default function DetailsModal({
         </div>
       )}
       
-      {isAdmin && totalPeople > 15 && status !== 'Ungrouped' && (
+      {(isAdmin || isGuide) && totalPeople > 15 && status !== 'Ungrouped' && (
         <div className="mb-4 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r">
           <p className="text-sm text-amber-900 font-semibold">
             ⚠️ This group has {totalPeople} people (max 15). Select participants below to split into a new group.
@@ -166,7 +168,7 @@ export default function DetailsModal({
         <table className="w-full">
           <thead className="bg-stone-100">
             <tr>
-              {isAdmin && (
+              {(isAdmin || isGuide) && (
                 <th className="text-left py-3 px-4 text-xs font-bold text-stone-700 uppercase w-12">
                   <input
                     type="checkbox"
@@ -186,7 +188,7 @@ export default function DetailsModal({
               <th className="text-left py-3 px-4 text-xs font-bold text-stone-700 uppercase">Phone</th>
               <th className="text-left py-3 px-4 text-xs font-bold text-stone-700 uppercase">Prefers</th>
               <th className="text-center py-3 px-4 text-xs font-bold text-stone-700 uppercase">Party Size</th>
-              {isAdmin && (
+              {(isAdmin || isGuide) && (
                 <th className="text-center py-3 px-4 text-xs font-bold text-stone-700 uppercase w-16"></th>
               )}
             </tr>
@@ -223,7 +225,7 @@ export default function DetailsModal({
                     : 'None'}
                 </td>
                 <td className="py-3 px-4 text-center font-bold">{p.group_size}</td>
-                {isAdmin && p.id && (
+                {(isAdmin || isGuide) && p.id && (
                   <td className="py-3 px-4 text-right">
                     <div className="flex justify-end gap-1">
                       {status !== 'Ungrouped' && (
@@ -237,15 +239,17 @@ export default function DetailsModal({
                           </svg>
                         </button>
                       )}
-                      <button
-                        onClick={() => handleCancelRequest(p.id!)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors flex items-center justify-center"
-                        title="Cancel this booking request"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleCancelRequest(p.id!)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors flex items-center justify-center"
+                          title="Cancel this booking request"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </td>
                 )}
@@ -255,7 +259,7 @@ export default function DetailsModal({
         </table>
       </div>
 
-      {isAdmin && selectedCount > 0 && (
+      {(isAdmin || isGuide) && selectedCount > 0 && (
         <div className="mt-6 pt-4 border-t border-stone-200 bg-blue-50 p-4 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
