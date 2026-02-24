@@ -88,17 +88,17 @@ export default function TourBoard({
   }
 
   return (
-    <div className="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
-      <div className="flex gap-4 min-w-max h-full items-stretch">
+    <div className="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 h-[calc(100vh-120px)]">
+      <div className="flex gap-3 h-full min-h-0">
         {columns.map(col => {
           const colTours = getColumnTours(col.id)
           
           return (
-            <div key={col.id} className="w-80 flex flex-col flex-shrink-0 bg-stone-50/50 rounded-xl border border-stone-200/50 h-full max-h-[800px]">
+            <div key={col.id} className="flex-1 min-w-[200px] flex flex-col bg-stone-50/50 rounded-xl border border-stone-200/50 min-h-0">
               {/* Column Header */}
-              <div className={`px-4 py-3 border-b-2 rounded-t-xl ${col.headerColor} ${col.borderColor}`}>
+              <div className={`px-3 py-2 border-b-2 rounded-t-xl ${col.headerColor} ${col.borderColor}`}>
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm uppercase tracking-wider">{col.title}</h3>
+                  <h3 className="font-bold text-xs uppercase tracking-wider">{col.title}</h3>
                   <span className="bg-white/50 px-2 py-0.5 rounded-full text-xs font-bold">
                     {colTours.length}
                   </span>
@@ -106,7 +106,7 @@ export default function TourBoard({
               </div>
 
               {/* Column Body / Cards */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-2 space-y-2">
                 {colTours.map(tour => {
                   const isMine = tour.guide_id === currentUserId
                   const isUngrouped = (tour as any)._isUngrouped
@@ -122,14 +122,14 @@ export default function TourBoard({
                     >
                       {/* Card Header (Date) */}
                       <div 
-                        className="px-4 py-3 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between cursor-pointer"
+                        className="px-3 py-2 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between cursor-pointer"
                         onClick={() => onViewDetails(tour.id)}
                       >
                         <div>
-                          <div className="font-bold text-stone-900">
+                          <div className="font-bold text-stone-900 text-sm">
                             {format(dateObj, 'MMM d, yyyy')}
                           </div>
-                          <div className="text-xs text-stone-500 font-medium">
+                          <div className="text-[10px] text-stone-500 font-medium">
                             {format(dateObj, 'EEEE')}
                           </div>
                         </div>
@@ -141,22 +141,22 @@ export default function TourBoard({
                       </div>
 
                       {/* Card Body */}
-                      <div className="p-4 flex-1 cursor-pointer" onClick={() => onViewDetails(tour.id)}>
-                        <div className="flex items-center gap-4 mb-4">
+                      <div className="p-3 flex-1 cursor-pointer" onClick={() => onViewDetails(tour.id)}>
+                        <div className="flex items-center gap-3 mb-3">
                           <div className="text-center">
-                            <div className="text-2xl font-black text-stone-800 leading-none">{peopleCount}</div>
+                            <div className="text-xl font-black text-stone-800 leading-none">{peopleCount}</div>
                             <div className="text-[10px] uppercase font-bold text-stone-500 tracking-wider mt-1">People</div>
                           </div>
                           <div className="w-px h-8 bg-stone-200"></div>
                           <div className="text-center">
-                            <div className="text-xl font-bold text-stone-700 leading-none">{reqCount}</div>
+                            <div className="text-lg font-bold text-stone-700 leading-none">{reqCount}</div>
                             <div className="text-[10px] uppercase font-bold text-stone-500 tracking-wider mt-1">Requests</div>
                           </div>
                         </div>
 
                         {/* Languages */}
                         {languages.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-4">
+                          <div className="flex flex-wrap gap-1 mb-3">
                             {languages.map(lang => (
                               <span key={lang} className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[11px] text-blue-700 font-medium">
                                 {lang}
@@ -197,7 +197,7 @@ export default function TourBoard({
                       </div>
 
                       {/* Card Footer Actions */}
-                      <div className="p-3 bg-stone-50 border-t border-stone-100 flex flex-col gap-2">
+                      <div className="px-3 py-2 bg-stone-50 border-t border-stone-100 flex flex-col gap-1.5">
                         {/* Ungrouped auto-group - available to both admins and guides */}
                         {(isAdmin || isGuide) && tour.status === 'Ungrouped' && onAutoGroup && (
                           <button
@@ -284,6 +284,15 @@ export default function TourBoard({
                                 className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded transition-colors"
                               >
                                 Complete
+                              </button>
+                            )}
+
+                            {!isMine && tour.status === 'Confirmed' && (
+                              <button
+                                onClick={() => onAction(tour.id, 'complete')}
+                                className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded transition-colors"
+                              >
+                                Mark Complete
                               </button>
                             )}
                           </>
