@@ -196,7 +196,7 @@ export default function DetailsModal({
           <tbody>
             {participants.map((p, idx) => (
               <tr key={p.id || idx} className="border-b border-stone-100 hover:bg-stone-50">
-                {isAdmin && p.id && (
+                {(isAdmin || isGuide) && p.id && (
                   <td className="py-3 px-4">
                     <input
                       type="checkbox"
