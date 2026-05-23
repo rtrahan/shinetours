@@ -7,14 +7,17 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     const searchParams = request.nextUrl.searchParams
     const showAll = searchParams.get('all') === 'true'
+    const publicOnly = searchParams.get('public') === 'true'
 
     const query = supabase
       .from('guides')
       .select('*')
       .order('first_name')
 
-    // Only filter by active if not showing all
-    if (!showAll) {
+    // Public booking dropdown should only show active, public-facing guides.
+    if (publicOnly) {
+      query.eq('is_active', true).eq('public_visible', true)
+    } else if (!showAll) {
       query.eq('is_active', true)
     }
 
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
     const body = await request.json()
-    const { email, password, first_name, last_name, phone, languages, is_admin } = body
+    const { email, password, first_name, last_name, phone, languages, is_admin, public_visible } = body
 
     if (!email || !password || !first_name || !last_name) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -73,6 +76,7 @@ export async function POST(request: NextRequest) {
         phone: phone || null,
         languages: languages || ['English'],
         is_admin: is_admin || false,
+        public_visible: public_visible ?? true,
         is_active: true,
         password_hash: '' // Using Supabase Auth, not custom passwords
       })

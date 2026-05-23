@@ -44,7 +44,7 @@ export default function YaleSubmissionModal({
   const CopyButton = ({ text, fieldId }: { text: string; fieldId: string }) => (
     <button
       onClick={() => copyToClipboard(text, fieldId)}
-      className="shrink-0 p-1.5 rounded hover:bg-stone-100 text-stone-400 hover:text-stone-600 transition-colors"
+      className="shrink-0 rounded-lg border border-stone-200 p-1.5 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700"
       title="Copy to clipboard"
     >
       {copiedField === fieldId ? (
@@ -66,36 +66,44 @@ export default function YaleSubmissionModal({
     <Modal isOpen={isOpen} onClose={onClose} title="Submit to Yale Art Gallery" maxWidth="max-w-2xl">
       <div className="space-y-5">
         {/* Tour Overview */}
-        <div className="bg-stone-50 rounded-lg p-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-stone-200 bg-stone-200 sm:grid-cols-4">
           <div>
-            <div className="text-[10px] uppercase font-bold text-stone-500 tracking-wider mb-1">Date</div>
-            <div className="text-sm font-bold text-stone-900">{formattedDate}</div>
+            <div className="bg-stone-50 p-4">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-stone-500">Date</div>
+              <div className="text-sm font-bold text-stone-900">{formattedDate}</div>
+            </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-stone-500 tracking-wider mb-1">Attendees</div>
-            <div className="text-sm font-bold text-stone-900">{totalPeople}</div>
+            <div className="bg-stone-50 p-4">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-stone-500">Attendees</div>
+              <div className="text-sm font-bold text-stone-900">{totalPeople}</div>
+            </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-stone-500 tracking-wider mb-1">Requests</div>
-            <div className="text-sm font-bold text-stone-900">{participants.length}</div>
+            <div className="bg-stone-50 p-4">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-stone-500">Requests</div>
+              <div className="text-sm font-bold text-stone-900">{participants.length}</div>
+            </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-stone-500 tracking-wider mb-1">Guide</div>
-            <div className="text-sm font-bold text-stone-900">{guideName || 'Unassigned'}</div>
+            <div className="bg-stone-50 p-4">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-stone-500">Guide</div>
+              <div className="text-sm font-bold text-stone-900">{guideName || 'Unassigned'}</div>
+            </div>
           </div>
         </div>
 
         {/* Participants */}
         <div>
-          <div className="text-[10px] uppercase font-bold text-stone-500 tracking-wider mb-2">Participants</div>
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">Participants</div>
           <div className="space-y-1.5">
             {participants.map((p: any, idx: number) => (
-              <div key={idx} className="flex items-center justify-between bg-white border border-stone-200 rounded-lg px-3 py-2">
+              <div key={idx} className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-3 py-2 shadow-sm">
                 <div className="min-w-0">
                   <div className="text-sm font-semibold text-stone-900 truncate">{p.contact_name}</div>
                   <div className="text-xs text-stone-500 truncate">{p.contact_email} &middot; {p.contact_phone}</div>
                 </div>
-                <div className="ml-3 shrink-0 bg-stone-800 text-white text-[11px] font-bold px-2.5 py-1 rounded">
+                <div className="ml-3 shrink-0 rounded-full bg-stone-900 px-2.5 py-1 text-[11px] font-bold text-white">
                   {p.group_size}
                 </div>
               </div>
@@ -106,16 +114,16 @@ export default function YaleSubmissionModal({
         {/* Yale Form Fields */}
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded bg-amber-100 flex items-center justify-center">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100">
               <svg className="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
               </svg>
             </div>
-            <div className="text-xs uppercase font-bold text-stone-700 tracking-wider">Yale Form Fields</div>
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-stone-700">Yale Form Fields</div>
           </div>
 
-          <div className="border border-stone-200 rounded-lg divide-y divide-stone-200 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2.5 bg-white hover:bg-stone-50">
+          <div className="overflow-hidden rounded-2xl border border-stone-200 divide-y divide-stone-200">
+            <div className="flex items-center justify-between bg-white px-4 py-3 hover:bg-stone-50">
               <div className="min-w-0">
                 <div className="text-[10px] uppercase font-bold text-stone-400 tracking-wider">Tour Type</div>
                 <div className="text-sm text-stone-900 font-medium">Self-Guided Tour</div>
@@ -123,7 +131,7 @@ export default function YaleSubmissionModal({
               <CopyButton text="Self-Guided Tour" fieldId="tourType" />
             </div>
 
-            <div className="flex items-center justify-between px-4 py-2.5 bg-white hover:bg-stone-50">
+            <div className="flex items-center justify-between bg-white px-4 py-3 hover:bg-stone-50">
               <div className="min-w-0">
                 <div className="text-[10px] uppercase font-bold text-stone-400 tracking-wider">Describe Your Group</div>
                 <div className="text-sm text-stone-900 font-medium">Other</div>
@@ -131,7 +139,7 @@ export default function YaleSubmissionModal({
               <CopyButton text="Other" fieldId="groupType" />
             </div>
 
-            <div className="flex items-center justify-between px-4 py-2.5 bg-white hover:bg-stone-50">
+            <div className="flex items-center justify-between bg-white px-4 py-3 hover:bg-stone-50">
               <div className="min-w-0">
                 <div className="text-[10px] uppercase font-bold text-stone-400 tracking-wider">Number of Attendees</div>
                 <div className="text-sm text-stone-900 font-bold">{totalPeople}</div>
@@ -139,7 +147,7 @@ export default function YaleSubmissionModal({
               <CopyButton text={String(totalPeople)} fieldId="attendees" />
             </div>
 
-            <div className="flex items-start justify-between px-4 py-2.5 bg-white hover:bg-stone-50">
+            <div className="flex items-start justify-between bg-white px-4 py-3 hover:bg-stone-50">
               <div className="min-w-0">
                 <div className="text-[10px] uppercase font-bold text-stone-400 tracking-wider mb-1">Contact Information</div>
                 <div className="text-sm text-stone-900 space-y-0.5">
@@ -152,7 +160,7 @@ export default function YaleSubmissionModal({
               <CopyButton text={contactBlock} fieldId="contact" />
             </div>
 
-            <div className="flex items-start justify-between px-4 py-2.5 bg-white hover:bg-stone-50">
+            <div className="flex items-start justify-between bg-white px-4 py-3 hover:bg-stone-50">
               <div className="min-w-0">
                 <div className="text-[10px] uppercase font-bold text-stone-400 tracking-wider mb-1">Date & Time Preferences</div>
                 <div className="text-sm text-stone-900 space-y-0.5">
@@ -165,7 +173,7 @@ export default function YaleSubmissionModal({
               <CopyButton text={dateTimeBlock} fieldId="dateTime" />
             </div>
 
-            <div className="flex items-start justify-between px-4 py-2.5 bg-white hover:bg-stone-50">
+            <div className="flex items-start justify-between bg-white px-4 py-3 hover:bg-stone-50">
               <div className="min-w-0">
                 <div className="text-[10px] uppercase font-bold text-stone-400 tracking-wider mb-1">Additional Info</div>
                 <div className="text-sm text-stone-900 space-y-0.5">
@@ -185,7 +193,7 @@ export default function YaleSubmissionModal({
           href="https://artgallery.yale.edu/visit/groups-class-visits/adult-and-community-group-visits" 
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-between w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm group"
+          className="group flex w-full items-center justify-between rounded-2xl bg-blue-600 px-4 py-3 text-white shadow-sm transition-colors hover:bg-blue-700"
         >
           <div>
             <div className="text-sm font-bold">Open Yale Registration Form</div>
@@ -197,16 +205,16 @@ export default function YaleSubmissionModal({
         </a>
 
         {/* Actions */}
-        <div className="flex justify-between items-center pt-2 border-t border-stone-100">
+        <div className="flex items-center justify-between border-t border-stone-200 pt-5">
           <button 
             onClick={onClose}
-            className="px-5 py-2.5 text-stone-600 font-semibold hover:text-stone-800 hover:bg-stone-100 transition-all text-sm rounded-lg"
+            className="rounded-xl px-5 py-2.5 text-sm font-semibold text-stone-600 transition-all hover:bg-stone-100 hover:text-stone-800"
           >
             Cancel
           </button>
           <button 
             onClick={onSubmit}
-            className="px-6 py-2.5 bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all text-sm rounded-lg shadow-sm flex items-center gap-2"
+            className="flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     const result = await sendEmail({
       to: guide.email,
-      subject: `👋 You've been requested! Tour request for ${formattedDate}`,
+      subject: `Preferred Guide Request - ${formattedDate}`,
       html: guidePreferredRequestEmail({
         guideName: `${guide.first_name} ${guide.last_name}`,
         contactName,

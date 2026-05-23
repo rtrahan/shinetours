@@ -7,6 +7,7 @@ import TourBoard from '@/components/TourBoard'
 import DetailsModal from '@/components/DetailsModal'
 import YaleSubmissionModal from '@/components/YaleSubmissionModal'
 import ConfirmationModal from '@/components/ConfirmationModal'
+import { StaffFooter, StaffHeader } from '@/components/StaffChrome'
 import { TourGroup } from '@/lib/types'
 
 export default function AdminDashboard() {
@@ -21,7 +22,6 @@ export default function AdminDashboard() {
   const [showDetailsModal, setShowDetailsModal] = useState(false)
   const [showYaleModal, setShowYaleModal] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   useEffect(() => {
     fetchTours()
@@ -156,86 +156,62 @@ export default function AdminDashboard() {
     })
   ]
 
+  const statCards = [
+    {
+      label: 'Ungrouped Requests',
+      value: ungroupedRequests.reduce((sum, item) => sum + (item.requestCount || 0), 0),
+      detail: `${ungroupedRequests.length} date${ungroupedRequests.length === 1 ? '' : 's'}`,
+      accent: 'from-amber-300/20 to-amber-500/5 border-amber-200/20 text-amber-100'
+    },
+    {
+      label: 'Needs Guide',
+      value: allItems.filter(item => item.status !== 'Ungrouped' && !item.guide_id).length,
+      detail: 'awaiting assignment',
+      accent: 'from-orange-300/20 to-orange-500/5 border-orange-200/20 text-orange-100'
+    },
+    {
+      label: 'Ready for Yale',
+      value: allItems.filter(item => item.guide_id && (item.status === 'Ready' || item.status === 'Pending')).length,
+      detail: 'ready to submit',
+      accent: 'from-red-300/20 to-red-500/5 border-red-200/20 text-red-100'
+    },
+    {
+      label: 'Confirmed',
+      value: allItems.filter(item => item.status === 'Confirmed').length,
+      detail: `${allItems.filter(item => item.status === 'PendingYale').length} pending Yale`,
+      accent: 'from-emerald-300/20 to-emerald-500/5 border-emerald-200/20 text-emerald-100'
+    }
+  ]
+
   if (loading) {
-    return <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-      <p className="text-stone-600">Loading...</p>
+    return <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-6 py-5 text-center shadow-2xl shadow-black/30">
+        <p className="heading-font text-2xl font-light text-white">Loading operations...</p>
+        <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">Shine Tours</p>
+      </div>
     </div>
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#241d18_0,#11100e_34%,#050505_100%)] text-stone-100">
       {/* Header */}
-      <div className="bg-white border-b border-stone-200 shadow-sm">
-        <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-4 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2 md:gap-3">
-            <svg className="w-6 h-6 md:w-8 md:h-8 text-stone-700" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-            <div>
-              <h1 className="heading-font text-lg md:text-2xl font-light text-stone-800">Admin Dashboard</h1>
-              <p className="text-[10px] md:text-xs text-stone-500 uppercase tracking-widest">Shine Tours</p>
-            </div>
-          </div>
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-6 text-sm">
-            <a href="/admin/users" className="text-stone-600 hover:text-stone-800 uppercase tracking-wide flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-              </svg>
-              Users
-            </a>
-            <a href="/" className="text-stone-600 hover:text-stone-800 uppercase tracking-wide">← Home</a>
-            <button 
-              onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
-              className="text-stone-600 hover:text-stone-800 uppercase tracking-wide"
-            >
-              Logout
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className="md:hidden p-2 hover:bg-stone-100 rounded transition-colors"
-          >
-            <svg className="w-6 h-6 text-stone-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Mobile Menu Dropdown */}
-        {showMobileMenu && (
-          <div className="md:hidden border-t border-stone-200 bg-white">
-            <div className="px-4 py-3 space-y-3">
-              <a href="/admin/users" className="flex items-center gap-2 text-stone-700 hover:text-stone-900 font-medium">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-                Users
-              </a>
-              <a href="/" className="flex items-center gap-2 text-stone-700 hover:text-stone-900 font-medium">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                Home
-              </a>
-              <button 
-                onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
-                className="flex items-center gap-2 text-stone-700 hover:text-stone-900 font-medium w-full text-left"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-                Logout
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      <StaffHeader role="admin" active="dashboard" />
 
       {/* Main Content */}
-      <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-4 md:py-6">
+      <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-3 md:py-4">
+        <div className="mb-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
+          {statCards.map(card => (
+            <div key={card.label} className={`rounded-xl border bg-gradient-to-br ${card.accent} px-3 py-2.5 shadow-xl shadow-black/10`}>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] opacity-70">{card.label}</p>
+                  <p className="mt-1 text-[11px] text-stone-400">{card.detail}</p>
+                </div>
+                <p className="heading-font text-3xl font-light leading-none text-white">{card.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
         <TourBoard
           tours={allItems}
           guides={guides}
@@ -288,6 +264,7 @@ export default function AdminDashboard() {
           />
         </>
       )}
+      <StaffFooter />
     </div>
   )
 }

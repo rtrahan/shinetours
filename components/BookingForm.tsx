@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 interface BookingFormProps {
   selectedDate: Date
   availableGuides: any[]
+  defaultPreferredGuideId?: string
   onSuccess: () => void
 }
 
@@ -28,7 +29,7 @@ interface DateDetails {
   }>
 }
 
-export default function BookingForm({ selectedDate, availableGuides, onSuccess }: BookingFormProps) {
+export default function BookingForm({ selectedDate, availableGuides, defaultPreferredGuideId, onSuccess }: BookingFormProps) {
   const [groupSize, setGroupSize] = useState(1)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -45,8 +46,19 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
   
   // Filter guides by selected language
   const filteredGuides = availableGuides.filter(guide => 
-    guide.languages && guide.languages.includes(preferredLanguage)
+    guide.languages && guide.languages.includes(preferredLanguage) && guide.public_visible !== false
   )
+
+  useEffect(() => {
+    if (!defaultPreferredGuideId) return
+    const defaultGuide = availableGuides.find(guide => guide.id === defaultPreferredGuideId)
+    if (!defaultGuide) return
+
+    setPreferredGuideId(defaultPreferredGuideId)
+    if (defaultGuide.languages?.length && !defaultGuide.languages.includes(preferredLanguage)) {
+      setPreferredLanguage(defaultGuide.languages[0])
+    }
+  }, [defaultPreferredGuideId, availableGuides])
 
   // Fetch date details when date changes
   useEffect(() => {
@@ -121,34 +133,49 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
   const maxGroupSize = 15 // Allow up to 15 people per request
 
   return (
-    <div className="bg-white border border-stone-200 shadow-sm rounded-lg p-8">
+    <div className="h-full rounded-3xl border border-white/10 bg-[#11100e] p-5 shadow-2xl shadow-black/30 md:p-6 lg:p-7">
       <div className="mb-6">
-        <h2 className="heading-font text-2xl font-light text-stone-800 mb-2">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-amber-100/65">
+          Step 2
+        </p>
+        <h2 className="heading-font mb-2 text-3xl font-light tracking-[-0.04em] text-white md:text-4xl">
           Request a Tour
         </h2>
+        <p className="text-sm leading-6 text-stone-400">
+          We will use these details to coordinate your group and submit the request to Yale.
+        </p>
       </div>
 
       {/* Date Details Info Box */}
       {dateDetails && (
-        <div className="mb-6 bg-stone-50 border-l-4 border-stone-800 p-5 rounded">
-          <h3 className="heading-font text-xl font-light text-stone-800 mb-3">
-            {format(selectedDate, 'EEEE, MMMM d')}
-          </h3>
-          <div className="text-sm text-stone-600 space-y-1">
-            <p>
-              <span className="font-semibold">{dateDetails.requestCount} {dateDetails.requestCount === 1 ? 'request' : 'requests'} for {dateDetails.totalPeople} {dateDetails.totalPeople === 1 ? 'guest' : 'guests'}</span> {dateDetails.requestCount === 1 ? 'has' : 'have'} been requested for this day
-              {dateDetails.groupsCount > 0 && (
-                <>
-                  {' • '}
-                  <span className="font-semibold">{dateDetails.groupsCount} tour group{dateDetails.groupsCount !== 1 ? 's' : ''}</span> already formed
-                </>
-              )}
-            </p>
+        <div className="mb-6 overflow-hidden rounded-2xl border border-amber-100/15 bg-amber-100/[0.07] shadow-inner shadow-amber-950/20">
+          <div className="border-b border-amber-100/10 px-4 py-4 md:px-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-100/55">Selected Date</p>
+            <h3 className="heading-font mt-1 text-2xl font-light tracking-[-0.03em] text-white">
+              {format(selectedDate, 'EEEE, MMMM d')}
+            </h3>
+          </div>
+          <div className="space-y-3 px-4 py-4 text-sm text-stone-300 md:px-5">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-white/10 bg-black/15 px-3 py-2">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-stone-500">Requests</p>
+                <p className="mt-1 text-lg font-semibold text-white">{dateDetails.requestCount}</p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-black/15 px-3 py-2">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-stone-500">Guests</p>
+                <p className="mt-1 text-lg font-semibold text-white">{dateDetails.totalPeople}</p>
+              </div>
+            </div>
+            {dateDetails.groupsCount > 0 && (
+              <p className="text-xs leading-5 text-stone-400">
+                <span className="font-semibold text-stone-200">{dateDetails.groupsCount} tour group{dateDetails.groupsCount !== 1 ? 's' : ''}</span> already formed for this date.
+              </p>
+            )}
             {dateDetails.requestCount > 0 && (
               <button
                 type="button"
                 onClick={() => setShowParticipants(true)}
-                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium mt-2 text-sm"
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-100/15 bg-amber-100/10 px-3 py-2 text-xs font-semibold text-amber-50 transition-colors hover:bg-amber-100/15 hover:text-white"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -160,9 +187,10 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">Party</p>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
             Party Size
           </label>
           <input
@@ -172,100 +200,113 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
             value={groupSize}
             onChange={(e) => setGroupSize(parseInt(e.target.value))}
             required
-            className="w-full px-4 py-3 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+            className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10"
             placeholder={`1-${maxGroupSize}`}
           />
-          <p className="mt-1 text-[10px] text-stone-500">
+          <p className="mt-2 text-[10px] text-stone-500">
             Max 15 guests per request
           </p>
         </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-          Name
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="w-full px-4 py-3 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
-        />
-      </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">Contact</p>
+          <div className="space-y-4">
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+                Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="Your full name"
+                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10"
+              />
+            </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-          Email
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-4 py-3 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
-        />
-      </div>
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="you@example.com"
+                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10"
+              />
+            </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-          Phone
-        </label>
-        <input
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-          className="w-full px-4 py-3 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
-        />
-      </div>
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+                Phone
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                placeholder="Best phone number"
+                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10"
+              />
+            </div>
+          </div>
+        </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-          Preferred Language
-        </label>
-        <select
-          value={preferredLanguage}
-          onChange={(e) => {
-            setPreferredLanguage(e.target.value)
-            setPreferredGuideId('') // Reset guide selection when language changes
-          }}
-          required
-          className="w-full px-4 py-3 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
-        >
-          {availableLanguages.map(lang => (
-            <option key={lang} value={lang}>
-              {lang}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1 text-[10px] text-stone-500">Select your preferred tour language</p>
-      </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">Preferences</p>
+          <div className="space-y-4">
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+                Preferred Language
+              </label>
+              <select
+                value={preferredLanguage}
+                onChange={(e) => {
+                  setPreferredLanguage(e.target.value)
+                  setPreferredGuideId('') // Reset guide selection when language changes
+                }}
+                required
+                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10 [&>option]:bg-stone-950"
+              >
+                {availableLanguages.map(lang => (
+                  <option key={lang} value={lang}>
+                    {lang}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-[10px] text-stone-500">Select your preferred tour language</p>
+            </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-          Preferred Tour Guide <span className="text-stone-400 font-normal text-[10px]">(Optional)</span>
-        </label>
-        <select
-          value={preferredGuideId}
-          onChange={(e) => setPreferredGuideId(e.target.value)}
-          className="w-full px-4 py-3 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
-        >
-          <option value="">No Preference</option>
-          {filteredGuides.map(guide => (
-            <option key={guide.id} value={guide.id}>
-              {guide.first_name} {guide.last_name}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1 text-[10px] text-stone-500">
-          {filteredGuides.length === 0 
-            ? `No guides available for ${preferredLanguage} tours` 
-            : `Showing guides who speak ${preferredLanguage}`}
-        </p>
-      </div>
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+                Preferred Tour Guide <span className="text-[10px] font-normal text-stone-500">(Optional)</span>
+              </label>
+              <select
+                value={preferredGuideId}
+                onChange={(e) => setPreferredGuideId(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10 [&>option]:bg-stone-950"
+              >
+                <option value="">No Preference</option>
+                {filteredGuides.map(guide => (
+                  <option key={guide.id} value={guide.id}>
+                    {guide.first_name} {guide.last_name}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-[10px] text-stone-500">
+                {filteredGuides.length === 0 
+                  ? `No guides available for ${preferredLanguage} tours` 
+                  : `Showing guides who speak ${preferredLanguage}`}
+              </p>
+            </div>
+          </div>
+        </div>
 
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-600 p-4">
+        <div className="bg-red-50 border border-red-100 border-l-4 border-l-red-600 p-4 rounded-lg">
           <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
@@ -273,7 +314,7 @@ export default function BookingForm({ selectedDate, availableGuides, onSuccess }
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-stone-800 text-white font-semibold py-4 px-6 hover:bg-stone-900 transition-all uppercase tracking-widest text-xs rounded disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+          className="w-full rounded-2xl bg-white px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-stone-950 shadow-xl shadow-black/20 transition-all hover:-translate-y-0.5 hover:bg-stone-100 hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Submitting...' : 'Request Tour'}
         </button>

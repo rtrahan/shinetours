@@ -11,10 +11,11 @@ export async function PATCH(
     const { id } = await context.params
     const body = await request.json()
 
-    // Allow updating: is_active, email, first_name, last_name, phone, is_admin, languages, password
+    // Allow updating: is_active, public_visible, email, first_name, last_name, phone, is_admin, languages, password
     const updateData: any = {}
     
     if (body.is_active !== undefined) updateData.is_active = body.is_active
+    if (body.public_visible !== undefined) updateData.public_visible = body.public_visible
     if (body.email) updateData.email = body.email
     if (body.first_name) updateData.first_name = body.first_name
     if (body.last_name) updateData.last_name = body.last_name

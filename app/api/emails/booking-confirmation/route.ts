@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendEmail, bookingConfirmationEmail } from '@/lib/email'
-import { format, parse } from 'date-fns'
+import { format } from 'date-fns'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     const result = await sendEmail({
       to: email,
-      subject: 'Tour Request Received - ShineTours',
+      subject: 'Tour Request Received - Shine Tours',
       html: bookingConfirmationEmail({
         contactName: name,
         tourDate: formattedDate,

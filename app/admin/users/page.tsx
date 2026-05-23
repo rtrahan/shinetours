@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { StaffFooter, StaffHeader } from '@/components/StaffChrome'
 
 interface Guide {
   id: string
@@ -13,6 +14,7 @@ interface Guide {
   languages: string[]
   is_admin: boolean
   is_active: boolean
+  public_visible?: boolean
   created_at: string
 }
 
@@ -32,7 +34,8 @@ export default function UsersPage() {
     last_name: '',
     phone: '',
     languages: ['English'] as string[],
-    is_admin: false
+    is_admin: false,
+    public_visible: true
   })
   const [editFormData, setEditFormData] = useState({
     email: '',
@@ -41,6 +44,7 @@ export default function UsersPage() {
     phone: '',
     languages: [] as string[],
     is_admin: false,
+    public_visible: true,
     password: ''
   })
   const [saving, setSaving] = useState(false)
@@ -48,6 +52,10 @@ export default function UsersPage() {
 
   // Available languages
   const availableLanguages = ['English', 'Spanish', 'Italian']
+  const adminCount = guides.filter(guide => guide.is_admin).length
+  const activeCount = guides.filter(guide => guide.is_active).length
+  const publicCount = guides.filter(guide => guide.public_visible !== false && guide.is_active).length
+  const languageCount = new Set(guides.flatMap(guide => guide.languages || [])).size
 
   useEffect(() => {
     checkAuth()
@@ -98,7 +106,8 @@ export default function UsersPage() {
         last_name: '',
         phone: '',
         languages: ['English'],
-        is_admin: false
+        is_admin: false,
+        public_visible: true
       })
       setShowAddModal(false)
       fetchGuides()
@@ -127,6 +136,7 @@ export default function UsersPage() {
       phone: guide.phone || '',
       languages: guide.languages || ['English'],
       is_admin: guide.is_admin,
+      public_visible: guide.public_visible !== false,
       password: ''
     })
     setShowEditModal(true)
@@ -188,47 +198,52 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-        <p className="text-stone-600">Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#050505]">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-6 py-5 text-center shadow-2xl shadow-black/30">
+          <p className="heading-font text-2xl font-light text-white">Loading users...</p>
+          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">Shine Tours</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#241d18_0,#11100e_34%,#050505_100%)] text-stone-100">
       {/* Header */}
-      <div className="bg-white border-b border-stone-200 shadow-sm">
-        <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-4 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2 md:gap-3">
-            <svg className="w-6 h-6 md:w-8 md:h-8 text-stone-700" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            <div>
-              <h1 className="heading-font text-lg md:text-2xl font-light text-stone-800">User Management</h1>
-              <p className="text-[10px] md:text-xs text-stone-500 uppercase tracking-widest">Guides & Admins</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 md:gap-6 text-xs md:text-sm">
-            <a href="/admin/dashboard" className="text-sm text-stone-600 hover:text-stone-800 uppercase tracking-wide">← Dashboard</a>
-            <button 
-              onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
-              className="text-sm text-stone-600 hover:text-stone-800 uppercase tracking-wide"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
+      <StaffHeader role="admin" active="users" />
 
       {/* Main Content */}
-      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 md:py-6">
-        <div className="flex justify-between items-center mb-4 md:mb-6 flex-wrap gap-3">
-          <h2 className="text-xl md:text-2xl font-bold text-stone-900">All Users ({guides.length})</h2>
+      <div className="mx-auto max-w-[1800px] px-4 py-4 md:px-8">
+        <div className="mb-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-amber-200/20 bg-amber-300/10 px-3 py-2.5">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-100/70">All Users</p>
+            <p className="heading-font mt-1 text-3xl font-light leading-none text-white">{guides.length}</p>
+          </div>
+          <div className="rounded-xl border border-emerald-200/20 bg-emerald-300/10 px-3 py-2.5">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-100/70">Active</p>
+            <p className="heading-font mt-1 text-3xl font-light leading-none text-white">{activeCount}</p>
+          </div>
+          <div className="rounded-xl border border-purple-200/20 bg-purple-300/10 px-3 py-2.5">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-purple-100/70">Admins</p>
+            <p className="heading-font mt-1 text-3xl font-light leading-none text-white">{adminCount}</p>
+          </div>
+          <div className="rounded-xl border border-blue-200/20 bg-blue-300/10 px-3 py-2.5">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-blue-100/70">Public</p>
+            <p className="heading-font mt-1 text-3xl font-light leading-none text-white">{publicCount}</p>
+            <p className="mt-1 text-[10px] text-stone-500">{languageCount} languages</p>
+          </div>
+        </div>
+
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-100/60">Directory</p>
+            <h2 className="heading-font text-3xl font-light tracking-[-0.04em] text-white md:text-4xl">All Users</h2>
+          </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 md:px-6 py-2 md:py-3 bg-stone-900 text-white font-semibold rounded-lg hover:bg-stone-800 transition-colors shadow-md flex items-center gap-2 text-sm md:text-base"
+            className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-stone-950 shadow-xl shadow-black/20 transition-all hover:-translate-y-0.5 hover:bg-stone-100"
           >
-            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/>
             </svg>
             Add User
@@ -236,74 +251,86 @@ export default function UsersPage() {
         </div>
 
         {/* Users Table */}
-        <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] shadow-2xl shadow-black/20">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px]">
-            <thead className="bg-stone-50 border-b-2 border-stone-200">
+            <table className="w-full min-w-[860px]">
+            <thead className="border-b border-white/10 bg-white/[0.045]">
               <tr>
-                <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Name</th>
-                <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Email</th>
-                <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Phone</th>
-                <th className="text-left py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Languages</th>
-                <th className="text-center py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Role</th>
-                <th className="text-center py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600">Status</th>
-                <th className="text-center py-4 px-6 text-xs font-bold uppercase tracking-wider text-stone-600 bg-stone-100">Actions</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">User</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">Contact</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">Languages</th>
+                <th className="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">Role</th>
+                <th className="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">Status</th>
+                <th className="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">Public</th>
+                <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-100">
+            <tbody className="divide-y divide-white/10">
               {guides.map(guide => (
-                <tr key={guide.id} className="hover:bg-stone-50 transition-colors">
-                  <td className="py-4 px-6">
-                    <p className="font-semibold text-stone-900">{guide.first_name} {guide.last_name}</p>
+                <tr key={guide.id} className="transition-colors hover:bg-white/[0.04]">
+                  <td className="px-4 py-3">
+                    <p className="font-semibold text-white">{guide.first_name} {guide.last_name}</p>
+                    <p className="mt-0.5 text-[10px] uppercase tracking-[0.16em] text-stone-600">
+                      Joined {new Date(guide.created_at).getFullYear()}
+                    </p>
                   </td>
-                  <td className="py-4 px-6">
-                    <p className="text-stone-700 text-sm">{guide.email}</p>
+                  <td className="px-4 py-3">
+                    <a href={`mailto:${guide.email}`} className="block text-sm font-medium text-blue-100 hover:text-white hover:underline">{guide.email}</a>
+                    <p className="mt-1 text-xs text-stone-500">{guide.phone || 'No phone'}</p>
                   </td>
-                  <td className="py-4 px-6">
-                    <p className="text-stone-700 text-sm">{guide.phone || '—'}</p>
-                  </td>
-                  <td className="py-4 px-6">
+                  <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {guide.languages && guide.languages.length > 0 ? (
                         guide.languages.map((lang) => (
-                          <span key={lang} className="inline-flex items-center px-2 py-0.5 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 font-medium">
+                          <span key={lang} className="inline-flex items-center rounded-full border border-blue-200/15 bg-blue-300/10 px-2 py-0.5 text-[10px] font-semibold text-blue-100/85">
                             {lang}
                           </span>
                         ))
                       ) : (
-                        <span className="text-stone-400 text-sm italic">None</span>
+                        <span className="text-stone-600 text-xs italic">None</span>
                       )}
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                  <td className="px-4 py-3 text-center">
+                    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
                       guide.is_admin 
-                        ? 'bg-purple-100 text-purple-800 border border-purple-200' 
-                        : 'bg-blue-100 text-blue-800 border border-blue-200'
+                        ? 'bg-purple-300/10 text-purple-100 border-purple-200/20' 
+                        : 'bg-blue-300/10 text-blue-100 border-blue-200/20'
                     }`}>
                       {guide.is_admin ? 'Admin' : 'Guide'}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => toggleActive(guide.id, guide.is_active)}
+                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] transition-colors ${
                       guide.is_active 
-                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
-                        : 'bg-stone-100 text-stone-600 border border-stone-200'
+                        ? 'bg-emerald-300/10 text-emerald-100 border-emerald-200/20 hover:bg-emerald-300/15' 
+                        : 'bg-stone-300/10 text-stone-300 border-stone-200/15 hover:bg-stone-300/15'
                     }`}>
                       {guide.is_active ? 'Active' : 'Inactive'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                      guide.public_visible !== false
+                        ? 'bg-amber-300/10 text-amber-100 border-amber-200/20'
+                        : 'bg-stone-300/10 text-stone-300 border-stone-200/15'
+                    }`}>
+                      {guide.public_visible !== false ? 'Shown' : 'Hidden'}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => openEditModal(guide)}
-                        className="px-4 py-2 text-xs font-bold rounded transition-all bg-blue-600 hover:bg-blue-700 text-white"
+                        className="rounded-lg bg-blue-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white transition-all hover:bg-blue-500"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteUser(guide.id, `${guide.first_name} ${guide.last_name}`)}
-                        className="px-4 py-2 text-xs font-bold rounded transition-all bg-red-600 hover:bg-red-700 text-white"
+                        className="rounded-lg bg-red-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white transition-all hover:bg-red-500"
                         title="Delete user permanently"
                       >
                         Delete
@@ -320,36 +347,39 @@ export default function UsersPage() {
 
       {/* Add User Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <div className="p-6 border-b border-stone-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="max-h-[88vh] w-full max-w-lg overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-2xl shadow-black/40">
+            <div className="border-b border-stone-200 p-5">
               <div className="flex items-center justify-between">
-                <h3 className="heading-font text-2xl font-light text-stone-800">Add New User</h3>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-stone-400">User Management</p>
+                  <h3 className="heading-font text-3xl font-light tracking-[-0.04em] text-stone-900">Add New User</h3>
+                </div>
                 <button
                   onClick={() => {
                     setShowAddModal(false)
                     setError('')
                   }}
-                  className="text-stone-400 hover:text-stone-600"
+                  className="rounded-full border border-stone-200 p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
               </div>
             </div>
 
-            <form onSubmit={handleAddUser} className="p-6">
-              <div className="space-y-4">
+            <form onSubmit={handleAddUser} className="max-h-[calc(88vh-92px)] overflow-y-auto p-5">
+              <div className="space-y-3">
                 {error && (
-                  <div className="bg-red-50 border-l-4 border-red-600 p-4">
+                  <div className="rounded-xl border border-red-100 border-l-4 border-l-red-600 bg-red-50 p-4">
                     <p className="text-sm text-red-800">{error}</p>
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                       First Name
                     </label>
                     <input
@@ -357,11 +387,11 @@ export default function UsersPage() {
                       value={formData.first_name}
                       onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                       required
-                      className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                      className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                       Last Name
                     </label>
                     <input
@@ -369,13 +399,13 @@ export default function UsersPage() {
                       value={formData.last_name}
                       onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                       required
-                      className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                      className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                     Email
                   </label>
                   <input
@@ -383,12 +413,12 @@ export default function UsersPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     required
-                    className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                     Password
                   </label>
                   <input
@@ -397,30 +427,30 @@ export default function UsersPage() {
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     required
                     minLength={6}
-                    className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                   />
                   <p className="text-xs text-stone-500 mt-1">Minimum 6 characters</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                     Phone
                   </label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                     Languages
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {availableLanguages.map((lang) => (
-                      <label key={lang} className="flex items-center gap-2 cursor-pointer">
+                      <label key={lang} className="flex cursor-pointer items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2">
                         <input
                           type="checkbox"
                           checked={formData.languages.includes(lang)}
@@ -433,14 +463,14 @@ export default function UsersPage() {
                           }}
                           className="w-4 h-4 text-blue-600 border-stone-300 rounded focus:ring-blue-500"
                         />
-                        <span className="text-xs text-stone-700">{lang}</span>
+                        <span className="text-xs font-medium text-stone-700">{lang}</span>
                       </label>
                     ))}
                   </div>
                   <p className="text-xs text-stone-500 mt-2">Select all languages this guide can conduct tours in</p>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 bg-stone-50 rounded-lg">
+                <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-3">
                   <input
                     type="checkbox"
                     id="is_admin"
@@ -452,23 +482,39 @@ export default function UsersPage() {
                     Make this user an Admin
                   </label>
                 </div>
+
+                <div className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 p-3">
+                  <input
+                    type="checkbox"
+                    id="public_visible"
+                    checked={formData.public_visible}
+                    onChange={(e) => setFormData({...formData, public_visible: e.target.checked})}
+                    className="mt-0.5 h-5 w-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                  />
+                  <label htmlFor="public_visible" className="text-sm font-semibold text-stone-800">
+                    <span className="block">Show in public booking dropdown</span>
+                    <span className="mt-1 block text-xs font-normal text-stone-500">
+                      Turn this off for internal-only accounts that should not be selectable by visitors.
+                    </span>
+                  </label>
+                </div>
               </div>
 
-              <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-stone-200">
+              <div className="mt-5 flex justify-end gap-3 border-t border-stone-200 pt-5">
                 <button
                   type="button"
                   onClick={() => {
                     setShowAddModal(false)
                     setError('')
                   }}
-                  className="px-6 py-3 border-2 border-stone-300 text-stone-700 font-semibold hover:bg-stone-50 transition-all rounded"
+                  className="rounded-xl border border-stone-300 px-5 py-2.5 font-semibold text-stone-700 transition-all hover:bg-stone-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-3 bg-stone-900 text-white font-semibold hover:bg-stone-800 transition-all rounded shadow-md disabled:opacity-50"
+                  className="rounded-xl bg-stone-950 px-5 py-2.5 font-semibold text-white shadow-md transition-all hover:bg-stone-800 disabled:opacity-50"
                 >
                   {saving ? 'Creating...' : 'Create User'}
                 </button>
@@ -480,36 +526,39 @@ export default function UsersPage() {
 
       {/* Edit User Modal */}
       {showEditModal && editingGuide && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <div className="p-6 border-b border-stone-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="max-h-[88vh] w-full max-w-lg overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-2xl shadow-black/40">
+            <div className="border-b border-stone-200 p-5">
               <div className="flex items-center justify-between">
-                <h3 className="heading-font text-2xl font-light text-stone-800">Edit User</h3>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-stone-400">User Management</p>
+                  <h3 className="heading-font text-3xl font-light tracking-[-0.04em] text-stone-900">Edit User</h3>
+                </div>
                 <button
                   onClick={() => {
                     setShowEditModal(false)
                     setEditingGuide(null)
                     setError('')
                   }}
-                  className="text-stone-400 hover:text-stone-600"
+                  className="rounded-full border border-stone-200 p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
               </div>
             </div>
 
-            <form onSubmit={handleUpdateUser} className="p-6">
-              <div className="space-y-4">
+            <form onSubmit={handleUpdateUser} className="max-h-[calc(88vh-92px)] overflow-y-auto p-5">
+              <div className="space-y-3">
                 {error && (
-                  <div className="bg-red-50 border-l-4 border-red-600 p-4">
+                  <div className="rounded-xl border border-red-100 border-l-4 border-l-red-600 bg-red-50 p-4">
                     <p className="text-sm text-red-800">{error}</p>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                     Email
                   </label>
                   <input
@@ -517,13 +566,13 @@ export default function UsersPage() {
                     value={editFormData.email}
                     onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
                     required
-                    className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                       First Name
                     </label>
                     <input
@@ -531,11 +580,11 @@ export default function UsersPage() {
                       value={editFormData.first_name}
                       onChange={(e) => setEditFormData({...editFormData, first_name: e.target.value})}
                       required
-                      className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                      className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                       Last Name
                     </label>
                     <input
@@ -543,30 +592,30 @@ export default function UsersPage() {
                       value={editFormData.last_name}
                       onChange={(e) => setEditFormData({...editFormData, last_name: e.target.value})}
                       required
-                      className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                      className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                     Phone
                   </label>
                   <input
                     type="tel"
                     value={editFormData.phone}
                     onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
-                    className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                     Languages
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {availableLanguages.map((lang) => (
-                      <label key={lang} className="flex items-center gap-2 cursor-pointer">
+                      <label key={lang} className="flex cursor-pointer items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2">
                         <input
                           type="checkbox"
                           checked={editFormData.languages.includes(lang)}
@@ -579,7 +628,7 @@ export default function UsersPage() {
                           }}
                           className="w-4 h-4 text-blue-600 border-stone-300 rounded focus:ring-blue-500"
                         />
-                        <span className="text-xs text-stone-700">{lang}</span>
+                        <span className="text-xs font-medium text-stone-700">{lang}</span>
                       </label>
                     ))}
                   </div>
@@ -587,7 +636,7 @@ export default function UsersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
                     New Password (optional)
                   </label>
                   <input
@@ -595,13 +644,13 @@ export default function UsersPage() {
                     value={editFormData.password}
                     onChange={(e) => setEditFormData({...editFormData, password: e.target.value})}
                     minLength={6}
-                    className="w-full px-3 py-2 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-sm transition-all rounded"
+                    className="w-full rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
                     placeholder="Leave blank to keep current password"
                   />
                   <p className="text-xs text-stone-500 mt-1">Only fill this in if you want to change the user's password (minimum 6 characters)</p>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 bg-stone-50 rounded-lg">
+                <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-3">
                   <input
                     type="checkbox"
                     id="edit_is_admin"
@@ -613,9 +662,25 @@ export default function UsersPage() {
                     Admin privileges
                   </label>
                 </div>
+
+                <div className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 p-3">
+                  <input
+                    type="checkbox"
+                    id="edit_public_visible"
+                    checked={editFormData.public_visible}
+                    onChange={(e) => setEditFormData({...editFormData, public_visible: e.target.checked})}
+                    className="mt-0.5 h-5 w-5 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                  />
+                  <label htmlFor="edit_public_visible" className="text-sm font-semibold text-stone-800">
+                    <span className="block">Show in public booking dropdown</span>
+                    <span className="mt-1 block text-xs font-normal text-stone-500">
+                      Hidden users remain available internally but are not offered to public visitors.
+                    </span>
+                  </label>
+                </div>
               </div>
 
-              <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-stone-200">
+              <div className="mt-5 flex justify-end gap-3 border-t border-stone-200 pt-5">
                 <button
                   type="button"
                   onClick={() => {
@@ -623,14 +688,14 @@ export default function UsersPage() {
                     setEditingGuide(null)
                     setError('')
                   }}
-                  className="px-6 py-3 border-2 border-stone-300 text-stone-700 font-semibold hover:bg-stone-50 transition-all rounded"
+                  className="rounded-xl border border-stone-300 px-5 py-2.5 font-semibold text-stone-700 transition-all hover:bg-stone-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-3 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all rounded shadow-md disabled:opacity-50"
+                  className="rounded-xl bg-blue-600 px-5 py-2.5 font-semibold text-white shadow-md transition-all hover:bg-blue-700 disabled:opacity-50"
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -639,6 +704,7 @@ export default function UsersPage() {
           </div>
         </div>
       )}
+      <StaffFooter />
     </div>
   )
 }

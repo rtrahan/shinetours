@@ -1,18 +1,44 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isBefore, startOfDay } from 'date-fns'
 
 interface CalendarProps {
   onDateSelect: (date: Date) => void
   selectedDate: Date | null
   bookingsData: any[]
+  selectedGuideIds?: string[]
+  selectedGuides?: Array<{ id: string; first_name: string; last_name: string }>
+  availableGuides?: Array<{ id: string; first_name: string; last_name: string }>
+  isLoadingGuides?: boolean
+  onGuideSelectionChange?: (guideIds: string[]) => void
+  showGuideAvailability?: boolean
 }
 
-export default function Calendar({ onDateSelect, selectedDate, bookingsData }: CalendarProps) {
+interface GuideAvailabilityDay {
+  date: string
+  guides: Array<{ id: string; first_name: string; last_name: string }>
+}
+
+export default function Calendar({
+  onDateSelect,
+  selectedDate,
+  bookingsData,
+  selectedGuideIds = [],
+  selectedGuides = [],
+  availableGuides = [],
+  isLoadingGuides = false,
+  onGuideSelectionChange,
+  showGuideAvailability = false
+}: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [bookingsByDate, setBookingsByDate] = useState<Record<string, any>>({})
   const [monthBookings, setMonthBookings] = useState<any[]>([])
+  const [availabilityByDate, setAvailabilityByDate] = useState<Record<string, GuideAvailabilityDay>>({})
+  const [guideMenuAtEnd, setGuideMenuAtEnd] = useState(false)
+  const [guideMenuOpen, setGuideMenuOpen] = useState(false)
+  const guideMenuRef = useRef<HTMLDivElement>(null)
+  const selectedGuideKey = selectedGuideIds.join(',')
 
   // Fetch bookings when month changes
   useEffect(() => {
@@ -51,6 +77,51 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
     setBookingsByDate(dataMap)
   }, [monthBookings])
 
+  useEffect(() => {
+    const fetchGuideAvailability = async () => {
+      if (!showGuideAvailability || selectedGuideIds.length === 0) {
+        setAvailabilityByDate({})
+        return
+      }
+
+      const year = currentMonth.getFullYear()
+      const month = currentMonth.getMonth() + 1
+
+      try {
+        const response = await fetch(`/api/guides/availability?year=${year}&month=${month}&guideIds=${selectedGuideIds.join(',')}`)
+        if (response.ok) {
+          const data: GuideAvailabilityDay[] = await response.json()
+          const dataMap: Record<string, GuideAvailabilityDay> = {}
+          data.forEach(day => {
+            dataMap[day.date] = day
+          })
+          setAvailabilityByDate(dataMap)
+        }
+      } catch (error) {
+        console.error('Error fetching guide availability:', error)
+      }
+    }
+
+    fetchGuideAvailability()
+  }, [currentMonth, selectedGuideKey, showGuideAvailability, selectedGuideIds])
+
+  useEffect(() => {
+    setGuideMenuAtEnd(false)
+  }, [availableGuides.length, selectedGuideKey])
+
+  useEffect(() => {
+    if (!guideMenuOpen) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!guideMenuRef.current?.contains(event.target as Node)) {
+        setGuideMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [guideMenuOpen])
+
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd })
@@ -63,6 +134,36 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
     setCurrentMonth(newDate)
   }
 
+  const guideInitials = (guide: { first_name: string; last_name: string }) =>
+    `${guide.first_name?.[0] || ''}${guide.last_name?.[0] || ''}`.toUpperCase()
+
+  const guideColorClass = (guideId: string) => {
+    const colors = [
+      'bg-amber-300/20 text-amber-50 border-amber-200/30',
+      'bg-blue-300/20 text-blue-50 border-blue-200/30',
+      'bg-emerald-300/20 text-emerald-50 border-emerald-200/30',
+      'bg-purple-300/20 text-purple-50 border-purple-200/30',
+      'bg-rose-300/20 text-rose-50 border-rose-200/30'
+    ]
+    const index = Math.max(0, selectedGuides.findIndex(guide => guide.id === guideId))
+    return colors[index % colors.length]
+  }
+
+  const toggleGuide = (guideId: string) => {
+    if (!onGuideSelectionChange) return
+    onGuideSelectionChange(
+      selectedGuideIds.includes(guideId)
+        ? selectedGuideIds.filter(id => id !== guideId)
+        : [...selectedGuideIds, guideId]
+    )
+  }
+
+  const handleGuideMenuScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget
+    const distanceFromBottom = target.scrollHeight - target.scrollTop - target.clientHeight
+    setGuideMenuAtEnd(distanceFromBottom < 8)
+  }
+
   const getDayClasses = (date: Date) => {
     const dayOfWeek = getDay(date)
     const isPast = isBefore(date, today)
@@ -71,58 +172,160 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
     const isSelected = selectedDate && isSameDay(date, selectedDate)
     const dateKey = format(date, 'yyyy-MM-dd')
     const hasBookings = bookingsByDate[dateKey]
-    const isAvailable = !isPast && isMuseumOpen
+    const hasGuideAvailability = !!availabilityByDate[dateKey]?.guides?.length
+    const requiresGuideAvailability = showGuideAvailability && selectedGuideIds.length > 0
+    const isAvailable = !isPast && isMuseumOpen && (!requiresGuideAvailability || hasGuideAvailability)
 
     // iOS-style for both mobile and desktop - date at top, plus at bottom
-    let classes = 'relative h-28 md:h-24 lg:h-28 flex flex-col transition-all duration-200 rounded '
-    classes += 'items-start justify-start p-1.5 md:p-2 '
+    let classes = 'relative h-28 md:h-24 lg:h-28 flex flex-col transition-all duration-200 rounded-2xl '
+    classes += 'items-start justify-start p-1.5 md:p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950 '
     
     if (!isAvailable) {
-      classes += 'bg-stone-100 text-stone-300 cursor-not-allowed opacity-40'
+      classes += 'bg-white/[0.025] text-stone-700 cursor-not-allowed border border-white/[0.04]'
     } else if (isSelected) {
-      classes += 'bg-stone-800 text-white shadow-xl scale-105 cursor-pointer'
+      classes += 'bg-amber-100 text-stone-950 shadow-2xl shadow-amber-950/30 ring-2 ring-amber-200 ring-offset-2 ring-offset-[#050505] cursor-pointer'
     } else if (hasBookings) {
-      classes += 'bg-white border-2 border-emerald-700 text-stone-800 hover:bg-emerald-50 hover:scale-105 hover:shadow-lg cursor-pointer'
+      classes += 'bg-emerald-300/14 border border-emerald-200/65 text-emerald-50 shadow-inner shadow-emerald-950/30 hover:bg-emerald-300/20 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer'
     } else if (isToday) {
-      classes += 'bg-white border-2 border-amber-600 text-stone-800 hover:bg-amber-50 hover:scale-105 cursor-pointer'
+      classes += 'bg-amber-300/14 border border-amber-200/70 text-amber-50 hover:bg-amber-300/20 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer'
     } else {
-      classes += 'bg-white border border-stone-200 text-stone-700 hover:border-stone-800 hover:scale-105 hover:shadow-md cursor-pointer'
+      classes += 'bg-white/[0.075] border border-white/[0.13] text-stone-100 hover:border-white/25 hover:bg-white/[0.11] hover:-translate-y-0.5 hover:shadow-md cursor-pointer'
     }
 
     return classes
   }
 
   return (
-    <div className="bg-white border border-stone-200 shadow-sm rounded-lg">
+    <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#11100e] shadow-2xl shadow-black/30">
       {/* Month Header */}
-      <div className="border-b border-stone-200 bg-stone-50 px-4 md:px-8 h-[60px] md:h-[72px] flex items-center justify-between">
+      <div className="flex h-[64px] items-center justify-between border-b border-white/10 bg-white/[0.045] px-4 md:h-[76px] md:px-8">
         <button 
           onClick={() => changeMonth(-1)}
-          className="p-2 hover:bg-stone-100 rounded transition-colors">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-stone-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          aria-label="Previous month"
+          className="rounded-full border border-white/10 bg-white/[0.04] p-2 transition-colors hover:bg-white/10">
+          <svg className="w-4 h-4 md:w-5 md:h-5 text-stone-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
-        <h2 className="heading-font text-xl md:text-3xl font-light text-stone-800">
+        <h2 className="heading-font text-2xl font-light tracking-[-0.03em] text-white md:text-4xl">
           {format(currentMonth, 'MMMM yyyy')}
         </h2>
         <button 
           onClick={() => changeMonth(1)}
-          className="p-2 hover:bg-stone-100 rounded transition-colors">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-stone-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          aria-label="Next month"
+          className="rounded-full border border-white/10 bg-white/[0.04] p-2 transition-colors hover:bg-white/10">
+          <svg className="w-4 h-4 md:w-5 md:h-5 text-stone-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
         </button>
       </div>
 
+      {showGuideAvailability && (
+        <div className="border-b border-white/10 bg-black/10 px-4 py-3 md:px-8">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">Guide Preference</p>
+              <p className="mt-1 text-sm text-stone-400">
+                {selectedGuideIds.length === 0
+                  ? 'Not specified. Showing all museum-open dates.'
+                  : `Only showing dates available for ${selectedGuideIds.length} selected guide${selectedGuideIds.length === 1 ? '' : 's'}.`}
+              </p>
+            </div>
+            <div ref={guideMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setGuideMenuOpen(open => !open)}
+                className="flex w-full cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/[0.06] md:min-w-[280px]"
+              >
+                <span className="truncate">
+                  {selectedGuideIds.length === 0
+                    ? 'Guide not specified'
+                    : selectedGuides.map(guide => guide.first_name).join(', ')}
+                </span>
+                <svg className={`h-4 w-4 shrink-0 text-stone-400 transition-transform ${guideMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              {guideMenuOpen && (
+              <div className="absolute right-0 z-30 mt-2 w-full min-w-[280px] overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] p-2 shadow-2xl shadow-black/40">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onGuideSelectionChange?.([])
+                    setGuideMenuOpen(false)
+                  }}
+                  className={`mb-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                    selectedGuideIds.length === 0
+                      ? 'bg-amber-200/15 text-amber-50'
+                      : 'text-stone-300 hover:bg-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  <span>Not specified</span>
+                  <span className="text-xs text-stone-500">All dates</span>
+                </button>
+                <div className="relative">
+                <div
+                  onScroll={handleGuideMenuScroll}
+                  className="max-h-56 overflow-y-auto pr-1 [scrollbar-color:rgba(245,245,244,0.28)_transparent] [scrollbar-width:thin]"
+                >
+                  {isLoadingGuides ? (
+                    <div className="px-3 py-2 text-sm text-stone-500">Loading guides...</div>
+                  ) : availableGuides.length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-stone-500">No public guides available yet.</div>
+                  ) : (
+                    availableGuides.map(guide => {
+                      const selected = selectedGuideIds.includes(guide.id)
+                      return (
+                        <button
+                          key={guide.id}
+                          type="button"
+                          onClick={() => toggleGuide(guide.id)}
+                          className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                            selected
+                              ? 'bg-amber-200/15 text-amber-50'
+                              : 'text-stone-300 hover:bg-white/[0.06] hover:text-white'
+                          }`}
+                        >
+                          <span>{guide.first_name} {guide.last_name}</span>
+                          <span className={`h-4 w-4 rounded border ${selected ? 'border-amber-100 bg-amber-100' : 'border-white/20'}`} />
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+                {availableGuides.length > 5 && !guideMenuAtEnd && (
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-[#11100e] via-[#11100e]/85 to-transparent pb-1 pt-8">
+                    <svg className="h-4 w-4 animate-bounce text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                )}
+                </div>
+              </div>
+              )}
+            </div>
+          </div>
+          {selectedGuideIds.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {selectedGuides.map(guide => (
+                <span key={guide.id} className="rounded-full border border-amber-200/25 bg-amber-200/10 px-3 py-1 text-xs font-semibold text-amber-50">
+                  {guide.first_name} {guide.last_name}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Calendar Grid */}
-      <div className="p-3 md:p-8">
+      <div className="p-3 md:p-6 lg:p-8">
         {/* Day Names */}
         <div className="grid grid-cols-7 gap-1 md:gap-4 mb-2 md:mb-4">
           {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
-            <div key={day} className="text-center text-[9px] md:text-xs font-semibold text-stone-500 uppercase tracking-wider py-1 md:py-2">
-              <span className="hidden md:inline">{day}</span>
-              <span className="md:hidden">{day.substring(0, 3)}</span>
+            <div key={day} className="py-1 text-center text-[9px] font-bold uppercase tracking-[0.14em] text-stone-500 sm:tracking-[0.18em] md:py-2 md:text-xs">
+              <span className="hidden xl:inline">{day}</span>
+              <span className="hidden sm:inline xl:hidden">{day.substring(0, 3)}</span>
+              <span className="sm:hidden">{day.substring(0, 1)}</span>
             </div>
           ))}
         </div>
@@ -131,7 +334,7 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
         <div className="grid grid-cols-7 gap-1 md:gap-4">
           {/* Empty cells for days before month starts */}
           {Array.from({ length: startDay }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-16 md:h-20 lg:h-24"></div>
+            <div key={`empty-${i}`} className="h-28 md:h-24 lg:h-28"></div>
           ))}
 
           {/* Days of month */}
@@ -142,13 +345,19 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
             const isAvailable = !isPast && isMuseumOpen
             const dateKey = format(date, 'yyyy-MM-dd')
             const hasBookings = bookingsByDate[dateKey]
+            const guideAvailability = availabilityByDate[dateKey]
             const isToday = isSameDay(date, today)
+            const isSelected = selectedDate && isSameDay(date, selectedDate)
+            const hasGuideAvailability = !!guideAvailability?.guides?.length
+            const showNamedGuides = selectedGuideIds.length > 1
+            const requiresGuideAvailability = showGuideAvailability && selectedGuideIds.length > 0
+            const canSelectDate = !isPast && isMuseumOpen && (!requiresGuideAvailability || hasGuideAvailability)
 
             return (
               <button
                 key={date.toISOString()}
-                onClick={() => isAvailable ? onDateSelect(date) : null}
-                disabled={!isAvailable}
+                onClick={() => canSelectDate ? onDateSelect(date) : null}
+                disabled={!canSelectDate}
                 className={getDayClasses(date)}
               >
                 {/* Day Number - always at top */}
@@ -166,39 +375,74 @@ export default function Calendar({ onDateSelect, selectedDate, bookingsData }: C
                 )}
 
                 {/* Booking Indicators - same on mobile and desktop */}
-                {isAvailable && (
+                {canSelectDate ? (
                   <div className="w-full mt-auto flex flex-col items-center">
-                    <div className="w-7 h-7 md:w-8 md:h-8 bg-stone-200 border-2 border-stone-300 rounded-full flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {showGuideAvailability && hasGuideAvailability && (
+                      <div className="mb-1 flex max-w-full flex-wrap justify-center gap-1">
+                        {showNamedGuides ? (
+                          guideAvailability.guides.slice(0, 4).map(guide => (
+                            <span
+                              key={guide.id}
+                              title={`${guide.first_name} ${guide.last_name}`}
+                              className={`inline-flex min-w-6 items-center justify-center rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase ${guideColorClass(guide.id)}`}
+                            >
+                              {guideInitials(guide)}
+                            </span>
+                          ))
+                        ) : (
+                          <span className={`rounded-full border px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide ${
+                            isSelected ? 'border-stone-950/20 bg-stone-950/10 text-stone-900' : 'border-emerald-200/25 bg-emerald-300/15 text-emerald-100'
+                          }`}>
+                            Guide available
+                          </span>
+                        )}
+                        {showNamedGuides && guideAvailability.guides.length > 4 && (
+                          <span className="inline-flex min-w-6 items-center justify-center rounded-full border border-white/15 bg-white/10 px-1.5 py-0.5 text-[8px] font-bold text-stone-200">
+                            +{guideAvailability.guides.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className={`flex h-7 w-7 items-center justify-center rounded-full border shadow-sm md:h-8 md:w-8 ${isSelected ? 'bg-stone-950/10 border-stone-950/20' : 'bg-white/10 border-white/15'}`}>
+                      <svg className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isSelected ? 'text-stone-950' : 'text-stone-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/>
                       </svg>
                     </div>
                     {hasBookings && (
-                      <div className="text-center text-[9px] md:text-[10px] text-emerald-700 font-semibold mt-1">
+                      <div className={`text-center text-[9px] md:text-[10px] font-semibold mt-1 ${isSelected ? 'text-stone-900' : 'text-emerald-200'}`}>
                         {hasBookings.requestCount} {hasBookings.requestCount === 1 ? 'req' : 'reqs'}
                       </div>
                     )}
+                    {!hasBookings && (
+                      <div className={`mt-1 hidden text-center text-[10px] font-medium md:block ${isSelected ? 'text-stone-800' : 'text-stone-500'}`}>
+                        Available
+                      </div>
+                    )}
                   </div>
-                )}
+                ) : requiresGuideAvailability && !isPast && isMuseumOpen ? (
+                  <div className="mt-auto w-full text-center text-[9px] font-semibold uppercase tracking-wide text-stone-600">
+                    No guide
+                  </div>
+                ) : null}
               </button>
             )
           })}
         </div>
 
         {/* Legend */}
-        <div className="mt-4 md:mt-8 pt-4 md:pt-6 border-t border-stone-200">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-            <div className="flex items-center gap-4 md:gap-8 flex-wrap">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-emerald-700"></div>
-                <span className="text-[10px] md:text-xs text-stone-600 uppercase tracking-wide">Has Requests</span>
+        <div className="mt-4 border-t border-white/10 pt-4 md:mt-8 md:pt-5">
+          <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200/20 bg-emerald-300/10 px-3 py-1.5">
+                <div className="h-2.5 w-2.5 rounded-full border border-emerald-200/80 bg-emerald-300/30"></div>
+                <span className="text-[10px] uppercase tracking-wide text-emerald-100/85 md:text-xs">Has Requests</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 md:w-4 md:h-4 bg-stone-800"></div>
-                <span className="text-[10px] md:text-xs text-stone-600 uppercase tracking-wide">Selected</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/20 bg-amber-300/10 px-3 py-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-amber-100"></div>
+                <span className="text-[10px] uppercase tracking-wide text-amber-100/85 md:text-xs">Selected</span>
               </div>
             </div>
-            <p className="text-[10px] md:text-xs text-amber-700 font-medium">Museum Open: Tue-Sun</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500 md:text-xs">Museum Open: Tue-Sun</p>
           </div>
         </div>
       </div>

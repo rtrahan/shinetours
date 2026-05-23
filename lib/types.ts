@@ -8,6 +8,7 @@ export interface Guide {
   phone: string | null
   is_admin: boolean
   is_active: boolean
+  public_visible?: boolean
   languages: string[]
   created_at: string
   updated_at: string

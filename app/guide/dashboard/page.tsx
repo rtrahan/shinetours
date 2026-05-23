@@ -7,6 +7,7 @@ import TourBoard from '@/components/TourBoard'
 import DetailsModal from '@/components/DetailsModal'
 import YaleSubmissionModal from '@/components/YaleSubmissionModal'
 import ConfirmationModal from '@/components/ConfirmationModal'
+import { StaffFooter, StaffHeader } from '@/components/StaffChrome'
 import { TourGroup } from '@/lib/types'
 
 export default function GuideDashboard() {
@@ -167,46 +168,62 @@ export default function GuideDashboard() {
     })
   ]
 
+  const statCards = [
+    {
+      label: 'My Tours',
+      value: allItems.filter(item => item.guide_id === currentUserId).length,
+      detail: 'assigned to you',
+      accent: 'from-purple-300/20 to-purple-500/5 border-purple-200/20 text-purple-100'
+    },
+    {
+      label: 'Needs Guide',
+      value: allItems.filter(item => item.status !== 'Ungrouped' && !item.guide_id).length,
+      detail: 'available to claim',
+      accent: 'from-orange-300/20 to-orange-500/5 border-orange-200/20 text-orange-100'
+    },
+    {
+      label: 'Ungrouped',
+      value: ungroupedRequests.reduce((sum, item) => sum + (item.requestCount || 0), 0),
+      detail: `${ungroupedRequests.length} date${ungroupedRequests.length === 1 ? '' : 's'}`,
+      accent: 'from-amber-300/20 to-amber-500/5 border-amber-200/20 text-amber-100'
+    },
+    {
+      label: 'Confirmed',
+      value: allItems.filter(item => item.status === 'Confirmed').length,
+      detail: `${allItems.filter(item => item.status === 'PendingYale').length} pending Yale`,
+      accent: 'from-emerald-300/20 to-emerald-500/5 border-emerald-200/20 text-emerald-100'
+    }
+  ]
+
   if (loading) {
-    return <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-      <p className="text-stone-600">Loading...</p>
+    return <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-6 py-5 text-center shadow-2xl shadow-black/30">
+        <p className="heading-font text-2xl font-light text-white">Loading guide board...</p>
+        <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">Shine Tours</p>
+      </div>
     </div>
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#241d18_0,#11100e_34%,#050505_100%)] text-stone-100">
       {/* Header */}
-      <div className="bg-white border-b border-stone-200 shadow-sm">
-        <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-4 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2 md:gap-3">
-            <svg className="w-6 h-6 md:w-8 md:h-8 text-stone-700" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-            <div>
-              <h1 className="heading-font text-lg md:text-2xl font-light text-stone-800">Guide Dashboard</h1>
-              <p className="text-[10px] md:text-xs text-stone-500 uppercase tracking-widest">Shine Tours</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 md:gap-6 text-xs md:text-sm">
-            <a href="/guide/profile" className="text-stone-600 hover:text-stone-800 uppercase tracking-wide flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-              Profile
-            </a>
-            <a href="/" className="text-stone-600 hover:text-stone-800 uppercase tracking-wide">← Home</a>
-            <button 
-              onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
-              className="text-stone-600 hover:text-stone-800 uppercase tracking-wide"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
+      <StaffHeader role="guide" active="dashboard" />
 
       {/* Main Content */}
-      <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-4 md:py-6">
+      <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-3 md:py-4">
+        <div className="mb-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
+          {statCards.map(card => (
+            <div key={card.label} className={`rounded-xl border bg-gradient-to-br ${card.accent} px-3 py-2.5 shadow-xl shadow-black/10`}>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] opacity-70">{card.label}</p>
+                  <p className="mt-1 text-[11px] text-stone-400">{card.detail}</p>
+                </div>
+                <p className="heading-font text-3xl font-light leading-none text-white">{card.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
         <TourBoard
           tours={allItems}
           currentUserId={currentUserId}
@@ -261,6 +278,7 @@ export default function GuideDashboard() {
           />
         </>
       )}
+      <StaffFooter />
     </div>
   )
 }

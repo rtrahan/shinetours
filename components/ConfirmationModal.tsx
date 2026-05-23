@@ -47,14 +47,15 @@ export default function ConfirmationModal({ isOpen, onClose, onConfirm, tourDate
     <Modal isOpen={isOpen} onClose={onClose} title="Confirm Tour with Yale" maxWidth="max-w-lg">
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
-          <div className="bg-blue-50 border-l-4 border-blue-600 p-5 rounded-r">
-            <p className="text-sm text-blue-900 font-semibold">
-              Step 2: Yale has responded with a confirmed time. Enter it below to notify all participants.
+          <div className="rounded-2xl border border-blue-100 border-l-4 border-l-blue-600 bg-blue-50 p-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-700">Next Step</p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-blue-950">
+              Yale has responded with a confirmed time. Enter it below to notify all participants.
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-stone-700 uppercase tracking-wider mb-3">
+            <label className="mb-3 block text-xs font-bold uppercase tracking-[0.18em] text-stone-600">
               Confirmed Date & Time
             </label>
             <input
@@ -62,22 +63,22 @@ export default function ConfirmationModal({ isOpen, onClose, onConfirm, tourDate
               value={confirmedDateTime}
               onChange={(e) => setConfirmedDateTime(e.target.value)}
               required
-              className="w-full px-4 py-4 border-2 border-stone-300 focus:border-stone-800 focus:outline-none text-lg transition-all rounded"
+              className="w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-4 text-lg text-stone-950 transition-all focus:border-stone-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-stone-200"
             />
           </div>
         </div>
 
-        <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-stone-200">
+        <div className="mt-8 flex justify-between gap-3 border-t border-stone-200 pt-6">
           <button
             type="button"
             onClick={onClose}
-            className="px-8 py-3 border-2 border-stone-300 text-stone-700 font-bold hover:bg-stone-50 transition-all uppercase tracking-wide text-sm rounded"
+            className="rounded-xl border border-stone-300 px-6 py-3 text-sm font-bold uppercase tracking-wide text-stone-700 transition-all hover:bg-stone-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-8 py-3 bg-stone-900 text-white font-bold hover:bg-stone-800 transition-all uppercase tracking-wide text-sm rounded shadow-md"
+            className="rounded-xl bg-stone-950 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-md transition-all hover:bg-stone-800"
           >
             Confirm Tour
           </button>

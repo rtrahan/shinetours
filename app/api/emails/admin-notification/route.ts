@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     const emailPromises = admins.map(admin => {
       return sendEmail({
         to: admin.email,
-        subject: `🔔 New Tour Request - ${formattedDate}`,
+        subject: `New Tour Request - ${formattedDate}`,
         html: adminNewRequestEmail({
           contactName,
           contactEmail,

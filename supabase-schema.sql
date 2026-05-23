@@ -13,6 +13,7 @@ CREATE TABLE guides (
   phone TEXT,
   is_admin BOOLEAN DEFAULT FALSE,
   is_active BOOLEAN DEFAULT TRUE,
+  public_visible BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -50,6 +51,15 @@ CREATE TABLE tour_settings (
   last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Guide availability table (date-only guide availability)
+CREATE TABLE guide_availability (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  guide_id UUID NOT NULL REFERENCES guides(id) ON DELETE CASCADE,
+  available_date DATE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (guide_id, available_date)
+);
+
 -- Indexes for performance
 CREATE INDEX idx_tour_groups_requested_date ON tour_groups(requested_date);
 CREATE INDEX idx_tour_groups_status ON tour_groups(status);
@@ -57,12 +67,15 @@ CREATE INDEX idx_tour_groups_guide_id ON tour_groups(guide_id);
 CREATE INDEX idx_booking_requests_requested_date ON booking_requests(requested_date);
 CREATE INDEX idx_booking_requests_tour_group_id ON booking_requests(tour_group_id);
 CREATE INDEX idx_booking_requests_preferred_guide_id ON booking_requests(preferred_guide_id);
+CREATE INDEX idx_guide_availability_guide_id ON guide_availability(guide_id);
+CREATE INDEX idx_guide_availability_available_date ON guide_availability(available_date);
 
 -- Enable Row Level Security
 ALTER TABLE guides ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tour_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE booking_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tour_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE guide_availability ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for guides
 CREATE POLICY "Guides can view all guides" ON guides FOR SELECT USING (true);
@@ -96,6 +109,10 @@ CREATE POLICY "Admins can manage tour settings" ON tour_settings FOR ALL USING (
     SELECT 1 FROM guides WHERE id = auth.uid() AND is_admin = true
   )
 );
+
+-- RLS Policies for guide_availability
+CREATE POLICY "Anyone can view guide availability" ON guide_availability FOR SELECT USING (true);
+CREATE POLICY "Enable guide availability management" ON guide_availability FOR ALL USING (true) WITH CHECK (true);
 
 -- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()

@@ -1,15 +1,27 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import Calendar from '@/components/Calendar'
 import BookingForm from '@/components/BookingForm'
+import { createClient } from '@/lib/supabase/client'
+
+const GallerySplatViewer = dynamic(() => import('@/components/GallerySplatViewer'), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 bg-stone-200 animate-pulse" />
+  ),
+})
 
 export default function Home() {
+  const supabase = createClient()
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [availableGuides, setAvailableGuides] = useState<any[]>([])
+  const [selectedGuideIds, setSelectedGuideIds] = useState<string[]>([])
   const [bookingsData, setBookingsData] = useState<any[]>([])
   const [isLoadingGuides, setIsLoadingGuides] = useState(true)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [staffUser, setStaffUser] = useState<{ is_admin: boolean } | null>(null)
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date)
@@ -27,7 +39,7 @@ export default function Home() {
   useEffect(() => {
     const fetchGuides = async () => {
       try {
-        const response = await fetch('/api/guides')
+        const response = await fetch('/api/guides?public=true')
         if (response.ok) {
           const data = await response.json()
           setAvailableGuides(data)
@@ -40,6 +52,37 @@ export default function Home() {
     }
 
     fetchGuides()
+  }, [])
+
+  useEffect(() => {
+    const fetchStaffUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user?.email) {
+          const { data: guide } = await supabase
+            .from('guides')
+            .select('is_admin')
+            .eq('email', user.email)
+            .eq('is_active', true)
+            .single()
+
+          if (guide) {
+            setStaffUser({ is_admin: guide.is_admin })
+            return
+          }
+        }
+
+        const response = await fetch('/api/auth/me')
+        if (response.ok) {
+          const data = await response.json()
+          setStaffUser({ is_admin: !!data.user?.is_admin })
+        }
+      } catch (error) {
+        console.error('Error checking staff user:', error)
+      }
+    }
+
+    fetchStaffUser()
   }, [])
 
   // Fetch booking calendar data for the current month
@@ -85,115 +128,181 @@ export default function Home() {
     refreshBookingsData() // Refresh one more time to be sure
   }
 
-  return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Header */}
-      <div className="bg-white border-b border-stone-200 shadow-sm">
-        <div className="max-w-[1800px] mx-auto px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <svg className="w-8 h-8 text-stone-700" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-            <div>
-              <h1 className="heading-font text-2xl font-light text-stone-800">Shine Tours</h1>
-              <p className="text-xs text-stone-500 uppercase tracking-widest">Yale University Art Gallery</p>
-            </div>
-          </div>
-          <a href="https://www.paypal.com/paypalme/sethmcneely" target="_blank" 
-            className="px-4 py-2 text-stone-600 hover:text-stone-800 border border-stone-300 hover:border-stone-400 font-medium text-sm rounded transition-all flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-            Donate
-          </a>
-        </div>
-      </div>
+  const handleStaffLogin = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.email) {
+        const { data: guide } = await supabase
+          .from('guides')
+          .select('is_admin')
+          .eq('email', user.email)
+          .eq('is_active', true)
+          .single()
 
-      {/* Hero Section */}
-      <div className="bg-stone-50 min-h-[90vh] flex items-center py-8 md:py-12">
-        <div className="max-w-[1600px] mx-auto w-full px-4 md:px-8">
+        if (guide) {
+          window.location.href = guide.is_admin ? '/admin/dashboard' : '/guide/dashboard'
+          return
+        }
+      }
+
+      const response = await fetch('/api/auth/me')
+      if (response.ok) {
+        const data = await response.json()
+        window.location.href = data.user?.is_admin ? '/admin/dashboard' : '/guide/dashboard'
+        return
+      }
+    } catch (error) {
+      console.error('Error checking staff session:', error)
+    }
+
+    window.location.href = '/login'
+  }
+
+  const handleGuideSelectionChange = (guideIds: string[]) => {
+    setSelectedDate(null)
+    setSelectedGuideIds(guideIds)
+  }
+
+  const selectedGuides = availableGuides.filter(guide => selectedGuideIds.includes(guide.id))
+  const bookingFormGuides = selectedGuideIds.length > 0 ? selectedGuides : availableGuides
+  const staffDashboardHref = staffUser?.is_admin ? '/admin/dashboard' : '/guide/dashboard'
+
+  return (
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#29211b_0,#15110d_38%,#0b0a09_100%)] text-stone-100">
+      {/* Header + Hero */}
+      <section className="relative min-h-[88vh] overflow-hidden bg-[#050505] md:min-h-[92vh]">
+        <div className="absolute inset-0 bg-[#050505]">
+          <GallerySplatViewer className="hero-viewer-fade h-full w-full" />
+        </div>
+
+        <header className="absolute inset-x-0 top-4 z-40 px-4 md:top-6 md:px-8">
+          <div className="mx-auto flex max-w-[1180px] items-center justify-between gap-4 rounded-full border border-white/15 bg-stone-950/25 px-4 py-3 shadow-2xl shadow-black/20 backdrop-blur-2xl md:px-5">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10">
+                <svg className="w-5 h-5 text-white/90 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+              </div>
+              <div className="min-w-0">
+                <p className="heading-font text-xl md:text-[1.6rem] font-medium text-white leading-none tracking-[-0.03em]">Shine Tours</p>
+                <p className="text-[9px] md:text-[10px] text-white/55 uppercase tracking-[0.24em] truncate">Yale Art Gallery</p>
+              </div>
+            </div>
+            {staffUser ? (
+              <div className="flex items-center gap-1 rounded-full border border-white/10 bg-black/20 p-1 text-[10px] font-bold uppercase tracking-[0.12em] md:text-xs">
+                <a href="/" className="rounded-full bg-white px-3 py-1.5 text-stone-950">Home</a>
+                <a href={staffDashboardHref} className="rounded-full px-3 py-1.5 text-stone-300 transition-colors hover:bg-white/[0.08] hover:text-white">
+                  Dashboard
+                </a>
+                <a href="/guide/availability" className="hidden rounded-full px-3 py-1.5 text-stone-300 transition-colors hover:bg-white/[0.08] hover:text-white sm:inline-flex">
+                  Availability
+                </a>
+                {staffUser.is_admin && (
+                  <a href="/admin/users" className="hidden rounded-full px-3 py-1.5 text-stone-300 transition-colors hover:bg-white/[0.08] hover:text-white md:inline-flex">
+                    Users
+                  </a>
+                )}
+                {!staffUser.is_admin && (
+                  <a href="/guide/profile" className="hidden rounded-full px-3 py-1.5 text-stone-300 transition-colors hover:bg-white/[0.08] hover:text-white md:inline-flex">
+                    Profile
+                  </a>
+                )}
+              </div>
+            ) : (
+              <a href="https://www.paypal.com/paypalme/sethmcneely" target="_blank"
+                className="px-3 md:px-4 py-2 text-white/90 hover:text-white bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/40 font-semibold text-xs md:text-sm rounded-full transition-all flex items-center gap-2 backdrop-blur-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                Donate
+              </a>
+            )}
+          </div>
+        </header>
+
+        <div className="relative z-30 flex w-full min-h-[88vh] md:min-h-[92vh] items-center px-4 md:px-8 pb-20 pt-28 md:pb-24 md:pt-32">
           
           {/* Success Modal */}
           {showSuccess && (
-            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 overflow-y-auto">
-              <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full my-8 overflow-hidden animate-in">
-                {/* Header with checkmark */}
-<div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-6 md:p-8 text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white rounded-full mb-3 md:mb-4 shadow-lg">
-                    <svg className="w-10 h-10 md:w-12 md:h-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/>
+            <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-sm">
+              <div className="my-8 w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-[#11100e] shadow-2xl shadow-black/50 animate-in">
+                <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top,#1f2c22_0,#11100e_64%)] p-6 text-center md:p-8">
+                  <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full border border-emerald-200/25 bg-emerald-300/10 shadow-lg md:h-20 md:w-20">
+                    <svg className="h-10 w-10 text-emerald-100 md:h-12 md:w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/>
                     </svg>
                   </div>
-                  <h2 className="heading-font text-2xl md:text-3xl font-light text-white mb-2">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-100/60">Tour Request</p>
+                  <h2 className="heading-font text-4xl font-light tracking-[-0.04em] text-white md:text-5xl">
                     Request Received!
                   </h2>
-                  <p className="text-emerald-50 text-sm">
+                  <p className="mt-2 text-sm text-stone-400">
                     Thank you for your tour request
                   </p>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 md:p-8 max-h-[60vh] md:max-h-none overflow-y-auto">
-                  <div className="space-y-3 md:space-y-4">
-                    {/* Step 1 */}
-                    <div className="flex items-start gap-3 md:gap-4">
-                      <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-blue-700 font-bold text-xs md:text-sm">1</span>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-stone-900 mb-1 text-sm md:text-base">Email Confirmation</h3>
-                        <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
-                          You'll receive an email confirmation shortly with your tour request details.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Step 2 */}
-                    <div className="flex items-start gap-3 md:gap-4">
-                      <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                        <span className="text-amber-700 font-bold text-xs md:text-sm">2</span>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-stone-900 mb-1 text-sm md:text-base">Yale Review Process</h3>
-                        <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
-                          We will submit your group's tour request to Yale University Art Gallery for approval.
-                        </p>
+                <div className="max-h-[60vh] overflow-y-auto p-6 md:max-h-none md:p-8">
+                  <div className="space-y-3">
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-300/15 text-xs font-bold text-blue-100">
+                          1
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-white md:text-base">Email Confirmation</h3>
+                          <p className="mt-1 text-xs leading-relaxed text-stone-400 md:text-sm">
+                            You'll receive an email confirmation shortly with your tour request details.
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Step 3 */}
-                    <div className="flex items-start gap-3 md:gap-4">
-                      <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <span className="text-emerald-700 font-bold text-xs md:text-sm">3</span>
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-300/15 text-xs font-bold text-amber-100">
+                          2
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-white md:text-base">Yale Review Process</h3>
+                          <p className="mt-1 text-xs leading-relaxed text-stone-400 md:text-sm">
+                            We will submit your group's tour request to Yale University Art Gallery for approval.
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-bold text-stone-900 mb-1 text-sm md:text-base">Time Confirmation</h3>
-                        <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
-                          Once Yale agrees to a time slot (between 11am-3pm), we'll send you a confirmation email with the exact time and meeting details.
-                        </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-300/15 text-xs font-bold text-emerald-100">
+                          3
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-white md:text-base">Time Confirmation</h3>
+                          <p className="mt-1 text-xs leading-relaxed text-stone-400 md:text-sm">
+                            Once Yale agrees to a time slot (between 11am-3pm), we'll send you a confirmation email with the exact time and meeting details.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Important Note */}
-                  <div className="mt-4 md:mt-6 bg-amber-50 border-l-4 border-amber-500 p-3 md:p-4 rounded-r">
-                    <div className="flex items-start gap-2 md:gap-3">
-                      <svg className="w-4 h-4 md:w-5 md:h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mt-5 rounded-2xl border border-amber-200/15 border-l-4 border-l-amber-300/80 bg-amber-300/10 p-4">
+                    <div className="flex items-start gap-3">
+                      <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                       </svg>
                       <div>
-                        <p className="text-xs md:text-sm font-semibold text-amber-900 mb-1">Important</p>
-                        <p className="text-xs md:text-sm text-amber-800">
-                          Your tour is <strong>not confirmed</strong> until you receive our confirmation email with the approved time from Yale.
+                        <p className="mb-1 text-sm font-bold text-amber-50">Important</p>
+                        <p className="text-xs leading-relaxed text-amber-50/80 md:text-sm">
+                          Your tour is <strong className="text-amber-50">not confirmed</strong> until you receive our confirmation email with the approved time from Yale.
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Close Button */}
                   <button
                     onClick={handleCloseSuccessModal}
-                    className="mt-4 md:mt-6 w-full py-3 md:py-4 px-6 bg-stone-800 text-white font-semibold rounded-lg hover:bg-stone-900 transition-colors shadow-md hover:shadow-lg text-sm md:text-base"
+                    className="mt-5 w-full rounded-2xl bg-white px-6 py-4 text-sm font-bold text-stone-950 shadow-xl transition-all hover:-translate-y-0.5 hover:bg-stone-100 md:text-base"
                   >
                     Got it, thanks!
                   </button>
@@ -202,106 +311,138 @@ export default function Home() {
             </div>
           )}
 
-          {/* Hero Section with Images */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center mb-12 md:mb-20 max-w-[1400px] mx-auto">
-            {/* Left Side - Text */}
-            <div className="text-center md:text-left">
-              <h1 className="heading-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-stone-900 mb-6 md:mb-8 leading-tight">
-                Enlightening<br/>Art Gallery<br/>Tours
+          {/* Hero overlay content */}
+          <div className="relative w-full max-w-[1600px] mx-auto text-center">
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[34rem] w-[56rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,0,0,0.66)_0%,rgba(31,24,17,0.38)_42%,rgba(0,0,0,0)_72%)] blur-2xl" />
+            <div className="relative mx-auto max-w-5xl">
+              <p className="mb-6 text-[10px] font-bold uppercase tracking-[0.36em] text-white/55 md:text-xs">
+                Yale University Art Gallery Tours
+              </p>
+
+              <h1 className="heading-font mx-auto max-w-5xl text-5xl font-medium text-white drop-shadow-sm sm:text-6xl md:text-7xl lg:text-8xl leading-[0.92] tracking-[-0.035em]">
+                Art, History, and<br className="hidden sm:block" /> the World of the Bible
               </h1>
-              
-              <button 
+
+              <div className="mx-auto mt-8 flex max-w-3xl items-center gap-4 md:mt-10">
+                <div className="h-px flex-1 bg-white/25" />
+                <p className="heading-font max-w-2xl text-2xl font-normal italic leading-snug text-white/95 sm:text-3xl md:text-4xl tracking-[-0.01em]">
+                  “And those having insight will shine”
+                </p>
+                <div className="h-px flex-1 bg-white/25" />
+              </div>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/45 md:text-sm">Daniel 12:3</p>
+
+              <div className="mx-auto mt-7 max-w-xl text-sm leading-7 text-white/65 md:mt-8 md:text-base">
+                A guided look at how art, archaeology, and the ancient world illuminate the Scriptures.
+              </div>
+
+              <button
                 onClick={() => {
                   document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' })
                 }}
-                className="px-6 md:px-8 py-3 md:py-4 bg-stone-900 text-white font-semibold rounded-full hover:bg-stone-800 transition-all shadow-lg hover:shadow-xl mb-8 md:mb-12 inline-block text-sm md:text-base"
+                className="group mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-stone-950 shadow-xl transition-all hover:-translate-y-0.5 hover:bg-stone-100 hover:shadow-2xl md:mt-10 md:px-9 md:py-4 md:text-base"
               >
-                Book A Tour!
+                Book a Tour
+                <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                </svg>
               </button>
-
-              <div className="mb-4 md:mb-6">
-                <p className="heading-font text-xl sm:text-2xl md:text-3xl text-stone-700 italic mb-2">
-                  "And those having insight will shine"
-                </p>
-                <p className="text-stone-500 text-sm md:text-base">
-                  — Daniel 12:3
-                </p>
-              </div>
-
-              <p className="text-stone-600 text-xs md:text-sm">
-                New Haven, Conn.
-              </p>
             </div>
+          </div>
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[48vh] bg-[linear-gradient(to_bottom,rgba(5,5,5,0)_0%,rgba(5,5,5,0.32)_30%,rgba(5,5,5,0.78)_68%,#050505_100%)]" />
+      </section>
 
-            {/* Right Side - Images */}
-            <div className="space-y-3 md:space-y-4">
-              <div className="rounded-xl md:rounded-2xl overflow-hidden shadow-lg md:shadow-xl">
-                <img 
-                  src="/gallery-exterior.jpg.webp" 
-                  alt="Yale University Art Gallery Exterior"
-                  className="w-full h-48 md:h-64 object-cover"
-                />
+      <div className="relative -mt-12 overflow-hidden bg-[#050505] px-4 pt-24 pb-12 md:px-8 md:pt-28 md:pb-16">
+        <div className="pointer-events-none absolute left-[-12%] top-48 h-80 w-80 rounded-full bg-amber-200/5 blur-3xl" />
+        <div className="pointer-events-none absolute right-[-10%] top-[34rem] h-96 w-96 rounded-full bg-emerald-300/5 blur-3xl" />
+        <div className="relative mx-auto w-full max-w-[1600px]">
+          {/* Booking Section */}
+          <div className="mx-auto mb-7 max-w-[1600px] md:mb-9">
+            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="mb-3 inline-flex rounded-full border border-amber-200/15 bg-amber-200/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-amber-100/70">
+                  Step 1
+                </p>
+                <h2 className="heading-font text-4xl font-light leading-none tracking-[-0.04em] text-white md:text-5xl">
+                  Choose a Date
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-400 md:text-base">
+                  Select an available museum day, then share your party details so we can submit the request to Yale.
+                </p>
               </div>
-              <div className="rounded-xl md:rounded-2xl overflow-hidden shadow-lg md:shadow-xl">
-                <img 
-                  src="/gallery-artwork.jpeg" 
-                  alt="Yale Art Gallery Collection"
-                  className="w-full h-48 md:h-64 object-cover object-right"
-                />
+              <div className="hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right md:block">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">Museum Days</p>
+                <p className="mt-1 text-sm font-medium text-stone-200">Tuesday through Sunday</p>
               </div>
             </div>
           </div>
-
-          {/* Booking Section */}
-          <div id="booking-section" className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 max-w-[1600px] mx-auto">
+          <div id="booking-section" className="mx-auto grid max-w-[1600px] scroll-mt-20 grid-cols-1 gap-7 md:grid-cols-5 md:items-start md:gap-8">
             {/* Calendar - Takes 3 columns on desktop, full width on mobile */}
             <div className="md:col-span-3">
               <Calendar 
                 selectedDate={selectedDate}
                 onDateSelect={handleDateSelect}
                 bookingsData={bookingsData}
+                selectedGuideIds={selectedGuideIds}
+                selectedGuides={selectedGuides}
+                availableGuides={availableGuides}
+                isLoadingGuides={isLoadingGuides}
+                onGuideSelectionChange={handleGuideSelectionChange}
+                showGuideAvailability
               />
             </div>
 
             {/* Booking Form - Takes 2 columns on desktop, full width on mobile */}
-            <div id="booking-form" className="md:col-span-2">
+            <div id="booking-form" className="md:sticky md:top-8 md:col-span-2">
               {selectedDate ? (
                 <BookingForm 
                   selectedDate={selectedDate}
-                  availableGuides={availableGuides}
+                  availableGuides={bookingFormGuides}
+                  defaultPreferredGuideId={selectedGuideIds.length === 1 ? selectedGuideIds[0] : undefined}
                   onSuccess={handleBookingSuccess}
                 />
               ) : (
-                <div className="bg-white rounded-lg shadow-lg p-8 flex items-center justify-center h-full">
-                  <p className="text-stone-500 text-center">
-                    Please select a date from the calendar to request a tour.
-                  </p>
+                <div className="flex h-full min-h-[320px] items-center justify-center rounded-3xl border border-white/10 bg-white/[0.055] p-8 shadow-2xl shadow-black/20 backdrop-blur-sm md:p-10">
+                  <div className="text-center max-w-sm">
+                    <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/10 text-stone-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                    <h3 className="heading-font mb-2 text-3xl font-light tracking-[-0.03em] text-white">Select a Date</h3>
+                    <p className="text-sm leading-relaxed text-stone-400">
+                      Pick an available day from the calendar to open the tour request form.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
           {/* Visitor Information Section */}
-          <div className="mt-16 md:mt-24 max-w-[1400px] mx-auto">
-            <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
+          <div id="visitor-info" className="mt-14 md:mt-20 max-w-[1400px] mx-auto scroll-mt-24">
+            <div className="bg-white/[0.06] border border-white/10 rounded-2xl shadow-2xl shadow-black/20 overflow-hidden backdrop-blur-sm">
               {/* Header */}
-              <div className="p-6 md:p-8 border-b border-stone-200">
-                <h2 className="heading-font text-3xl md:text-4xl font-light text-stone-900 mb-2">
+              <div className="p-6 md:p-8 border-b border-white/10 bg-white/[0.04]">
+                <h2 className="heading-font text-3xl md:text-4xl font-light text-white mb-2">
                   Visitor Information
                 </h2>
-                <p className="text-sm md:text-base text-stone-600">Everything you need to know for your tour</p>
+                <p className="text-sm md:text-base text-stone-400">Everything you need to know for your tour</p>
               </div>
 
               <div className="p-6 md:p-8">
                 {/* How Tour Requests Work */}
-                <div className="mb-6 md:mb-8 bg-blue-50 border-l-4 border-blue-500 p-4 md:p-6 rounded-r-lg">
+                <div className="mb-6 md:mb-8 bg-sky-400/10 border border-sky-300/15 border-l-4 border-l-sky-300/70 p-4 md:p-5 rounded-xl shadow-sm">
                   <div className="flex items-start gap-3">
-                    <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+                    <div className="w-9 h-9 rounded-full bg-sky-300/15 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
                     <div>
-                      <h3 className="font-bold text-blue-900 mb-2">How Tour Requests Work</h3>
-                      <p className="text-sm text-blue-800 leading-relaxed">
+                      <h3 className="font-bold text-sky-100 mb-2">How Tour Requests Work</h3>
+                      <p className="text-sm text-sky-100/75 leading-relaxed">
                         When you submit a tour request, you'll be grouped with other visitors requesting the same date (groups of 10-15 people). 
                         We then submit your tour request to Yale University Art Gallery for approval. Once Yale assigns a time slot, 
                         you'll receive a confirmation email with all the details.
@@ -313,35 +454,39 @@ export default function Home() {
                 {/* Info Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {/* Location & Parking */}
-                  <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <svg className="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                      </svg>
-                      <h3 className="font-bold text-stone-900 uppercase text-xs tracking-wider">Location & Parking</h3>
+                  <div className="bg-white/[0.05] border border-white/10 rounded-xl p-5 md:p-6 shadow-sm hover:bg-white/[0.07] transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-stone-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-stone-100 uppercase text-xs tracking-wider">Location & Parking</h3>
                     </div>
                     <div className="space-y-3 text-sm">
                       <div>
-                        <p className="font-semibold text-stone-900">Yale University Art Gallery</p>
-                        <p className="text-stone-600">1111 Chapel St, New Haven, CT</p>
+                        <p className="font-semibold text-white">Yale University Art Gallery</p>
+                        <p className="text-stone-400">1111 Chapel St, New Haven, CT</p>
                       </div>
                       <div>
-                        <p className="font-semibold text-stone-900">Parking</p>
-                        <p className="text-stone-600">150 York St, New Haven, CT</p>
+                        <p className="font-semibold text-white">Parking</p>
+                        <p className="text-stone-400">150 York St, New Haven, CT</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Museum & Attractions */}
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <svg className="w-5 h-5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                      </svg>
-                      <h3 className="font-bold text-amber-900 uppercase text-xs tracking-wider">Museum & Attractions</h3>
+                  <div className="bg-amber-300/10 border border-amber-200/15 rounded-xl p-5 md:p-6 shadow-sm hover:bg-amber-300/15 transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-full bg-amber-200/15 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-amber-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-amber-100 uppercase text-xs tracking-wider">Museum & Attractions</h3>
                     </div>
-                    <p className="text-sm text-amber-900 mb-3 leading-relaxed">
+                    <p className="text-sm text-amber-50/75 mb-3 leading-relaxed">
                       Explore world-class collections spanning centuries of artistic achievement. New Haven offers 
                       excellent dining and cultural attractions within walking distance.
                     </p>
@@ -349,7 +494,7 @@ export default function Home() {
                       href="https://artgallery.yale.edu" 
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-amber-700 hover:text-amber-900"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-amber-100 hover:text-white"
                     >
                       Visit Gallery Website
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -359,77 +504,81 @@ export default function Home() {
                   </div>
 
                   {/* Tour Details */}
-                  <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <svg className="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
-                      <h3 className="font-bold text-stone-900 uppercase text-xs tracking-wider">Tour Details</h3>
+                  <div className="bg-white/[0.05] border border-white/10 rounded-xl p-5 md:p-6 shadow-sm hover:bg-white/[0.07] transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-stone-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-stone-100 uppercase text-xs tracking-wider">Tour Details</h3>
                     </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-stone-600">Duration:</span>
-                        <span className="font-semibold text-stone-900">1.5 hours</span>
+                    <div className="space-y-2.5 text-sm">
+                      <div className="flex justify-between gap-4 border-b border-white/10 pb-2">
+                        <span className="text-stone-400">Duration:</span>
+                        <span className="font-semibold text-white">1.5 hours</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-stone-600">Group Size:</span>
-                        <span className="font-semibold text-stone-900">Maximum 15 people</span>
+                      <div className="flex justify-between gap-4 border-b border-white/10 pb-2">
+                        <span className="text-stone-400">Group Size:</span>
+                        <span className="font-semibold text-white">Maximum 15 people</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-stone-600">Availability:</span>
-                        <span className="font-semibold text-stone-900">Museum open Tue-Sun</span>
+                      <div className="flex justify-between gap-4 border-b border-white/10 pb-2">
+                        <span className="text-stone-400">Availability:</span>
+                        <span className="font-semibold text-white">Museum open Tue-Sun</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-stone-600">Approval:</span>
-                        <span className="font-semibold text-stone-900">By Yale</span>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-stone-400">Approval:</span>
+                        <span className="font-semibold text-white">By Yale</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Visitor Guidelines */}
-                  <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <svg className="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
-                      <h3 className="font-bold text-stone-900 uppercase text-xs tracking-wider">Visitor Guidelines</h3>
+                  <div className="bg-white/[0.05] border border-white/10 rounded-xl p-5 md:p-6 shadow-sm hover:bg-white/[0.07] transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-stone-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-stone-100 uppercase text-xs tracking-wider">Visitor Guidelines</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span className="text-stone-700">FREE admission</span>
+                        <span className="text-stone-300">FREE admission</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span className="text-stone-700">Wheelchair accessible</span>
+                        <span className="text-stone-300">Wheelchair accessible</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span className="text-stone-700">Casual dress</span>
+                        <span className="text-stone-300">Casual dress</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                        <span className="text-stone-700">No large bags</span>
+                        <span className="text-stone-300">No large bags</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                        <span className="text-stone-700">No food/drink</span>
+                        <span className="text-stone-300">No food/drink</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                        <span className="text-stone-700">Don't touch art</span>
+                        <span className="text-stone-300">Don't touch art</span>
                       </div>
                     </div>
                   </div>
@@ -439,22 +588,23 @@ export default function Home() {
           </div>
 
           {/* Quick Links for Staff */}
-          <div className="mt-16 text-center">
+          <div className="mt-12 md:mt-16 text-center">
             <p className="text-xs text-stone-500 mb-4">Staff Access:</p>
-            <a 
-              href="/login" 
-              className="inline-block px-8 py-3 bg-stone-800 text-white text-sm font-semibold rounded-lg hover:bg-stone-900 transition-colors shadow-md hover:shadow-lg"
+            <button
+              type="button"
+              onClick={handleStaffLogin}
+              className="inline-block px-8 py-3 bg-white/10 text-white text-sm font-semibold rounded-full border border-white/10 hover:bg-white/15 transition-colors shadow-md hover:shadow-lg"
             >
               Staff Login →
-            </a>
+            </button>
             <p className="text-xs text-stone-400 mt-3">Admins and guides login here</p>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-stone-200 mt-12">
-        <div className="max-w-[1800px] mx-auto px-8 py-8">
+      <footer className="bg-black/20 border-t border-white/10 mt-10 md:mt-12">
+        <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-8">
           <div className="text-center">
             <p className="text-sm text-stone-500">© 2025 Shine Tours. All rights reserved.</p>
           </div>

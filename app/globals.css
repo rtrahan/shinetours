@@ -2,15 +2,37 @@
 
 @layer base {
   .heading-font {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-playfair), Georgia, serif;
+    font-feature-settings: "liga" 1, "kern" 1;
   }
 
   body {
     font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    text-rendering: geometricPrecision;
   }
 }
 
 @layer utilities {
+  .hero-viewer-fade {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 52%,
+      rgb(0 0 0 / 0.72) 64%,
+      rgb(0 0 0 / 0.24) 78%,
+      transparent 92%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 52%,
+      rgb(0 0 0 / 0.72) 64%,
+      rgb(0 0 0 / 0.24) 78%,
+      transparent 92%
+    );
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

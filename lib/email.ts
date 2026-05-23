@@ -30,7 +30,7 @@ export async function sendEmail({ to, subject, html, from, fromName }: EmailPara
           {
             From: {
               Email: from || process.env.FROM_EMAIL || 'noreply@shinetours.com',
-              Name: fromName || 'ShineTours - Yale Art Gallery'
+              Name: fromName || 'Shine Tours - Yale Art Gallery'
             },
             To: [
               {
@@ -50,70 +50,247 @@ export async function sendEmail({ to, subject, html, from, fromName }: EmailPara
   }
 }
 
-// Email Templates
+// Email templates
+
+const BRAND_NAME = 'Shine Tours'
+const BRAND_SUBTITLE = 'Yale University Art Gallery Tours'
+const LOCATION = 'New Haven, Connecticut'
+const DEFAULT_CONTACT_EMAIL = 'tours@shinetours.com'
+
+type EmailShellParams = {
+  preheader: string
+  label: string
+  title: string
+  subtitle: string
+  body: string
+  footerNote?: string
+}
+
+type Detail = {
+  label: string
+  value: string
+}
+
+function escapeHtml(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function escapeAttribute(value: unknown) {
+  return escapeHtml(value).replace(/`/g, '&#96;')
+}
+
+function peopleLabel(count: number) {
+  return `${count} ${count === 1 ? 'person' : 'people'}`
+}
+
+function paragraph(content: string, options: { muted?: boolean } = {}) {
+  const color = options.muted ? '#7c756c' : '#3b332c'
+
+  return `<p style="margin:0 0 18px;color:${color};font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;">${content}</p>`
+}
+
+function sectionTitle(title: string) {
+  return `<h2 style="margin:0 0 14px;color:#211a14;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:400;letter-spacing:-0.02em;line-height:1.2;">${escapeHtml(title)}</h2>`
+}
+
+function detailRows(details: Detail[]) {
+  return details
+    .map(
+      detail => `
+        <tr>
+          <td style="padding:12px 0;border-bottom:1px solid #ede7dd;color:#8a7d6b;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;vertical-align:top;width:145px;">${escapeHtml(detail.label)}</td>
+          <td style="padding:12px 0;border-bottom:1px solid #ede7dd;color:#2b241e;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;vertical-align:top;">${detail.value}</td>
+        </tr>
+      `
+    )
+    .join('')
+}
+
+function card(title: string, content: string) {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:24px 0;border-collapse:separate;border-spacing:0;background:#fffdfa;border:1px solid #e8decd;border-radius:18px;box-shadow:0 18px 45px rgba(41,37,36,0.08);">
+      <tr>
+        <td style="padding:24px;">
+          ${sectionTitle(title)}
+          ${content}
+        </td>
+      </tr>
+    </table>
+  `
+}
+
+function detailCard(title: string, details: Detail[]) {
+  return card(
+    title,
+    `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">${detailRows(details)}</table>`
+  )
+}
+
+function notice(title: string, content: string, tone: 'gold' | 'green' = 'gold') {
+  const palette = {
+    gold: {
+      background: '#fff8e8',
+      border: '#d7b56d',
+      title: '#6f4f16',
+      text: '#5d4b2f',
+    },
+    green: {
+      background: '#edf8f1',
+      border: '#4f9a6d',
+      title: '#175233',
+      text: '#315741',
+    },
+  }[tone]
+
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:24px 0;background:${palette.background};border-left:4px solid ${palette.border};border-radius:14px;">
+      <tr>
+        <td style="padding:18px 20px;">
+          <p style="margin:0 0 6px;color:${palette.title};font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;">${escapeHtml(title)}</p>
+          <p style="margin:0;color:${palette.text};font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;">${content}</p>
+        </td>
+      </tr>
+    </table>
+  `
+}
+
+function orderedSteps(steps: Array<{ title: string; body: string }>) {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+      ${steps
+        .map(
+          (step, index) => `
+            <tr>
+              <td style="padding:${index === 0 ? '2px' : '18px'} 0 0;vertical-align:top;width:42px;">
+                <div style="height:28px;width:28px;border-radius:999px;background:#211a14;color:#d7b56d;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:28px;text-align:center;">${index + 1}</div>
+              </td>
+              <td style="padding:${index === 0 ? '0' : '16px'} 0 0;color:#3b332c;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;">
+                <strong style="color:#211a14;">${escapeHtml(step.title)}</strong><br>
+                ${step.body}
+              </td>
+            </tr>
+          `
+        )
+        .join('')}
+    </table>
+  `
+}
+
+function bulletList(items: string[]) {
+  return `
+    <ul style="margin:0;padding:0 0 0 20px;color:#3b332c;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.75;">
+      ${items.map(item => `<li style="margin:8px 0;">${item}</li>`).join('')}
+    </ul>
+  `
+}
+
+function scripture() {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:26px;border-top:1px solid #eadfce;">
+      <tr>
+        <td style="padding-top:22px;text-align:center;">
+          <p style="margin:0;color:#7a5d2f;font-family:Georgia,'Times New Roman',serif;font-size:18px;font-style:italic;line-height:1.45;">"And those having insight will shine"</p>
+          <p style="margin:8px 0 0;color:#9a8f80;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;">Daniel 12:3</p>
+        </td>
+      </tr>
+    </table>
+  `
+}
+
+function emailShell({ preheader, label, title, subtitle, body, footerNote }: EmailShellParams) {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>${escapeHtml(title)}</title>
+</head>
+<body style="margin:0;padding:0;background:#050505;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(preheader)}</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#050505;border-collapse:collapse;">
+    <tr>
+      <td align="center" style="padding:32px 14px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;border-collapse:separate;border-spacing:0;background:#f7f1e8;border-radius:26px;overflow:hidden;">
+          <tr>
+            <td style="padding:34px 28px 38px;background:#15110d;background-image:radial-gradient(circle at top,#443627 0%,#15110d 50%,#080706 100%);text-align:center;">
+              <p style="margin:0 0 16px;color:#d7b56d;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;">${escapeHtml(label)}</p>
+              <h1 style="margin:0;color:#fffaf0;font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;letter-spacing:-0.035em;line-height:1.08;">${escapeHtml(title)}</h1>
+              <p style="margin:14px 0 0;color:#d8cbbb;font-family:Arial,Helvetica,sans-serif;font-size:14px;letter-spacing:0.02em;line-height:1.6;">${escapeHtml(subtitle)}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 28px 30px;background:#f7f1e8;">
+              ${body}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 28px 30px;background:#11100e;text-align:center;">
+              <p style="margin:0;color:#fffaf0;font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:400;letter-spacing:-0.02em;">${BRAND_NAME}</p>
+              <p style="margin:7px 0 0;color:#a99d8c;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">${BRAND_SUBTITLE}</p>
+              <p style="margin:14px 0 0;color:#766f66;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;">${footerNote ? escapeHtml(footerNote) : LOCATION}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `
+}
 
 export function bookingConfirmationEmail(params: {
   contactName: string
   tourDate: string
   groupSize: number
 }) {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: 'Georgia', serif; color: #292524; line-height: 1.6; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #1c1917 0%, #44403c 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0; }
-    .content { background: #fafaf9; padding: 30px; border-radius: 0 0 8px 8px; }
-    .highlight { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
-    .button { display: inline-block; padding: 12px 30px; background: #1c1917; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-    .footer { text-align: center; padding: 20px; color: #78716c; font-size: 14px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 style="margin: 0; font-weight: 300; font-size: 32px;">Tour Request Received</h1>
-      <p style="margin: 10px 0 0 0; opacity: 0.9;">ShineTours - Yale Art Gallery</p>
-    </div>
-    <div class="content">
-      <p>Dear ${params.contactName},</p>
-      
-      <p>Thank you for requesting an art gallery tour! We've received your request for:</p>
-      
-      <div style="background: white; padding: 20px; border-radius: 6px; margin: 20px 0;">
-        <p style="margin: 5px 0;"><strong>Date:</strong> ${params.tourDate}</p>
-        <p style="margin: 5px 0;"><strong>Party Size:</strong> ${params.groupSize} ${params.groupSize === 1 ? 'person' : 'people'}</p>
-      </div>
+  const contactName = escapeHtml(params.contactName)
+  const tourDate = escapeHtml(params.tourDate)
 
-      <div class="highlight">
-        <p style="margin: 0; font-weight: 600;">⚠️ Important: Your tour is NOT YET CONFIRMED</p>
-      </div>
-
-      <h3 style="color: #1c1917;">What Happens Next:</h3>
-      
-      <ol style="padding-left: 20px;">
-        <li style="margin: 10px 0;"><strong>Grouping:</strong> You may be grouped with other visitors requesting the same date (groups of 10-15 people).</li>
-        <li style="margin: 10px 0;"><strong>Yale Submission:</strong> We'll submit your group's tour request to Yale University Art Gallery for approval.</li>
-        <li style="margin: 10px 0;"><strong>Confirmation:</strong> Once Yale agrees to a time slot (between 11am-3pm), we'll send you a confirmation email with the exact time and meeting details.</li>
-      </ol>
-
-      <p style="margin-top: 30px;">Please wait for our confirmation email before making any travel arrangements.</p>
-
-      <p style="margin-top: 20px;">
-        <em>"And those having insight will shine"</em><br>
-        <small>— Daniel 12:3</small>
-      </p>
-    </div>
-    <div class="footer">
-      <p>ShineTours - Yale University Art Gallery Tours</p>
-      <p>New Haven, Connecticut</p>
-    </div>
-  </div>
-</body>
-</html>
-  `
+  return emailShell({
+    preheader: `We received your Yale Art Gallery tour request for ${params.tourDate}.`,
+    label: 'Request Received',
+    title: 'Your Tour Request Is In',
+    subtitle: 'We will review the date, group the request if needed, and submit it to Yale for approval.',
+    body: `
+      ${paragraph(`Dear ${contactName},`)}
+      ${paragraph('Thank you for requesting a guided visit with Shine Tours. We have received your request and will handle the next steps with care.')}
+      ${detailCard('Request Details', [
+        { label: 'Date', value: tourDate },
+        { label: 'Party Size', value: escapeHtml(peopleLabel(params.groupSize)) },
+      ])}
+      ${notice(
+        'Not Yet Confirmed',
+        'Your tour is not confirmed until Yale University Art Gallery approves a time slot and we send a final confirmation email.'
+      )}
+      ${card(
+        'What Happens Next',
+        orderedSteps([
+          {
+            title: 'Grouping',
+            body: 'We may group visitors requesting the same date, usually into groups of 10 to 15 people.',
+          },
+          {
+            title: 'Yale Submission',
+            body: 'We submit the tour request to Yale University Art Gallery for approval.',
+          },
+          {
+            title: 'Confirmation',
+            body: 'Once Yale agrees to a time between 11am and 3pm, we will send the exact time and meeting details.',
+          },
+        ])
+      )}
+      ${paragraph('Please wait for the final confirmation before making travel arrangements.', { muted: true })}
+      ${scripture()}
+    `,
+  })
 }
 
 export function tourConfirmedEmail(params: {
@@ -125,77 +302,42 @@ export function tourConfirmedEmail(params: {
   guidePhone: string
   totalPeople: number
 }) {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: 'Georgia', serif; color: #292524; line-height: 1.6; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0; }
-    .content { background: #fafaf9; padding: 30px; border-radius: 0 0 8px 8px; }
-    .success-box { background: #d1fae5; border: 2px solid #10b981; padding: 20px; border-radius: 6px; margin: 20px 0; }
-    .info-box { background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid #d6d3d1; }
-    .footer { text-align: center; padding: 20px; color: #78716c; font-size: 14px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 style="margin: 0; font-weight: 300; font-size: 32px;">✓ Tour Confirmed!</h1>
-      <p style="margin: 10px 0 0 0; opacity: 0.9;">Your Yale Art Gallery tour is confirmed</p>
-    </div>
-    <div class="content">
-      <p>Dear ${params.contactName},</p>
-      
-      <div class="success-box">
-        <p style="margin: 0; font-weight: 600; font-size: 18px;">🎉 Great news! Yale has confirmed your tour.</p>
-      </div>
+  const contactName = escapeHtml(params.contactName)
+  const guideEmail = escapeHtml(params.guideEmail || DEFAULT_CONTACT_EMAIL)
+  const guideEmailHref = escapeAttribute(params.guideEmail || DEFAULT_CONTACT_EMAIL)
 
-      <div class="info-box">
-        <h3 style="margin-top: 0; color: #1c1917;">Tour Details:</h3>
-        <p style="margin: 5px 0;"><strong>Date & Time:</strong> ${params.confirmedTime}</p>
-        <p style="margin: 5px 0;"><strong>Group Size:</strong> ${params.totalPeople} people</p>
-        <p style="margin: 5px 0;"><strong>Location:</strong> Yale University Art Gallery<br>1111 Chapel St, New Haven, CT</p>
-      </div>
-
-      <div class="info-box">
-        <h3 style="margin-top: 0; color: #1c1917;">Your Tour Guide:</h3>
-        <p style="margin: 5px 0; font-size: 18px; color: #7c3aed;"><strong>${params.guideName}</strong></p>
-        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${params.guideEmail}" style="color: #2563eb;">${params.guideEmail}</a></p>
-        <p style="margin: 5px 0;"><strong>Phone:</strong> ${params.guidePhone}</p>
-        <p style="margin: 15px 0 0 0; font-size: 14px; color: #78716c;">
-          Feel free to contact your guide if you have any questions before the tour.
-        </p>
-      </div>
-
-      <h3 style="color: #1c1917;">Before Your Visit:</h3>
-      
-      <ul style="padding-left: 20px;">
-        <li style="margin: 10px 0;">Arrive 10 minutes early</li>
-        <li style="margin: 10px 0;">Parking available at 150 York St, New Haven, CT</li>
-        <li style="margin: 10px 0;">No large bags allowed</li>
-        <li style="margin: 10px 0;">No food or drink in the gallery</li>
-        <li style="margin: 10px 0;">Photography without flash is permitted</li>
-      </ul>
-
-      <p style="margin-top: 30px;">We look forward to seeing you!</p>
-
-      <p style="margin-top: 20px;">
-        <em>"And those having insight will shine"</em><br>
-        <small>— Daniel 12:3</small>
-      </p>
-    </div>
-    <div class="footer">
-      <p>ShineTours - Yale University Art Gallery Tours</p>
-      <p>New Haven, Connecticut</p>
-    </div>
-  </div>
-</body>
-</html>
-  `
+  return emailShell({
+    preheader: `Your Yale Art Gallery tour is confirmed for ${params.confirmedTime}.`,
+    label: 'Tour Confirmed',
+    title: 'Your Visit Is Confirmed',
+    subtitle: 'Yale has approved your tour time. We look forward to welcoming you.',
+    body: `
+      ${paragraph(`Dear ${contactName},`)}
+      ${notice('Confirmed By Yale', 'Your tour has been approved. Please save the details below and plan to arrive a few minutes early.', 'green')}
+      ${detailCard('Tour Details', [
+        { label: 'Date and Time', value: escapeHtml(params.confirmedTime) },
+        { label: 'Group Size', value: escapeHtml(peopleLabel(params.totalPeople)) },
+        { label: 'Location', value: 'Yale University Art Gallery<br>1111 Chapel St, New Haven, CT' },
+      ])}
+      ${detailCard('Your Guide', [
+        { label: 'Guide', value: escapeHtml(params.guideName) },
+        { label: 'Email', value: `<a href="mailto:${guideEmailHref}" style="color:#7a5d2f;text-decoration:underline;">${guideEmail}</a>` },
+        { label: 'Phone', value: escapeHtml(params.guidePhone || 'Not provided') },
+      ])}
+      ${card(
+        'Before Your Visit',
+        bulletList([
+          'Arrive 10 minutes early so the group can begin on time.',
+          'Parking is available at 150 York St, New Haven, CT.',
+          'Large bags, food, and drink are not permitted in the gallery.',
+          'Photography without flash is permitted unless otherwise noted in the gallery.',
+        ])
+      )}
+      ${paragraph('If anything changes before the visit, please contact your guide or reply to the confirmation email.', { muted: true })}
+      ${scripture()}
+    `,
+  })
 }
-
 
 export function adminNewRequestEmail(params: {
   contactName: string
@@ -207,56 +349,36 @@ export function adminNewRequestEmail(params: {
   totalRequestsForDate: number
   totalPeopleForDate: number
 }) {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: 'Georgia', serif; color: #292524; line-height: 1.6; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-    .content { background: #fafaf9; padding: 30px; border-radius: 0 0 8px 8px; }
-    .info-box { background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid #d6d3d1; }
-    .highlight { background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 style="margin: 0; font-weight: 300; font-size: 28px;">🔔 New Tour Request</h1>
-      <p style="margin: 10px 0 0 0; opacity: 0.9;">Action may be needed</p>
-    </div>
-    <div class="content">
-      <p>A new tour request has been submitted:</p>
+  const contactEmail = escapeHtml(params.contactEmail)
+  const contactEmailHref = escapeAttribute(params.contactEmail)
+  const details: Detail[] = [
+    { label: 'Date', value: escapeHtml(params.tourDate) },
+    { label: 'Party Size', value: escapeHtml(peopleLabel(params.groupSize)) },
+    { label: 'Contact', value: escapeHtml(params.contactName) },
+    { label: 'Email', value: `<a href="mailto:${contactEmailHref}" style="color:#7a5d2f;text-decoration:underline;">${contactEmail}</a>` },
+    { label: 'Phone', value: escapeHtml(params.contactPhone || 'Not provided') },
+  ]
 
-      <div class="info-box">
-        <h3 style="margin-top: 0; color: #1c1917;">Request Details:</h3>
-        <p style="margin: 5px 0;"><strong>Date:</strong> ${params.tourDate}</p>
-        <p style="margin: 5px 0;"><strong>Party Size:</strong> ${params.groupSize} ${params.groupSize === 1 ? 'person' : 'people'}</p>
-        <p style="margin: 5px 0;"><strong>Contact:</strong> ${params.contactName}</p>
-        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${params.contactEmail}" style="color: #2563eb;">${params.contactEmail}</a></p>
-        <p style="margin: 5px 0;"><strong>Phone:</strong> ${params.contactPhone || 'Not provided'}</p>
-        ${params.preferredGuide ? `<p style="margin: 5px 0;"><strong>Preferred Guide:</strong> <span style="color: #7c3aed;">${params.preferredGuide}</span></p>` : ''}
-      </div>
+  if (params.preferredGuide) {
+    details.push({ label: 'Preferred Guide', value: escapeHtml(params.preferredGuide) })
+  }
 
-      <div class="highlight">
-        <p style="margin: 0; font-weight: 600; color: #1e40af;">This Date Summary:</p>
-        <p style="margin: 5px 0 0 0; color: #1e40af; font-size: 14px;">
-          <strong>${params.totalRequestsForDate} total ${params.totalRequestsForDate === 1 ? 'request' : 'requests'}</strong> for ${params.totalPeopleForDate} ${params.totalPeopleForDate === 1 ? 'person' : 'people'} on ${params.tourDate}
-        </p>
-      </div>
-
-      <p style="margin-top: 20px; font-size: 14px; color: #78716c;">
-        You can group requests, assign guides, and manage this tour in the admin dashboard.
-      </p>
-    </div>
-    <div style="text-align: center; padding: 20px; color: #78716c; font-size: 14px;">
-      <p>Shine Tours - Admin Notification</p>
-    </div>
-  </div>
-</body>
-</html>
-  `
+  return emailShell({
+    preheader: `New tour request for ${params.tourDate}: ${params.contactName}, ${peopleLabel(params.groupSize)}.`,
+    label: 'Admin Notification',
+    title: 'New Tour Request',
+    subtitle: 'A visitor has submitted a new request that may need grouping or guide assignment.',
+    body: `
+      ${paragraph('A new tour request has been submitted through the Shine Tours booking form.')}
+      ${detailCard('Request Details', details)}
+      ${notice(
+        'Date Summary',
+        `${escapeHtml(`${params.totalRequestsForDate} total ${params.totalRequestsForDate === 1 ? 'request' : 'requests'}`)} for ${escapeHtml(peopleLabel(params.totalPeopleForDate))} on ${escapeHtml(params.tourDate)}.`
+      )}
+      ${paragraph('Use the admin dashboard to group requests, assign guides, and manage Yale submission.', { muted: true })}
+    `,
+    footerNote: 'Admin notification',
+  })
 }
 
 export function guidePreferredRequestEmail(params: {
@@ -267,58 +389,29 @@ export function guidePreferredRequestEmail(params: {
   contactEmail: string
   contactPhone: string
 }) {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: 'Georgia', serif; color: #292524; line-height: 1.6; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-    .content { background: #fafaf9; padding: 30px; border-radius: 0 0 8px 8px; }
-    .info-box { background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid #d6d3d1; }
-    .success-box { background: #dbeafe; border: 2px solid #3b82f6; padding: 15px; border-radius: 6px; margin: 20px 0; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 style="margin: 0; font-weight: 300; font-size: 28px;">👋 You've Been Requested!</h1>
-      <p style="margin: 10px 0 0 0; opacity: 0.9;">Someone wants you as their tour guide</p>
-    </div>
-    <div class="content">
-      <p>Dear ${params.guideName},</p>
-      
-      <div class="success-box">
-        <p style="margin: 0; font-weight: 600; color: #1e40af;">
-          ${params.contactName} has requested a tour and specifically asked for you!
-        </p>
-      </div>
+  const guideName = escapeHtml(params.guideName)
+  const contactName = escapeHtml(params.contactName)
+  const contactEmail = escapeHtml(params.contactEmail)
+  const contactEmailHref = escapeAttribute(params.contactEmail)
 
-      <div class="info-box">
-        <h3 style="margin-top: 0; color: #1c1917;">Tour Request Details:</h3>
-        <p style="margin: 5px 0;"><strong>Requested Date:</strong> ${params.tourDate}</p>
-        <p style="margin: 5px 0;"><strong>Party Size:</strong> ${params.groupSize} ${params.groupSize === 1 ? 'person' : 'people'}</p>
-        <p style="margin: 5px 0;"><strong>Contact:</strong> ${params.contactName}</p>
-        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${params.contactEmail}" style="color: #2563eb;">${params.contactEmail}</a></p>
-        <p style="margin: 5px 0;"><strong>Phone:</strong> ${params.contactPhone || 'Not provided'}</p>
-      </div>
-
-      <p style="margin-top: 20px;">
-        This request is currently ungrouped. Once an admin creates a tour group for this date and assigns you, 
-        you'll be able to manage the tour and submit it to Yale.
-      </p>
-
-      <p style="margin-top: 20px;">
-        <em>"And those having insight will shine"</em><br>
-        <small>— Daniel 12:3</small>
-      </p>
-    </div>
-    <div style="text-align: center; padding: 20px; color: #78716c; font-size: 14px;">
-      <p>Shine Tours - Guide Notification</p>
-    </div>
-  </div>
-</body>
-</html>
-  `
+  return emailShell({
+    preheader: `${params.contactName} requested you for a Yale Art Gallery tour on ${params.tourDate}.`,
+    label: 'Guide Notification',
+    title: 'You Were Requested',
+    subtitle: 'A visitor asked for you as their preferred guide.',
+    body: `
+      ${paragraph(`Dear ${guideName},`)}
+      ${notice('Preferred Guide Request', `${contactName} submitted a tour request and specifically asked for you.`)}
+      ${detailCard('Tour Request Details', [
+        { label: 'Requested Date', value: escapeHtml(params.tourDate) },
+        { label: 'Party Size', value: escapeHtml(peopleLabel(params.groupSize)) },
+        { label: 'Contact', value: contactName },
+        { label: 'Email', value: `<a href="mailto:${contactEmailHref}" style="color:#7a5d2f;text-decoration:underline;">${contactEmail}</a>` },
+        { label: 'Phone', value: escapeHtml(params.contactPhone || 'Not provided') },
+      ])}
+      ${paragraph('This request is currently ungrouped. Once an admin creates a tour group for this date and assigns you, you will be able to manage the tour and submit it to Yale.')}
+      ${scripture()}
+    `,
+    footerNote: 'Guide notification',
+  })
 }

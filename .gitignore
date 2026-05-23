@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated gaussian splat source (ksplat is kept for the site)
+public/gaussians/*.ply

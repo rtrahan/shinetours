@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       .from('tour_groups')
       .select(`
         *,
-        guide:guides(first_name, last_name),
+        guide:guides(first_name, last_name, email, phone),
         booking_requests(contact_name, contact_email, group_size)
       `)
       .eq('id', tourGroupId)
@@ -42,15 +42,11 @@ export async function POST(request: NextRequest) {
     const guidePhone = tourGroup.guide?.phone || 'N/A'
     const totalPeople = tourGroup.booking_requests?.reduce((sum: number, b: any) => sum + b.group_size, 0) || 0
     
-    // Format the requested date properly
-    const [year, month, day] = tourGroup.requested_date.split('-').map(Number)
-    const requestDateObj = new Date(year, month - 1, day)
-
     // Send email to all participants
     const emailPromises = tourGroup.booking_requests?.map((booking: any) => {
       return sendEmail({
         to: booking.contact_email,
-        subject: '✓ Your Yale Art Gallery Tour is Confirmed!',
+        subject: 'Your Yale Art Gallery Tour Is Confirmed',
         html: tourConfirmedEmail({
           contactName: booking.contact_name,
           tourDate: tourGroup.requested_date,
