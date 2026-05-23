@@ -13,6 +13,16 @@ const GallerySplatViewer = dynamic(() => import('@/components/GallerySplatViewer
   ),
 })
 
+type ThemePreference = 'system' | 'light' | 'dark'
+type ResolvedTheme = 'light' | 'dark'
+
+const THEME_STORAGE_KEY = 'shine-tours-theme-preference'
+const THEME_OPTIONS: Array<{ value: ThemePreference; label: string }> = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+]
+
 export default function Home() {
   const supabase = createClient()
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -22,6 +32,49 @@ export default function Home() {
   const [isLoadingGuides, setIsLoadingGuides] = useState(true)
   const [showSuccess, setShowSuccess] = useState(false)
   const [staffUser, setStaffUser] = useState<{ is_admin: boolean } | null>(null)
+  const [themePreference, setThemePreference] = useState<ThemePreference>('system')
+  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>('dark')
+
+  const resolvedTheme = themePreference === 'system' ? systemTheme : themePreference
+  const isLightTheme = resolvedTheme === 'light'
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)')
+    const syncSystemTheme = () => {
+      setSystemTheme(mediaQuery.matches ? 'light' : 'dark')
+    }
+
+    syncSystemTheme()
+
+    try {
+      const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+      if (savedTheme === 'system' || savedTheme === 'light' || savedTheme === 'dark') {
+        setThemePreference(savedTheme)
+      }
+    } catch {
+      // Ignore storage failures and keep the system preference.
+    }
+
+    mediaQuery.addEventListener('change', syncSystemTheme)
+
+    return () => {
+      mediaQuery.removeEventListener('change', syncSystemTheme)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.style.colorScheme = resolvedTheme
+  }, [resolvedTheme])
+
+  const handleThemePreferenceChange = (nextTheme: ThemePreference) => {
+    setThemePreference(nextTheme)
+
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme)
+    } catch {
+      // The visible state should still update if storage is unavailable.
+    }
+  }
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date)
@@ -168,12 +221,26 @@ export default function Home() {
   const staffDashboardHref = staffUser?.is_admin ? '/admin/dashboard' : '/guide/dashboard'
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#29211b_0,#15110d_38%,#0b0a09_100%)] text-stone-100">
+    <div
+      data-theme={resolvedTheme}
+      className={`public-home min-h-screen transition-colors duration-300 ${
+        isLightTheme
+          ? 'bg-[radial-gradient(circle_at_top_left,#fff8ed_0,#efe4d5_38%,#faf7f0_100%)] text-stone-950'
+          : 'bg-[radial-gradient(circle_at_top_left,#29211b_0,#15110d_38%,#0b0a09_100%)] text-stone-100'
+      }`}
+    >
       {/* Header + Hero */}
-      <section className="relative min-h-[88vh] overflow-hidden bg-[#050505] md:min-h-[92vh]">
-        <div className="absolute inset-0 bg-[#050505]">
-          <GallerySplatViewer className="hero-viewer-fade h-full w-full" />
+      <section className={`relative overflow-hidden ${isLightTheme ? 'min-h-[92vh] bg-[#faf7f0] md:min-h-[96vh]' : 'min-h-[98vh] bg-[#050505] md:min-h-[104vh]'}`}>
+        <div className={`absolute inset-0 ${isLightTheme ? 'bg-[#faf7f0]' : 'bg-[#050505]'}`}>
+          <GallerySplatViewer className={`${isLightTheme ? 'hero-viewer-fade-light' : 'hero-viewer-fade'} h-full w-full`} theme={resolvedTheme} />
         </div>
+        <div
+          className={`pointer-events-none absolute inset-0 z-10 ${
+            isLightTheme
+              ? 'bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.32)_0%,rgba(255,255,255,0.13)_40%,rgba(250,247,240,0.08)_62%,rgba(250,247,240,0.26)_100%)]'
+              : 'bg-[radial-gradient(circle_at_center,rgba(12,10,9,0.08)_0%,rgba(12,10,9,0.22)_54%,rgba(5,5,5,0.48)_100%)]'
+          }`}
+        />
 
         <header className="absolute inset-x-0 top-4 z-40 px-4 md:top-6 md:px-8">
           <div className="mx-auto flex max-w-[1180px] items-center justify-between gap-4 rounded-full border border-white/15 bg-stone-950/25 px-4 py-3 shadow-2xl shadow-black/20 backdrop-blur-2xl md:px-5">
@@ -220,7 +287,11 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="relative z-30 flex w-full min-h-[88vh] md:min-h-[92vh] items-center px-4 md:px-8 pb-20 pt-28 md:pb-24 md:pt-32">
+        <div
+          className={`relative z-30 flex w-full items-center px-4 pb-28 pt-28 md:px-8 md:pb-32 md:pt-32 ${
+            isLightTheme ? 'min-h-[92vh] md:min-h-[96vh]' : 'min-h-[98vh] md:min-h-[104vh]'
+          }`}
+        >
           
           {/* Success Modal */}
           {showSuccess && (
@@ -313,26 +384,36 @@ export default function Home() {
 
           {/* Hero overlay content */}
           <div className="relative w-full max-w-[1600px] mx-auto text-center">
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[34rem] w-[56rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,0,0,0.66)_0%,rgba(31,24,17,0.38)_42%,rgba(0,0,0,0)_72%)] blur-2xl" />
-            <div className="relative mx-auto max-w-5xl">
-              <p className="mb-6 text-[10px] font-bold uppercase tracking-[0.36em] text-white/55 md:text-xs">
+            <div
+              className={`pointer-events-none absolute left-1/2 top-1/2 h-[32rem] w-[58rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl ${
+                isLightTheme
+                  ? 'bg-[radial-gradient(circle,rgba(0,0,0,0.42)_0%,rgba(31,24,17,0.24)_46%,rgba(0,0,0,0)_76%)]'
+                  : 'bg-[radial-gradient(circle,rgba(0,0,0,0.66)_0%,rgba(31,24,17,0.38)_42%,rgba(0,0,0,0)_72%)]'
+              }`}
+            />
+            <div
+              className={`hero-copy relative mx-auto max-w-5xl rounded-[2rem] px-4 py-6 md:px-10 md:py-8 ${
+                isLightTheme ? 'text-[#fffaf0]' : ''
+              }`}
+            >
+              <p className={`mb-5 text-[10px] font-bold uppercase tracking-[0.36em] md:text-xs ${isLightTheme ? 'text-[#fffaf0]/70' : 'text-white/55'}`}>
                 Yale University Art Gallery Tours
               </p>
 
-              <h1 className="heading-font mx-auto max-w-5xl text-5xl font-medium text-white drop-shadow-sm sm:text-6xl md:text-7xl lg:text-8xl leading-[0.92] tracking-[-0.035em]">
+              <h1 className={`heading-font mx-auto max-w-5xl text-5xl font-medium drop-shadow-sm sm:text-6xl md:text-7xl lg:text-[5.5rem] leading-[0.92] tracking-[-0.035em] ${isLightTheme ? 'text-[#fffaf0]' : 'text-white'}`}>
                 Art, History, and<br className="hidden sm:block" /> the World of the Bible
               </h1>
 
               <div className="mx-auto mt-8 flex max-w-3xl items-center gap-4 md:mt-10">
                 <div className="h-px flex-1 bg-white/25" />
-                <p className="heading-font max-w-2xl text-2xl font-normal italic leading-snug text-white/95 sm:text-3xl md:text-4xl tracking-[-0.01em]">
+                <p className={`heading-font max-w-2xl text-2xl font-normal italic leading-snug sm:text-3xl md:text-4xl tracking-[-0.01em] ${isLightTheme ? 'text-[#fffaf0]/95' : 'text-white/95'}`}>
                   “And those having insight will shine”
                 </p>
                 <div className="h-px flex-1 bg-white/25" />
               </div>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/45 md:text-sm">Daniel 12:3</p>
+              <p className={`mt-3 text-xs font-semibold uppercase tracking-[0.24em] md:text-sm ${isLightTheme ? 'text-[#fffaf0]/60' : 'text-white/45'}`}>Daniel 12:3</p>
 
-              <div className="mx-auto mt-7 max-w-xl text-sm leading-7 text-white/65 md:mt-8 md:text-base">
+              <div className={`mx-auto mt-7 max-w-2xl text-sm leading-7 md:mt-8 md:text-base ${isLightTheme ? 'text-[#fffaf0]/80' : 'text-white/65'}`}>
                 A guided look at how art, archaeology, and the ancient world illuminate the Scriptures.
               </div>
 
@@ -350,10 +431,20 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[48vh] bg-[linear-gradient(to_bottom,rgba(5,5,5,0)_0%,rgba(5,5,5,0.32)_30%,rgba(5,5,5,0.78)_68%,#050505_100%)]" />
+        <div
+          className={`pointer-events-none absolute inset-x-0 z-20 ${
+            isLightTheme
+              ? 'bottom-0 h-[30vh] bg-[linear-gradient(to_bottom,rgba(250,247,240,0)_0%,rgba(250,247,240,0.12)_34%,rgba(250,247,240,0.56)_76%,#faf7f0_100%)]'
+              : '-bottom-[6vh] h-[15vh] bg-[linear-gradient(to_bottom,rgba(5,5,5,0)_0%,rgba(5,5,5,0.2)_32%,rgba(5,5,5,0.62)_70%,#050505_100%)]'
+          }`}
+        />
       </section>
 
-      <div className="relative -mt-12 overflow-hidden bg-[#050505] px-4 pt-24 pb-12 md:px-8 md:pt-28 md:pb-16">
+      <div
+        className={`relative overflow-hidden px-4 transition-colors duration-300 md:px-8 ${
+          isLightTheme ? 'mt-0 bg-[#faf7f0] pt-24 pb-0 md:pt-28 md:pb-0' : 'mt-0 bg-[#050505] pt-24 pb-12 md:pt-28 md:pb-16'
+        }`}
+      >
         <div className="pointer-events-none absolute left-[-12%] top-48 h-80 w-80 rounded-full bg-amber-200/5 blur-3xl" />
         <div className="pointer-events-none absolute right-[-10%] top-[34rem] h-96 w-96 rounded-full bg-emerald-300/5 blur-3xl" />
         <div className="relative mx-auto w-full max-w-[1600px]">
@@ -384,6 +475,7 @@ export default function Home() {
                 selectedDate={selectedDate}
                 onDateSelect={handleDateSelect}
                 bookingsData={bookingsData}
+                theme={resolvedTheme}
                 selectedGuideIds={selectedGuideIds}
                 selectedGuides={selectedGuides}
                 availableGuides={availableGuides}
@@ -399,6 +491,7 @@ export default function Home() {
                 <BookingForm 
                   selectedDate={selectedDate}
                   availableGuides={bookingFormGuides}
+                  theme={resolvedTheme}
                   defaultPreferredGuideId={selectedGuideIds.length === 1 ? selectedGuideIds[0] : undefined}
                   onSuccess={handleBookingSuccess}
                 />
@@ -603,10 +696,49 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-black/20 border-t border-white/10 mt-10 md:mt-12">
-        <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-8">
-          <div className="text-center">
-            <p className="text-sm text-stone-500">© 2025 Shine Tours. All rights reserved.</p>
+      <footer className={`mt-10 border-t transition-colors duration-300 md:mt-12 ${isLightTheme ? 'border-stone-900/10 bg-white/65' : 'border-white/10 bg-black/20'}`}>
+        <div className="mx-auto max-w-[1800px] px-4 py-8 md:px-8">
+          <div className="flex flex-col items-center justify-between gap-5 text-center md:flex-row md:text-left">
+            <p className={`text-sm ${isLightTheme ? 'text-stone-600' : 'text-stone-500'}`}>© 2025 Shine Tours. All rights reserved.</p>
+            <div className="flex flex-col items-center gap-2 md:items-end">
+              <p className={`text-[10px] font-bold uppercase tracking-[0.22em] ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>
+                Theme
+              </p>
+              <div
+                role="group"
+                aria-label="Theme preference"
+                className={`flex rounded-full border p-1 text-[11px] font-bold uppercase tracking-[0.12em] shadow-sm backdrop-blur-sm ${
+                  isLightTheme ? 'border-stone-900/10 bg-white/75 text-stone-600' : 'border-white/10 bg-black/20 text-stone-300'
+                }`}
+              >
+                {THEME_OPTIONS.map((option) => {
+                  const isActive = themePreference === option.value
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-pressed={isActive}
+                      onClick={() => handleThemePreferenceChange(option.value)}
+                      className={`rounded-full px-3 py-1.5 transition-colors ${
+                        isActive
+                          ? isLightTheme
+                            ? 'bg-stone-950 text-[#faf7f0] shadow-sm'
+                            : 'bg-white text-stone-950 shadow-sm'
+                          : isLightTheme
+                            ? 'hover:bg-stone-950/[0.06] hover:text-stone-950'
+                            : 'hover:bg-white/[0.08] hover:text-white'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className={`text-xs ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>
+                {themePreference === 'system' ? `Following system: ${resolvedTheme}` : `Using ${resolvedTheme} mode`}
+              </p>
+            </div>
           </div>
         </div>
       </footer>

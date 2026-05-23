@@ -7,6 +7,7 @@ interface CalendarProps {
   onDateSelect: (date: Date) => void
   selectedDate: Date | null
   bookingsData: any[]
+  theme?: 'light' | 'dark'
   selectedGuideIds?: string[]
   selectedGuides?: Array<{ id: string; first_name: string; last_name: string }>
   availableGuides?: Array<{ id: string; first_name: string; last_name: string }>
@@ -24,6 +25,7 @@ export default function Calendar({
   onDateSelect,
   selectedDate,
   bookingsData,
+  theme = 'dark',
   selectedGuideIds = [],
   selectedGuides = [],
   availableGuides = [],
@@ -31,6 +33,7 @@ export default function Calendar({
   onGuideSelectionChange,
   showGuideAvailability = false
 }: CalendarProps) {
+  const isLightTheme = theme === 'light'
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [bookingsByDate, setBookingsByDate] = useState<Record<string, any>>({})
   const [monthBookings, setMonthBookings] = useState<any[]>([])
@@ -138,13 +141,21 @@ export default function Calendar({
     `${guide.first_name?.[0] || ''}${guide.last_name?.[0] || ''}`.toUpperCase()
 
   const guideColorClass = (guideId: string) => {
-    const colors = [
-      'bg-amber-300/20 text-amber-50 border-amber-200/30',
-      'bg-blue-300/20 text-blue-50 border-blue-200/30',
-      'bg-emerald-300/20 text-emerald-50 border-emerald-200/30',
-      'bg-purple-300/20 text-purple-50 border-purple-200/30',
-      'bg-rose-300/20 text-rose-50 border-rose-200/30'
-    ]
+    const colors = isLightTheme
+      ? [
+          'bg-amber-100 text-amber-900 border-amber-300/70',
+          'bg-blue-100 text-blue-900 border-blue-300/70',
+          'bg-emerald-100 text-emerald-900 border-emerald-300/70',
+          'bg-purple-100 text-purple-900 border-purple-300/70',
+          'bg-rose-100 text-rose-900 border-rose-300/70'
+        ]
+      : [
+          'bg-amber-300/20 text-amber-50 border-amber-200/30',
+          'bg-blue-300/20 text-blue-50 border-blue-200/30',
+          'bg-emerald-300/20 text-emerald-50 border-emerald-200/30',
+          'bg-purple-300/20 text-purple-50 border-purple-200/30',
+          'bg-rose-300/20 text-rose-50 border-rose-200/30'
+        ]
     const index = Math.max(0, selectedGuides.findIndex(guide => guide.id === guideId))
     return colors[index % colors.length]
   }
@@ -178,54 +189,78 @@ export default function Calendar({
 
     // iOS-style for both mobile and desktop - date at top, plus at bottom
     let classes = 'relative h-28 md:h-24 lg:h-28 flex flex-col transition-all duration-200 rounded-2xl '
-    classes += 'items-start justify-start p-1.5 md:p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950 '
+    classes += `items-start justify-start p-1.5 md:p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70 focus-visible:ring-offset-2 ${isLightTheme ? 'focus-visible:ring-offset-stone-100 ' : 'focus-visible:ring-offset-stone-950 '}`
     
     if (!isAvailable) {
-      classes += 'bg-white/[0.025] text-stone-700 cursor-not-allowed border border-white/[0.04]'
+      classes += isLightTheme
+        ? 'bg-stone-100/80 text-stone-400 cursor-not-allowed border border-stone-200/80'
+        : 'bg-white/[0.025] text-stone-700 cursor-not-allowed border border-white/[0.04]'
     } else if (isSelected) {
-      classes += 'bg-amber-100 text-stone-950 shadow-2xl shadow-amber-950/30 ring-2 ring-amber-200 ring-offset-2 ring-offset-[#050505] cursor-pointer'
+      classes += isLightTheme
+        ? 'bg-amber-200 text-stone-950 shadow-xl shadow-amber-900/10 ring-2 ring-amber-300 ring-offset-2 ring-offset-[#faf7f0] cursor-pointer'
+        : 'bg-amber-100 text-stone-950 shadow-2xl shadow-amber-950/30 ring-2 ring-amber-200 ring-offset-2 ring-offset-[#050505] cursor-pointer'
     } else if (hasBookings) {
-      classes += 'bg-emerald-300/14 border border-emerald-200/65 text-emerald-50 shadow-inner shadow-emerald-950/30 hover:bg-emerald-300/20 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer'
+      classes += isLightTheme
+        ? 'bg-emerald-100/90 border border-emerald-300/70 text-emerald-950 shadow-sm hover:bg-emerald-100 hover:-translate-y-0.5 hover:shadow-md cursor-pointer'
+        : 'bg-emerald-300/14 border border-emerald-200/65 text-emerald-50 shadow-inner shadow-emerald-950/30 hover:bg-emerald-300/20 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer'
     } else if (isToday) {
-      classes += 'bg-amber-300/14 border border-amber-200/70 text-amber-50 hover:bg-amber-300/20 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer'
+      classes += isLightTheme
+        ? 'bg-amber-100/90 border border-amber-300/80 text-amber-950 shadow-sm hover:bg-amber-100 hover:-translate-y-0.5 hover:shadow-md cursor-pointer'
+        : 'bg-amber-300/14 border border-amber-200/70 text-amber-50 hover:bg-amber-300/20 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer'
     } else {
-      classes += 'bg-white/[0.075] border border-white/[0.13] text-stone-100 hover:border-white/25 hover:bg-white/[0.11] hover:-translate-y-0.5 hover:shadow-md cursor-pointer'
+      classes += isLightTheme
+        ? 'bg-white/80 border border-stone-200/90 text-stone-700 shadow-sm hover:border-stone-300 hover:bg-white hover:-translate-y-0.5 hover:shadow-md cursor-pointer'
+        : 'bg-white/[0.075] border border-white/[0.13] text-stone-100 hover:border-white/25 hover:bg-white/[0.11] hover:-translate-y-0.5 hover:shadow-md cursor-pointer'
     }
 
     return classes
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#11100e] shadow-2xl shadow-black/30">
+    <div
+      className={`overflow-hidden rounded-3xl border shadow-2xl transition-colors duration-300 ${
+        isLightTheme
+          ? 'border-stone-200/80 bg-white/[0.82] shadow-stone-300/30'
+          : 'border-white/10 bg-[#11100e] shadow-black/30'
+      }`}
+    >
       {/* Month Header */}
-      <div className="flex h-[64px] items-center justify-between border-b border-white/10 bg-white/[0.045] px-4 md:h-[76px] md:px-8">
+      <div
+        className={`flex h-[64px] items-center justify-between border-b px-4 md:h-[76px] md:px-8 ${
+          isLightTheme ? 'border-stone-200/80 bg-stone-50/80' : 'border-white/10 bg-white/[0.045]'
+        }`}
+      >
         <button 
           onClick={() => changeMonth(-1)}
           aria-label="Previous month"
-          className="rounded-full border border-white/10 bg-white/[0.04] p-2 transition-colors hover:bg-white/10">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-stone-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          className={`rounded-full border p-2 transition-colors ${
+            isLightTheme ? 'border-stone-200 bg-white text-stone-600 hover:bg-stone-100' : 'border-white/10 bg-white/[0.04] text-stone-300 hover:bg-white/10'
+          }`}>
+          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
-        <h2 className="heading-font text-2xl font-light tracking-[-0.03em] text-white md:text-4xl">
+        <h2 className={`heading-font text-2xl font-light tracking-[-0.03em] md:text-4xl ${isLightTheme ? 'text-stone-900' : 'text-white'}`}>
           {format(currentMonth, 'MMMM yyyy')}
         </h2>
         <button 
           onClick={() => changeMonth(1)}
           aria-label="Next month"
-          className="rounded-full border border-white/10 bg-white/[0.04] p-2 transition-colors hover:bg-white/10">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-stone-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          className={`rounded-full border p-2 transition-colors ${
+            isLightTheme ? 'border-stone-200 bg-white text-stone-600 hover:bg-stone-100' : 'border-white/10 bg-white/[0.04] text-stone-300 hover:bg-white/10'
+          }`}>
+          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
         </button>
       </div>
 
       {showGuideAvailability && (
-        <div className="border-b border-white/10 bg-black/10 px-4 py-3 md:px-8">
+        <div className={`border-b px-4 py-3 md:px-8 ${isLightTheme ? 'border-stone-200/80 bg-white/[0.65]' : 'border-white/10 bg-black/10'}`}>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">Guide Preference</p>
-              <p className="mt-1 text-sm text-stone-400">
+              <p className={`text-[10px] font-bold uppercase tracking-[0.22em] ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>Guide Preference</p>
+              <p className={`mt-1 text-sm ${isLightTheme ? 'text-stone-600' : 'text-stone-400'}`}>
                 {selectedGuideIds.length === 0
                   ? 'Not specified. Showing all museum-open dates.'
                   : `Only showing dates available for ${selectedGuideIds.length} selected guide${selectedGuideIds.length === 1 ? '' : 's'}.`}
@@ -235,19 +270,27 @@ export default function Calendar({
               <button
                 type="button"
                 onClick={() => setGuideMenuOpen(open => !open)}
-                className="flex w-full cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/[0.06] md:min-w-[280px]"
+                className={`flex w-full cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors md:min-w-[280px] ${
+                  isLightTheme
+                    ? 'border-stone-200 bg-white text-stone-900 hover:bg-stone-50'
+                    : 'border-white/10 bg-black/25 text-white hover:bg-white/[0.06]'
+                }`}
               >
                 <span className="truncate">
                   {selectedGuideIds.length === 0
                     ? 'Guide not specified'
                     : selectedGuides.map(guide => guide.first_name).join(', ')}
                 </span>
-                <svg className={`h-4 w-4 shrink-0 text-stone-400 transition-transform ${guideMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`h-4 w-4 shrink-0 transition-transform ${guideMenuOpen ? 'rotate-180' : ''} ${isLightTheme ? 'text-stone-500' : 'text-stone-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </button>
               {guideMenuOpen && (
-              <div className="absolute right-0 z-30 mt-2 w-full min-w-[280px] overflow-hidden rounded-2xl border border-white/10 bg-[#11100e] p-2 shadow-2xl shadow-black/40">
+              <div
+                className={`absolute right-0 z-30 mt-2 w-full min-w-[280px] overflow-hidden rounded-2xl border p-2 shadow-2xl ${
+                  isLightTheme ? 'border-stone-200 bg-white shadow-stone-300/40' : 'border-white/10 bg-[#11100e] shadow-black/40'
+                }`}
+              >
                 <button
                   type="button"
                   onClick={() => {
@@ -256,22 +299,24 @@ export default function Calendar({
                   }}
                   className={`mb-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors ${
                     selectedGuideIds.length === 0
-                      ? 'bg-amber-200/15 text-amber-50'
-                      : 'text-stone-300 hover:bg-white/[0.06] hover:text-white'
+                      ? isLightTheme ? 'bg-amber-100 text-amber-950' : 'bg-amber-200/15 text-amber-50'
+                      : isLightTheme ? 'text-stone-700 hover:bg-stone-100 hover:text-stone-950' : 'text-stone-300 hover:bg-white/[0.06] hover:text-white'
                   }`}
                 >
                   <span>Not specified</span>
-                  <span className="text-xs text-stone-500">All dates</span>
+                  <span className={`text-xs ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>All dates</span>
                 </button>
                 <div className="relative">
                 <div
                   onScroll={handleGuideMenuScroll}
-                  className="max-h-56 overflow-y-auto pr-1 [scrollbar-color:rgba(245,245,244,0.28)_transparent] [scrollbar-width:thin]"
+                  className={`max-h-56 overflow-y-auto pr-1 [scrollbar-width:thin] ${
+                    isLightTheme ? '[scrollbar-color:rgba(120,113,108,0.35)_transparent]' : '[scrollbar-color:rgba(245,245,244,0.28)_transparent]'
+                  }`}
                 >
                   {isLoadingGuides ? (
-                    <div className="px-3 py-2 text-sm text-stone-500">Loading guides...</div>
+                    <div className={`px-3 py-2 text-sm ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>Loading guides...</div>
                   ) : availableGuides.length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-stone-500">No public guides available yet.</div>
+                    <div className={`px-3 py-2 text-sm ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>No public guides available yet.</div>
                   ) : (
                     availableGuides.map(guide => {
                       const selected = selectedGuideIds.includes(guide.id)
@@ -282,20 +327,24 @@ export default function Calendar({
                           onClick={() => toggleGuide(guide.id)}
                           className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors ${
                             selected
-                              ? 'bg-amber-200/15 text-amber-50'
-                              : 'text-stone-300 hover:bg-white/[0.06] hover:text-white'
+                              ? isLightTheme ? 'bg-amber-100 text-amber-950' : 'bg-amber-200/15 text-amber-50'
+                              : isLightTheme ? 'text-stone-700 hover:bg-stone-100 hover:text-stone-950' : 'text-stone-300 hover:bg-white/[0.06] hover:text-white'
                           }`}
                         >
                           <span>{guide.first_name} {guide.last_name}</span>
-                          <span className={`h-4 w-4 rounded border ${selected ? 'border-amber-100 bg-amber-100' : 'border-white/20'}`} />
+                          <span className={`h-4 w-4 rounded border ${selected ? 'border-amber-400 bg-amber-400' : isLightTheme ? 'border-stone-300' : 'border-white/20'}`} />
                         </button>
                       )
                     })
                   )}
                 </div>
                 {availableGuides.length > 5 && !guideMenuAtEnd && (
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-[#11100e] via-[#11100e]/85 to-transparent pb-1 pt-8">
-                    <svg className="h-4 w-4 animate-bounce text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div
+                    className={`pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t pb-1 pt-8 ${
+                      isLightTheme ? 'from-white via-white/85 to-transparent' : 'from-[#11100e] via-[#11100e]/85 to-transparent'
+                    }`}
+                  >
+                    <svg className={`h-4 w-4 animate-bounce ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                   </div>
@@ -308,7 +357,12 @@ export default function Calendar({
           {selectedGuideIds.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {selectedGuides.map(guide => (
-                <span key={guide.id} className="rounded-full border border-amber-200/25 bg-amber-200/10 px-3 py-1 text-xs font-semibold text-amber-50">
+                <span
+                  key={guide.id}
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                    isLightTheme ? 'border-amber-300/70 bg-amber-100 text-amber-950' : 'border-amber-200/25 bg-amber-200/10 text-amber-50'
+                  }`}
+                >
                   {guide.first_name} {guide.last_name}
                 </span>
               ))}
@@ -322,7 +376,7 @@ export default function Calendar({
         {/* Day Names */}
         <div className="grid grid-cols-7 gap-1 md:gap-4 mb-2 md:mb-4">
           {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
-            <div key={day} className="py-1 text-center text-[9px] font-bold uppercase tracking-[0.14em] text-stone-500 sm:tracking-[0.18em] md:py-2 md:text-xs">
+            <div key={day} className={`py-1 text-center text-[9px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] md:py-2 md:text-xs ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>
               <span className="hidden xl:inline">{day}</span>
               <span className="hidden sm:inline xl:hidden">{day.substring(0, 3)}</span>
               <span className="sm:hidden">{day.substring(0, 1)}</span>
@@ -369,7 +423,7 @@ export default function Calendar({
 
                 {/* Today Badge */}
                 {isToday && (
-                  <span className="absolute top-1 right-1 text-[7px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 bg-amber-500 text-white rounded-full uppercase tracking-wider shadow-sm">
+                  <span className="absolute top-1 right-1 text-[7px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 bg-amber-500 text-[#fffaf0] rounded-full uppercase tracking-wider shadow-sm">
                     Today
                   </span>
                 )}
@@ -391,36 +445,52 @@ export default function Calendar({
                           ))
                         ) : (
                           <span className={`rounded-full border px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide ${
-                            isSelected ? 'border-stone-950/20 bg-stone-950/10 text-stone-900' : 'border-emerald-200/25 bg-emerald-300/15 text-emerald-100'
+                            isSelected
+                              ? 'border-stone-950/20 bg-stone-950/10 text-stone-900'
+                              : isLightTheme
+                                ? 'border-emerald-300/70 bg-emerald-100 text-emerald-900'
+                                : 'border-emerald-200/25 bg-emerald-300/15 text-emerald-100'
                           }`}>
                             Guide available
                           </span>
                         )}
                         {showNamedGuides && guideAvailability.guides.length > 4 && (
-                          <span className="inline-flex min-w-6 items-center justify-center rounded-full border border-white/15 bg-white/10 px-1.5 py-0.5 text-[8px] font-bold text-stone-200">
+                          <span
+                            className={`inline-flex min-w-6 items-center justify-center rounded-full border px-1.5 py-0.5 text-[8px] font-bold ${
+                              isLightTheme ? 'border-stone-300 bg-white text-stone-600' : 'border-white/15 bg-white/10 text-stone-200'
+                            }`}
+                          >
                             +{guideAvailability.guides.length - 4}
                           </span>
                         )}
                       </div>
                     )}
-                    <div className={`flex h-7 w-7 items-center justify-center rounded-full border shadow-sm md:h-8 md:w-8 ${isSelected ? 'bg-stone-950/10 border-stone-950/20' : 'bg-white/10 border-white/15'}`}>
-                      <svg className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isSelected ? 'text-stone-950' : 'text-stone-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div
+                      className={`flex h-7 w-7 items-center justify-center rounded-full border shadow-sm md:h-8 md:w-8 ${
+                        isSelected
+                          ? 'bg-stone-950/10 border-stone-950/20'
+                          : isLightTheme
+                            ? 'bg-white border-stone-300'
+                            : 'bg-white/10 border-white/15'
+                      }`}
+                    >
+                      <svg className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isSelected ? 'text-stone-950' : isLightTheme ? 'text-stone-500' : 'text-stone-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/>
                       </svg>
                     </div>
                     {hasBookings && (
-                      <div className={`text-center text-[9px] md:text-[10px] font-semibold mt-1 ${isSelected ? 'text-stone-900' : 'text-emerald-200'}`}>
+                      <div className={`text-center text-[9px] md:text-[10px] font-semibold mt-1 ${isSelected ? 'text-stone-900' : isLightTheme ? 'text-emerald-800' : 'text-emerald-200'}`}>
                         {hasBookings.requestCount} {hasBookings.requestCount === 1 ? 'req' : 'reqs'}
                       </div>
                     )}
                     {!hasBookings && (
-                      <div className={`mt-1 hidden text-center text-[10px] font-medium md:block ${isSelected ? 'text-stone-800' : 'text-stone-500'}`}>
+                      <div className={`mt-1 hidden text-center text-[10px] font-medium md:block ${isSelected ? 'text-stone-800' : isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>
                         Available
                       </div>
                     )}
                   </div>
                 ) : requiresGuideAvailability && !isPast && isMuseumOpen ? (
-                  <div className="mt-auto w-full text-center text-[9px] font-semibold uppercase tracking-wide text-stone-600">
+                  <div className={`mt-auto w-full text-center text-[9px] font-semibold uppercase tracking-wide ${isLightTheme ? 'text-stone-400' : 'text-stone-600'}`}>
                     No guide
                   </div>
                 ) : null}
@@ -430,19 +500,27 @@ export default function Calendar({
         </div>
 
         {/* Legend */}
-        <div className="mt-4 border-t border-white/10 pt-4 md:mt-8 md:pt-5">
+        <div className={`mt-4 border-t pt-4 md:mt-8 md:pt-5 ${isLightTheme ? 'border-stone-200/80' : 'border-white/10'}`}>
           <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200/20 bg-emerald-300/10 px-3 py-1.5">
-                <div className="h-2.5 w-2.5 rounded-full border border-emerald-200/80 bg-emerald-300/30"></div>
-                <span className="text-[10px] uppercase tracking-wide text-emerald-100/85 md:text-xs">Has Requests</span>
+              <div
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${
+                  isLightTheme ? 'border-emerald-300/70 bg-emerald-100/80' : 'border-emerald-200/20 bg-emerald-300/10'
+                }`}
+              >
+                <div className={`h-2.5 w-2.5 rounded-full border ${isLightTheme ? 'border-emerald-500 bg-emerald-400' : 'border-emerald-200/80 bg-emerald-300/30'}`}></div>
+                <span className={`text-[10px] uppercase tracking-wide md:text-xs ${isLightTheme ? 'text-emerald-800' : 'text-emerald-100/85'}`}>Has Requests</span>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/20 bg-amber-300/10 px-3 py-1.5">
-                <div className="h-2.5 w-2.5 rounded-full bg-amber-100"></div>
-                <span className="text-[10px] uppercase tracking-wide text-amber-100/85 md:text-xs">Selected</span>
+              <div
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${
+                  isLightTheme ? 'border-amber-300/70 bg-amber-100/80' : 'border-amber-200/20 bg-amber-300/10'
+                }`}
+              >
+                <div className={`h-2.5 w-2.5 rounded-full ${isLightTheme ? 'bg-amber-400' : 'bg-amber-100'}`}></div>
+                <span className={`text-[10px] uppercase tracking-wide md:text-xs ${isLightTheme ? 'text-amber-800' : 'text-amber-100/85'}`}>Selected</span>
               </div>
             </div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500 md:text-xs">Museum Open: Tue-Sun</p>
+            <p className={`text-[10px] font-semibold uppercase tracking-[0.16em] md:text-xs ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>Museum Open: Tue-Sun</p>
           </div>
         </div>
       </div>

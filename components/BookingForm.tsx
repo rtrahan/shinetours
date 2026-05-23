@@ -7,6 +7,7 @@ interface BookingFormProps {
   selectedDate: Date
   availableGuides: any[]
   defaultPreferredGuideId?: string
+  theme?: 'light' | 'dark'
   onSuccess: () => void
 }
 
@@ -29,7 +30,8 @@ interface DateDetails {
   }>
 }
 
-export default function BookingForm({ selectedDate, availableGuides, defaultPreferredGuideId, onSuccess }: BookingFormProps) {
+export default function BookingForm({ selectedDate, availableGuides, defaultPreferredGuideId, theme = 'dark', onSuccess }: BookingFormProps) {
+  const isLightTheme = theme === 'light'
   const [groupSize, setGroupSize] = useState(1)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -131,51 +133,76 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
   }
 
   const maxGroupSize = 15 // Allow up to 15 people per request
+  const shellClass = isLightTheme
+    ? 'border-stone-200/80 bg-white/[0.86] shadow-stone-300/30'
+    : 'border-white/10 bg-[#11100e] shadow-black/30'
+  const eyebrowClass = isLightTheme ? 'text-amber-700' : 'text-amber-100/65'
+  const titleClass = isLightTheme ? 'text-stone-950' : 'text-white'
+  const bodyClass = isLightTheme ? 'text-stone-600' : 'text-stone-400'
+  const sectionClass = isLightTheme
+    ? 'rounded-2xl border border-stone-200/80 bg-white/[0.72] p-4'
+    : 'rounded-2xl border border-white/10 bg-white/[0.035] p-4'
+  const labelClass = isLightTheme
+    ? 'mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-600'
+    : 'mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300'
+  const inputClass = isLightTheme
+    ? 'w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-950 transition-all placeholder:text-stone-400 focus:border-amber-500/70 focus:outline-none focus:ring-2 focus:ring-amber-200/60'
+    : 'w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10'
+  const selectClass = `${inputClass} ${isLightTheme ? '[&>option]:bg-white [&>option]:text-stone-950' : '[&>option]:bg-stone-950'}`
+  const mutedClass = isLightTheme ? 'text-stone-500' : 'text-stone-500'
 
   return (
-    <div className="h-full rounded-3xl border border-white/10 bg-[#11100e] p-5 shadow-2xl shadow-black/30 md:p-6 lg:p-7">
+    <div className={`h-full rounded-3xl border p-5 shadow-2xl md:p-6 lg:p-7 ${shellClass}`}>
       <div className="mb-6">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-amber-100/65">
+        <p className={`mb-2 text-[10px] font-bold uppercase tracking-[0.24em] ${eyebrowClass}`}>
           Step 2
         </p>
-        <h2 className="heading-font mb-2 text-3xl font-light tracking-[-0.04em] text-white md:text-4xl">
+        <h2 className={`heading-font mb-2 text-3xl font-light tracking-[-0.04em] md:text-4xl ${titleClass}`}>
           Request a Tour
         </h2>
-        <p className="text-sm leading-6 text-stone-400">
+        <p className={`text-sm leading-6 ${bodyClass}`}>
           We will use these details to coordinate your group and submit the request to Yale.
         </p>
       </div>
 
       {/* Date Details Info Box */}
       {dateDetails && (
-        <div className="mb-6 overflow-hidden rounded-2xl border border-amber-100/15 bg-amber-100/[0.07] shadow-inner shadow-amber-950/20">
-          <div className="border-b border-amber-100/10 px-4 py-4 md:px-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-100/55">Selected Date</p>
-            <h3 className="heading-font mt-1 text-2xl font-light tracking-[-0.03em] text-white">
+        <div className={`mb-6 overflow-hidden rounded-2xl border shadow-inner ${
+          isLightTheme
+            ? 'border-amber-300/50 bg-amber-50/80 shadow-amber-900/5'
+            : 'border-amber-100/15 bg-amber-100/[0.07] shadow-amber-950/20'
+        }`}>
+          <div className={`border-b px-4 py-4 md:px-5 ${isLightTheme ? 'border-amber-300/40' : 'border-amber-100/10'}`}>
+            <p className={`text-[10px] font-bold uppercase tracking-[0.22em] ${isLightTheme ? 'text-amber-700' : 'text-amber-100/55'}`}>Selected Date</p>
+            <h3 className={`heading-font mt-1 text-2xl font-light tracking-[-0.03em] ${titleClass}`}>
               {format(selectedDate, 'EEEE, MMMM d')}
             </h3>
           </div>
-          <div className="space-y-3 px-4 py-4 text-sm text-stone-300 md:px-5">
+          <div className={`space-y-3 px-4 py-4 text-sm md:px-5 ${isLightTheme ? 'text-stone-600' : 'text-stone-300'}`}>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-white/10 bg-black/15 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-stone-500">Requests</p>
-                <p className="mt-1 text-lg font-semibold text-white">{dateDetails.requestCount}</p>
+              <div className={`rounded-xl border px-3 py-2 ${isLightTheme ? 'border-amber-200/70 bg-white/70' : 'border-white/10 bg-black/15'}`}>
+                <p className={`text-[10px] uppercase tracking-[0.18em] ${mutedClass}`}>Requests</p>
+                <p className={`mt-1 text-lg font-semibold ${titleClass}`}>{dateDetails.requestCount}</p>
               </div>
-              <div className="rounded-xl border border-white/10 bg-black/15 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-stone-500">Guests</p>
-                <p className="mt-1 text-lg font-semibold text-white">{dateDetails.totalPeople}</p>
+              <div className={`rounded-xl border px-3 py-2 ${isLightTheme ? 'border-amber-200/70 bg-white/70' : 'border-white/10 bg-black/15'}`}>
+                <p className={`text-[10px] uppercase tracking-[0.18em] ${mutedClass}`}>Guests</p>
+                <p className={`mt-1 text-lg font-semibold ${titleClass}`}>{dateDetails.totalPeople}</p>
               </div>
             </div>
             {dateDetails.groupsCount > 0 && (
-              <p className="text-xs leading-5 text-stone-400">
-                <span className="font-semibold text-stone-200">{dateDetails.groupsCount} tour group{dateDetails.groupsCount !== 1 ? 's' : ''}</span> already formed for this date.
+              <p className={`text-xs leading-5 ${bodyClass}`}>
+                <span className={`font-semibold ${isLightTheme ? 'text-stone-800' : 'text-stone-200'}`}>{dateDetails.groupsCount} tour group{dateDetails.groupsCount !== 1 ? 's' : ''}</span> already formed for this date.
               </p>
             )}
             {dateDetails.requestCount > 0 && (
               <button
                 type="button"
                 onClick={() => setShowParticipants(true)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber-100/15 bg-amber-100/10 px-3 py-2 text-xs font-semibold text-amber-50 transition-colors hover:bg-amber-100/15 hover:text-white"
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
+                  isLightTheme
+                    ? 'border-amber-300/60 bg-amber-100 text-amber-800 hover:bg-amber-200/70'
+                    : 'border-amber-100/15 bg-amber-100/10 text-amber-50 hover:bg-amber-100/15 hover:text-white'
+                }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -188,9 +215,9 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">Party</p>
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+        <div className={sectionClass}>
+          <p className={`mb-4 text-[10px] font-bold uppercase tracking-[0.22em] ${mutedClass}`}>Party</p>
+          <label className={labelClass}>
             Party Size
           </label>
           <input
@@ -200,19 +227,19 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
             value={groupSize}
             onChange={(e) => setGroupSize(parseInt(e.target.value))}
             required
-            className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10"
+            className={inputClass}
             placeholder={`1-${maxGroupSize}`}
           />
-          <p className="mt-2 text-[10px] text-stone-500">
+          <p className={`mt-2 text-[10px] ${mutedClass}`}>
             Max 15 guests per request
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">Contact</p>
+        <div className={sectionClass}>
+          <p className={`mb-4 text-[10px] font-bold uppercase tracking-[0.22em] ${mutedClass}`}>Contact</p>
           <div className="space-y-4">
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+              <label className={labelClass}>
                 Name
               </label>
               <input
@@ -221,12 +248,12 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
                 onChange={(e) => setName(e.target.value)}
                 required
                 placeholder="Your full name"
-                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+              <label className={labelClass}>
                 Email
               </label>
               <input
@@ -235,12 +262,12 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+              <label className={labelClass}>
                 Phone
               </label>
               <input
@@ -249,17 +276,17 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
                 onChange={(e) => setPhone(e.target.value)}
                 required
                 placeholder="Best phone number"
-                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10"
+                className={inputClass}
               />
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">Preferences</p>
+        <div className={sectionClass}>
+          <p className={`mb-4 text-[10px] font-bold uppercase tracking-[0.22em] ${mutedClass}`}>Preferences</p>
           <div className="space-y-4">
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
+              <label className={labelClass}>
                 Preferred Language
               </label>
               <select
@@ -269,7 +296,7 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
                   setPreferredGuideId('') // Reset guide selection when language changes
                 }}
                 required
-                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10 [&>option]:bg-stone-950"
+                className={selectClass}
               >
                 {availableLanguages.map(lang => (
                   <option key={lang} value={lang}>
@@ -277,17 +304,17 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
                   </option>
                 ))}
               </select>
-              <p className="mt-2 text-[10px] text-stone-500">Select your preferred tour language</p>
+              <p className={`mt-2 text-[10px] ${mutedClass}`}>Select your preferred tour language</p>
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300">
-                Preferred Tour Guide <span className="text-[10px] font-normal text-stone-500">(Optional)</span>
+              <label className={labelClass}>
+                Preferred Tour Guide <span className={`text-[10px] font-normal ${mutedClass}`}>(Optional)</span>
               </label>
               <select
                 value={preferredGuideId}
                 onChange={(e) => setPreferredGuideId(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10 [&>option]:bg-stone-950"
+                className={selectClass}
               >
                 <option value="">No Preference</option>
                 {filteredGuides.map(guide => (
@@ -296,7 +323,7 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
                   </option>
                 ))}
               </select>
-              <p className="mt-2 text-[10px] text-stone-500">
+              <p className={`mt-2 text-[10px] ${mutedClass}`}>
                 {filteredGuides.length === 0 
                   ? `No guides available for ${preferredLanguage} tours` 
                   : `Showing guides who speak ${preferredLanguage}`}
@@ -314,7 +341,11 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-2xl bg-white px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-stone-950 shadow-xl shadow-black/20 transition-all hover:-translate-y-0.5 hover:bg-stone-100 hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50"
+          className={`w-full rounded-2xl px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] shadow-xl transition-all hover:-translate-y-0.5 hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50 ${
+            isLightTheme
+              ? 'bg-stone-950 text-[#faf7f0] shadow-stone-300/30 hover:bg-stone-800'
+              : 'bg-white text-stone-950 shadow-black/20 hover:bg-stone-100'
+          }`}
         >
           {loading ? 'Submitting...' : 'Request Tour'}
         </button>
