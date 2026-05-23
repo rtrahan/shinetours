@@ -7,6 +7,7 @@ interface GallerySplatViewerProps {
   splatUrl?: string
   fallbackSrc?: string
   theme?: 'light' | 'dark'
+  onReady?: () => void
 }
 
 const BASE_CAMERA = {
@@ -19,11 +20,13 @@ export default function GallerySplatViewer({
   splatUrl = '/gaussians/20240917_yale.ksplat',
   fallbackSrc = '/20240917_yale.jpg',
   theme = 'dark',
+  onReady,
 }: GallerySplatViewerProps) {
   const stageRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
   const viewerRef = useRef<any>(null)
+  const onReadyRef = useRef(onReady)
   const orientationHandlerRef = useRef<((event: DeviceOrientationEvent) => void) | null>(null)
   const parallaxFrameRef = useRef(0)
   const scrollFrameRef = useRef(0)
@@ -47,6 +50,15 @@ export default function GallerySplatViewer({
     : 'bg-gradient-to-t from-stone-950/55 via-transparent to-stone-950/20'
   const sceneVerticalOffset = '5vh'
   const imageVerticalOffset = 38
+
+  useEffect(() => {
+    onReadyRef.current = onReady
+  }, [onReady])
+
+  const markReady = () => {
+    setIsReady(true)
+    onReadyRef.current?.()
+  }
 
   const setFixedCamera = () => {
     const viewer = viewerRef.current
@@ -226,6 +238,7 @@ export default function GallerySplatViewer({
 
     if (prefersReducedMotion) {
       setUseFallback(true)
+      onReadyRef.current?.()
       return
     }
 
@@ -270,7 +283,7 @@ export default function GallerySplatViewer({
 
         viewer.start()
         setFixedCamera()
-        setIsReady(true)
+        markReady()
 
         if (isMobile) {
           const DeviceOrientation = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
@@ -286,6 +299,7 @@ export default function GallerySplatViewer({
       } catch (error) {
         console.error('Failed to load gallery splat:', error)
         setUseFallback(true)
+        onReadyRef.current?.()
       }
     }
 

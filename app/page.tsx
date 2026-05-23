@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, type CSSProperties } from 'react'
 import dynamic from 'next/dynamic'
 import Calendar from '@/components/Calendar'
 import BookingForm from '@/components/BookingForm'
@@ -34,6 +34,9 @@ export default function Home() {
   const [staffUser, setStaffUser] = useState<{ is_admin: boolean } | null>(null)
   const [themePreference, setThemePreference] = useState<ThemePreference>('system')
   const [systemTheme, setSystemTheme] = useState<ResolvedTheme>('dark')
+  const [heroVisualReady, setHeroVisualReady] = useState(false)
+  const [heroCopyReady, setHeroCopyReady] = useState(false)
+  const [heroMenuReady, setHeroMenuReady] = useState(false)
 
   const resolvedTheme = themePreference === 'system' ? systemTheme : themePreference
   const isLightTheme = resolvedTheme === 'light'
@@ -75,6 +78,34 @@ export default function Home() {
       // The visible state should still update if storage is unavailable.
     }
   }
+
+  const handleHeroVisualReady = useCallback(() => {
+    setHeroVisualReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!heroVisualReady) return
+
+    const copyDelay = window.setTimeout(() => {
+      setHeroCopyReady(true)
+    }, 450)
+
+    return () => {
+      window.clearTimeout(copyDelay)
+    }
+  }, [heroVisualReady])
+
+  useEffect(() => {
+    if (!heroCopyReady) return
+
+    const menuDelay = window.setTimeout(() => {
+      setHeroMenuReady(true)
+    }, 1400)
+
+    return () => {
+      window.clearTimeout(menuDelay)
+    }
+  }, [heroCopyReady])
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date)
@@ -232,7 +263,11 @@ export default function Home() {
       {/* Header + Hero */}
       <section className={`relative overflow-hidden ${isLightTheme ? 'min-h-[92vh] bg-[#faf7f0] md:min-h-[96vh]' : 'min-h-[98vh] bg-[#050505] md:min-h-[104vh]'}`}>
         <div className={`absolute inset-0 ${isLightTheme ? 'bg-[#faf7f0]' : 'bg-[#050505]'}`}>
-          <GallerySplatViewer className={`${isLightTheme ? 'hero-viewer-fade-light' : 'hero-viewer-fade'} h-full w-full`} theme={resolvedTheme} />
+          <GallerySplatViewer
+            className={`${isLightTheme ? 'hero-viewer-fade-light' : 'hero-viewer-fade'} h-full w-full`}
+            theme={resolvedTheme}
+            onReady={handleHeroVisualReady}
+          />
         </div>
         <div
           className={`pointer-events-none absolute inset-0 z-10 ${
@@ -241,8 +276,23 @@ export default function Home() {
               : 'bg-[radial-gradient(circle_at_center,rgba(12,10,9,0.08)_0%,rgba(12,10,9,0.22)_54%,rgba(5,5,5,0.48)_100%)]'
           }`}
         />
+        <div
+          role="status"
+          aria-live="polite"
+          className={`pointer-events-none absolute inset-0 z-30 flex items-center justify-center px-4 pt-24 transition-opacity duration-500 ${
+            heroVisualReady ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          <div className="flex items-center justify-center rounded-full border border-white/20 bg-black/20 p-4 text-[#fffaf0] shadow-2xl shadow-black/20 backdrop-blur-md">
+            <svg className="hero-loading-ring h-10 w-10" viewBox="0 0 36 36" aria-hidden="true">
+              <circle className="text-white/20" cx="18" cy="18" r="14" fill="none" stroke="currentColor" strokeWidth="2" />
+              <circle className="hero-loading-ring__stroke text-[#fffaf0]" cx="18" cy="18" r="14" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+            </svg>
+            <span className="sr-only">Loading gallery scene</span>
+          </div>
+        </div>
 
-        <header className="absolute inset-x-0 top-4 z-40 px-4 md:top-6 md:px-8">
+        <header className={`hero-menu absolute inset-x-0 top-4 z-40 px-4 md:top-6 md:px-8 ${heroMenuReady ? 'hero-menu-ready' : ''}`}>
           <div className="mx-auto flex max-w-[1180px] items-center justify-between gap-4 rounded-full border border-white/15 bg-stone-950/25 px-4 py-3 shadow-2xl shadow-black/20 backdrop-blur-2xl md:px-5">
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10">
@@ -392,28 +442,45 @@ export default function Home() {
               }`}
             />
             <div
-              className={`hero-copy relative mx-auto max-w-5xl rounded-[2rem] px-4 py-6 md:px-10 md:py-8 ${
+              className={`hero-copy relative mx-auto max-w-5xl rounded-[2rem] px-4 py-6 md:px-10 md:py-8 ${heroCopyReady ? 'hero-copy-ready' : ''} ${
                 isLightTheme ? 'text-[#fffaf0]' : ''
               }`}
             >
-              <p className={`mb-5 text-[10px] font-bold uppercase tracking-[0.36em] md:text-xs ${isLightTheme ? 'text-[#fffaf0]/70' : 'text-white/55'}`}>
+              <p
+                className={`hero-reveal mb-5 text-[10px] font-bold uppercase tracking-[0.36em] md:text-xs ${isLightTheme ? 'text-[#fffaf0]/70' : 'text-white/55'}`}
+                style={{ '--hero-delay': '120ms' } as CSSProperties}
+              >
                 Yale University Art Gallery Tours
               </p>
 
-              <h1 className={`heading-font mx-auto max-w-5xl text-5xl font-medium drop-shadow-sm sm:text-6xl md:text-7xl lg:text-[5.5rem] leading-[0.92] tracking-[-0.035em] ${isLightTheme ? 'text-[#fffaf0]' : 'text-white'}`}>
+              <h1
+                className={`hero-reveal heading-font mx-auto max-w-5xl text-5xl font-medium drop-shadow-sm sm:text-6xl md:text-7xl lg:text-[5.5rem] leading-[0.92] tracking-[-0.035em] ${isLightTheme ? 'text-[#fffaf0]' : 'text-white'}`}
+                style={{ '--hero-delay': '240ms' } as CSSProperties}
+              >
                 Art, History, and<br className="hidden sm:block" /> the World of the Bible
               </h1>
 
               <div className="mx-auto mt-8 flex max-w-3xl items-center gap-4 md:mt-10">
-                <div className="h-px flex-1 bg-white/25" />
-                <p className={`heading-font max-w-2xl text-2xl font-normal italic leading-snug sm:text-3xl md:text-4xl tracking-[-0.01em] ${isLightTheme ? 'text-[#fffaf0]/95' : 'text-white/95'}`}>
+                <div className="hero-rule h-px flex-1 bg-white/25" style={{ '--hero-delay': '520ms' } as CSSProperties} />
+                <p
+                  className={`hero-reveal heading-font max-w-2xl text-2xl font-normal italic leading-snug sm:text-3xl md:text-4xl tracking-[-0.01em] ${isLightTheme ? 'text-[#fffaf0]/95' : 'text-white/95'}`}
+                  style={{ '--hero-delay': '420ms' } as CSSProperties}
+                >
                   “And those having insight will shine”
                 </p>
-                <div className="h-px flex-1 bg-white/25" />
+                <div className="hero-rule h-px flex-1 bg-white/25" style={{ '--hero-delay': '520ms' } as CSSProperties} />
               </div>
-              <p className={`mt-3 text-xs font-semibold uppercase tracking-[0.24em] md:text-sm ${isLightTheme ? 'text-[#fffaf0]/60' : 'text-white/45'}`}>Daniel 12:3</p>
+              <p
+                className={`hero-reveal mt-3 text-xs font-semibold uppercase tracking-[0.24em] md:text-sm ${isLightTheme ? 'text-[#fffaf0]/60' : 'text-white/45'}`}
+                style={{ '--hero-delay': '560ms' } as CSSProperties}
+              >
+                Daniel 12:3
+              </p>
 
-              <div className={`mx-auto mt-7 max-w-2xl text-sm leading-7 md:mt-8 md:text-base ${isLightTheme ? 'text-[#fffaf0]/80' : 'text-white/65'}`}>
+              <div
+                className={`hero-reveal mx-auto mt-7 max-w-2xl text-sm leading-7 md:mt-8 md:text-base ${isLightTheme ? 'text-[#fffaf0]/80' : 'text-white/65'}`}
+                style={{ '--hero-delay': '700ms' } as CSSProperties}
+              >
                 A guided look at how art, archaeology, and the ancient world illuminate the Scriptures.
               </div>
 
@@ -421,7 +488,8 @@ export default function Home() {
                 onClick={() => {
                   document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' })
                 }}
-                className="group mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-stone-950 shadow-xl transition-all hover:-translate-y-0.5 hover:bg-stone-100 hover:shadow-2xl md:mt-10 md:px-9 md:py-4 md:text-base"
+                className="hero-reveal group mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-stone-950 shadow-xl transition-all hover:-translate-y-0.5 hover:bg-stone-100 hover:shadow-2xl md:mt-10 md:px-9 md:py-4 md:text-base"
+                style={{ '--hero-delay': '840ms' } as CSSProperties}
               >
                 Book a Tour
                 <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
