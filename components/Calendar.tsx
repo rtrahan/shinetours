@@ -188,8 +188,8 @@ export default function Calendar({
     const isAvailable = !isPast && isMuseumOpen && (!requiresGuideAvailability || hasGuideAvailability)
 
     // iOS-style for both mobile and desktop - date at top, plus at bottom
-    let classes = 'relative h-28 md:h-24 lg:h-28 flex flex-col transition-all duration-200 rounded-2xl '
-    classes += `items-start justify-start p-1.5 md:p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70 focus-visible:ring-offset-2 ${isLightTheme ? 'focus-visible:ring-offset-stone-100 ' : 'focus-visible:ring-offset-stone-950 '}`
+    let classes = 'relative h-24 md:h-[4.5rem] lg:h-[4.75rem] flex flex-col transition-all duration-200 rounded-xl '
+    classes += `items-start justify-start p-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70 focus-visible:ring-offset-2 ${isLightTheme ? 'focus-visible:ring-offset-stone-100 ' : 'focus-visible:ring-offset-stone-950 '}`
     
     if (!isAvailable) {
       classes += isLightTheme
@@ -226,41 +226,41 @@ export default function Calendar({
     >
       {/* Month Header */}
       <div
-        className={`flex h-[64px] items-center justify-between border-b px-4 md:h-[76px] md:px-8 ${
+        className={`flex h-[54px] items-center justify-between border-b px-4 md:h-14 md:px-5 ${
           isLightTheme ? 'border-stone-200/80 bg-stone-50/80' : 'border-white/10 bg-white/[0.045]'
         }`}
       >
         <button 
           onClick={() => changeMonth(-1)}
           aria-label="Previous month"
-          className={`rounded-full border p-2 transition-colors ${
+          className={`rounded-full border p-1.5 transition-colors ${
             isLightTheme ? 'border-stone-200 bg-white text-stone-600 hover:bg-stone-100' : 'border-white/10 bg-white/[0.04] text-stone-300 hover:bg-white/10'
           }`}>
-          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
-        <h2 className={`heading-font text-2xl font-light tracking-[-0.03em] md:text-4xl ${isLightTheme ? 'text-stone-900' : 'text-white'}`}>
+        <h2 className={`heading-font text-2xl font-light tracking-[-0.03em] md:text-[1.7rem] ${isLightTheme ? 'text-stone-900' : 'text-white'}`}>
           {format(currentMonth, 'MMMM yyyy')}
         </h2>
         <button 
           onClick={() => changeMonth(1)}
           aria-label="Next month"
-          className={`rounded-full border p-2 transition-colors ${
+          className={`rounded-full border p-1.5 transition-colors ${
             isLightTheme ? 'border-stone-200 bg-white text-stone-600 hover:bg-stone-100' : 'border-white/10 bg-white/[0.04] text-stone-300 hover:bg-white/10'
           }`}>
-          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
         </button>
       </div>
 
       {showGuideAvailability && (
-        <div className={`border-b px-4 py-3 md:px-8 ${isLightTheme ? 'border-stone-200/80 bg-white/[0.65]' : 'border-white/10 bg-black/10'}`}>
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className={`border-b px-4 py-2 md:px-5 ${isLightTheme ? 'border-stone-200/80 bg-white/[0.65]' : 'border-white/10 bg-black/10'}`}>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
               <p className={`text-[10px] font-bold uppercase tracking-[0.22em] ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>Guide Preference</p>
-              <p className={`mt-1 text-sm ${isLightTheme ? 'text-stone-600' : 'text-stone-400'}`}>
+              <p className={`mt-0.5 text-xs leading-4 md:text-sm ${isLightTheme ? 'text-stone-600' : 'text-stone-400'}`}>
                 {selectedGuideIds.length === 0
                   ? 'Not specified. Showing all museum-open dates.'
                   : `Only showing dates available for ${selectedGuideIds.length} selected guide${selectedGuideIds.length === 1 ? '' : 's'}.`}
@@ -270,7 +270,7 @@ export default function Calendar({
               <button
                 type="button"
                 onClick={() => setGuideMenuOpen(open => !open)}
-                className={`flex w-full cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors md:min-w-[280px] ${
+                className={`flex w-full cursor-pointer list-none items-center justify-between gap-3 rounded-xl border px-3.5 py-2 text-sm font-semibold transition-colors md:min-w-[240px] ${
                   isLightTheme
                     ? 'border-stone-200 bg-white text-stone-900 hover:bg-stone-50'
                     : 'border-white/10 bg-black/25 text-white hover:bg-white/[0.06]'
@@ -372,11 +372,11 @@ export default function Calendar({
       )}
 
       {/* Calendar Grid */}
-      <div className="p-3 md:p-6 lg:p-8">
+      <div className="p-3 md:p-3.5 lg:p-4">
         {/* Day Names */}
-        <div className="grid grid-cols-7 gap-1 md:gap-4 mb-2 md:mb-4">
+        <div className="mb-2 grid grid-cols-7 gap-1 md:mb-2 md:gap-1.5 lg:gap-2">
           {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
-            <div key={day} className={`py-1 text-center text-[9px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] md:py-2 md:text-xs ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>
+            <div key={day} className={`py-1 text-center text-[9px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] md:py-1 md:text-[10px] ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>
               <span className="hidden xl:inline">{day}</span>
               <span className="hidden sm:inline xl:hidden">{day.substring(0, 3)}</span>
               <span className="sm:hidden">{day.substring(0, 1)}</span>
@@ -385,10 +385,10 @@ export default function Calendar({
         </div>
 
         {/* Days Grid */}
-        <div className="grid grid-cols-7 gap-1 md:gap-4">
+        <div className="grid grid-cols-7 gap-1 md:gap-1.5 lg:gap-2">
           {/* Empty cells for days before month starts */}
           {Array.from({ length: startDay }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-28 md:h-24 lg:h-28"></div>
+            <div key={`empty-${i}`} className="h-24 md:h-[4.5rem] lg:h-[4.75rem]"></div>
           ))}
 
           {/* Days of month */}
@@ -416,14 +416,14 @@ export default function Calendar({
               >
                 {/* Day Number - always at top */}
                 <div className="w-full mb-auto">
-                  <span className="heading-font text-lg md:text-xl lg:text-2xl font-light">
+                  <span className="heading-font text-lg font-light">
                     {format(date, 'd')}
                   </span>
                 </div>
 
                 {/* Today Badge */}
                 {isToday && (
-                  <span className="absolute top-1 right-1 text-[7px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 bg-amber-500 text-[#fffaf0] rounded-full uppercase tracking-wider shadow-sm">
+                  <span className="absolute right-1 top-1 rounded-full bg-amber-500 px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-wider text-[#fffaf0] shadow-sm">
                     Today
                   </span>
                 )}
@@ -466,7 +466,7 @@ export default function Calendar({
                       </div>
                     )}
                     <div
-                      className={`flex h-7 w-7 items-center justify-center rounded-full border shadow-sm md:h-8 md:w-8 ${
+                      className={`flex h-6 w-6 items-center justify-center rounded-full border shadow-sm ${
                         isSelected
                           ? 'bg-stone-950/10 border-stone-950/20'
                           : isLightTheme
@@ -474,17 +474,17 @@ export default function Calendar({
                             : 'bg-white/10 border-white/15'
                       }`}
                     >
-                      <svg className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isSelected ? 'text-stone-950' : isLightTheme ? 'text-stone-500' : 'text-stone-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`h-3 w-3 ${isSelected ? 'text-stone-950' : isLightTheme ? 'text-stone-500' : 'text-stone-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/>
                       </svg>
                     </div>
                     {hasBookings && (
-                      <div className={`text-center text-[9px] md:text-[10px] font-semibold mt-1 ${isSelected ? 'text-stone-900' : isLightTheme ? 'text-emerald-800' : 'text-emerald-200'}`}>
+                      <div className={`mt-0.5 text-center text-[9px] font-semibold ${isSelected ? 'text-stone-900' : isLightTheme ? 'text-emerald-800' : 'text-emerald-200'}`}>
                         {hasBookings.requestCount} {hasBookings.requestCount === 1 ? 'req' : 'reqs'}
                       </div>
                     )}
                     {!hasBookings && (
-                      <div className={`mt-1 hidden text-center text-[10px] font-medium md:block ${isSelected ? 'text-stone-800' : isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>
+                      <div className={`mt-1 hidden text-center text-[10px] font-medium ${isSelected ? 'text-stone-800' : isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>
                         Available
                       </div>
                     )}
@@ -500,24 +500,24 @@ export default function Calendar({
         </div>
 
         {/* Legend */}
-        <div className={`mt-4 border-t pt-4 md:mt-8 md:pt-5 ${isLightTheme ? 'border-stone-200/80' : 'border-white/10'}`}>
-          <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
+        <div className={`mt-3 border-t pt-3 ${isLightTheme ? 'border-stone-200/80' : 'border-white/10'}`}>
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-wrap items-center gap-2">
               <div
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${
+                className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 ${
                   isLightTheme ? 'border-emerald-300/70 bg-emerald-100/80' : 'border-emerald-200/20 bg-emerald-300/10'
                 }`}
               >
                 <div className={`h-2.5 w-2.5 rounded-full border ${isLightTheme ? 'border-emerald-500 bg-emerald-400' : 'border-emerald-200/80 bg-emerald-300/30'}`}></div>
-                <span className={`text-[10px] uppercase tracking-wide md:text-xs ${isLightTheme ? 'text-emerald-800' : 'text-emerald-100/85'}`}>Has Requests</span>
+                <span className={`text-[10px] uppercase tracking-wide ${isLightTheme ? 'text-emerald-800' : 'text-emerald-100/85'}`}>Has Requests</span>
               </div>
               <div
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${
+                className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 ${
                   isLightTheme ? 'border-amber-300/70 bg-amber-100/80' : 'border-amber-200/20 bg-amber-300/10'
                 }`}
               >
                 <div className={`h-2.5 w-2.5 rounded-full ${isLightTheme ? 'bg-amber-400' : 'bg-amber-100'}`}></div>
-                <span className={`text-[10px] uppercase tracking-wide md:text-xs ${isLightTheme ? 'text-amber-800' : 'text-amber-100/85'}`}>Selected</span>
+                <span className={`text-[10px] uppercase tracking-wide ${isLightTheme ? 'text-amber-800' : 'text-amber-100/85'}`}>Selected</span>
               </div>
             </div>
             <p className={`text-[10px] font-semibold uppercase tracking-[0.16em] md:text-xs ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>Museum Open: Tue-Sun</p>

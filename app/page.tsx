@@ -510,33 +510,33 @@ export default function Home() {
 
       <div
         className={`relative overflow-hidden px-4 transition-colors duration-300 md:px-8 ${
-          isLightTheme ? 'mt-0 bg-[#faf7f0] pt-24 pb-0 md:pt-28 md:pb-0' : 'mt-0 bg-[#050505] pt-24 pb-12 md:pt-28 md:pb-16'
+          isLightTheme ? 'mt-0 bg-[#faf7f0] pt-16 pb-0 md:pt-20 md:pb-0' : 'mt-0 bg-[#050505] pt-16 pb-12 md:pt-20 md:pb-16'
         }`}
       >
         <div className="pointer-events-none absolute left-[-12%] top-48 h-80 w-80 rounded-full bg-amber-200/5 blur-3xl" />
         <div className="pointer-events-none absolute right-[-10%] top-[34rem] h-96 w-96 rounded-full bg-emerald-300/5 blur-3xl" />
         <div className="relative mx-auto w-full max-w-[1600px]">
           {/* Booking Section */}
-          <div className="mx-auto mb-7 max-w-[1600px] md:mb-9">
-            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div className="mx-auto mb-4 max-w-[1600px] md:mb-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="mb-3 inline-flex rounded-full border border-amber-200/15 bg-amber-200/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-amber-100/70">
+                <p className="mb-1.5 inline-flex rounded-full border border-amber-200/15 bg-amber-200/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-amber-100/70">
                   Step 1
                 </p>
-                <h2 className="heading-font text-4xl font-light leading-none tracking-[-0.04em] text-white md:text-5xl">
+                <h2 className="heading-font text-4xl font-light leading-none tracking-[-0.04em] text-white md:text-[2.5rem]">
                   Choose a Date
                 </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-400 md:text-base">
+                <p className="mt-1.5 max-w-2xl text-sm leading-5 text-stone-400">
                   Select an available museum day, then share your party details so we can submit the request to Yale.
                 </p>
               </div>
-              <div className="hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right md:block">
+              <div className="hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-right md:block">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">Museum Days</p>
                 <p className="mt-1 text-sm font-medium text-stone-200">Tuesday through Sunday</p>
               </div>
             </div>
           </div>
-          <div id="booking-section" className="mx-auto grid max-w-[1600px] scroll-mt-20 grid-cols-1 gap-7 md:grid-cols-5 md:items-start md:gap-8">
+          <div id="booking-section" className="mx-auto grid max-w-[1600px] scroll-mt-20 grid-cols-1 gap-5 md:grid-cols-5 md:items-start md:gap-5">
             {/* Calendar - Takes 3 columns on desktop, full width on mobile */}
             <div className="md:col-span-3">
               <Calendar 
@@ -564,15 +564,15 @@ export default function Home() {
                   onSuccess={handleBookingSuccess}
                 />
               ) : (
-                <div className="flex h-full min-h-[320px] items-center justify-center rounded-3xl border border-white/10 bg-white/[0.055] p-8 shadow-2xl shadow-black/20 backdrop-blur-sm md:p-10">
+                <div className="flex h-full min-h-[220px] items-center justify-center rounded-3xl border border-white/10 bg-white/[0.055] p-6 shadow-2xl shadow-black/20 backdrop-blur-sm md:min-h-[240px] md:p-7">
                   <div className="text-center max-w-sm">
-                    <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/10 text-stone-300">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/10 text-stone-300">
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                       </svg>
                     </div>
-                    <h3 className="heading-font mb-2 text-3xl font-light tracking-[-0.03em] text-white">Select a Date</h3>
-                    <p className="text-sm leading-relaxed text-stone-400">
+                    <h3 className="heading-font mb-1.5 text-2xl font-light tracking-[-0.03em] text-white md:text-3xl">Select a Date</h3>
+                    <p className="text-sm leading-5 text-stone-400">
                       Pick an available day from the calendar to open the tour request form.
                     </p>
                   </div>

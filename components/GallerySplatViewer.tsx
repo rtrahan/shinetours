@@ -35,7 +35,7 @@ export default function GallerySplatViewer({
   const pointerCurrentRef = useRef({ x: 0, y: 0 })
   const [isReady, setIsReady] = useState(false)
   const [useFallback, setUseFallback] = useState(false)
-  const [needsMotionTap, setNeedsMotionTap] = useState(false)
+  const [awaitingMotionGesture, setAwaitingMotionGesture] = useState(false)
   const isLightTheme = theme === 'light'
   const viewerBackground = isLightTheme ? '#faf7f0' : '#0c0a09'
   const stageBackgroundClass = isLightTheme ? 'bg-[#faf7f0]' : 'bg-stone-950'
@@ -122,7 +122,7 @@ export default function GallerySplatViewer({
     }
 
     window.addEventListener('deviceorientation', orientationHandlerRef.current, true)
-    setNeedsMotionTap(false)
+    setAwaitingMotionGesture(false)
     return true
   }
 
@@ -216,6 +216,31 @@ export default function GallerySplatViewer({
   }, [])
 
   useEffect(() => {
+    if (!awaitingMotionGesture) return
+
+    let hasRequestedPermission = false
+
+    const requestMotionPermission = () => {
+      if (hasRequestedPermission) return
+      hasRequestedPermission = true
+
+      void enableDeviceMotion().finally(() => {
+        setAwaitingMotionGesture(false)
+      })
+    }
+
+    window.addEventListener('touchmove', requestMotionPermission, { passive: true, once: true })
+    window.addEventListener('wheel', requestMotionPermission, { passive: true, once: true })
+    window.addEventListener('scroll', requestMotionPermission, { passive: true, once: true })
+
+    return () => {
+      window.removeEventListener('touchmove', requestMotionPermission)
+      window.removeEventListener('wheel', requestMotionPermission)
+      window.removeEventListener('scroll', requestMotionPermission)
+    }
+  }, [awaitingMotionGesture])
+
+  useEffect(() => {
     if (stageRef.current) {
       stageRef.current.style.backgroundColor = viewerBackground
     }
@@ -291,7 +316,7 @@ export default function GallerySplatViewer({
           }
 
           if (typeof DeviceOrientation?.requestPermission === 'function') {
-            setNeedsMotionTap(true)
+            setAwaitingMotionGesture(true)
           } else {
             await enableDeviceMotion()
           }
@@ -351,17 +376,6 @@ export default function GallerySplatViewer({
       />
       <div className={`pointer-events-none absolute inset-0 ${vignetteClass}`} />
       <div className={`pointer-events-none absolute inset-0 ${edgeFadeClass}`} />
-      {needsMotionTap && (
-        <button
-          type="button"
-          onClick={() => {
-            void enableDeviceMotion()
-          }}
-          className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/30 bg-black/35 px-4 py-2 text-[11px] uppercase tracking-[0.16em] text-white/90 backdrop-blur-sm md:hidden"
-        >
-          Tap to enable motion
-        </button>
-      )}
     </div>
   )
 }

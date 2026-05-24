@@ -140,53 +140,53 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
   const titleClass = isLightTheme ? 'text-stone-950' : 'text-white'
   const bodyClass = isLightTheme ? 'text-stone-600' : 'text-stone-400'
   const sectionClass = isLightTheme
-    ? 'rounded-2xl border border-stone-200/80 bg-white/[0.72] p-4'
-    : 'rounded-2xl border border-white/10 bg-white/[0.035] p-4'
+    ? 'rounded-xl border border-stone-200/80 bg-white/[0.72] p-3'
+    : 'rounded-xl border border-white/10 bg-white/[0.035] p-3'
   const labelClass = isLightTheme
-    ? 'mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-600'
-    : 'mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-300'
+    ? 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-stone-600'
+    : 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-stone-300'
   const inputClass = isLightTheme
-    ? 'w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-950 transition-all placeholder:text-stone-400 focus:border-amber-500/70 focus:outline-none focus:ring-2 focus:ring-amber-200/60'
-    : 'w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10'
+    ? 'w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2 text-sm text-stone-950 transition-all placeholder:text-stone-400 focus:border-amber-500/70 focus:outline-none focus:ring-2 focus:ring-amber-200/60'
+    : 'w-full rounded-xl border border-white/10 bg-black/25 px-3.5 py-2 text-sm text-white transition-all placeholder:text-stone-600 focus:border-amber-200/70 focus:outline-none focus:ring-2 focus:ring-amber-200/10'
   const selectClass = `${inputClass} ${isLightTheme ? '[&>option]:bg-white [&>option]:text-stone-950' : '[&>option]:bg-stone-950'}`
   const mutedClass = isLightTheme ? 'text-stone-500' : 'text-stone-500'
 
   return (
-    <div className={`h-full rounded-3xl border p-5 shadow-2xl md:p-6 lg:p-7 ${shellClass}`}>
-      <div className="mb-6">
-        <p className={`mb-2 text-[10px] font-bold uppercase tracking-[0.24em] ${eyebrowClass}`}>
+    <div className={`h-full rounded-3xl border p-3.5 shadow-2xl md:p-4 ${shellClass}`}>
+      <div className="mb-3">
+        <p className={`mb-1.5 text-[10px] font-bold uppercase tracking-[0.24em] ${eyebrowClass}`}>
           Step 2
         </p>
-        <h2 className={`heading-font mb-2 text-3xl font-light tracking-[-0.04em] md:text-4xl ${titleClass}`}>
+        <h2 className={`heading-font mb-1.5 text-3xl font-light tracking-[-0.04em] md:text-[1.85rem] ${titleClass}`}>
           Request a Tour
         </h2>
-        <p className={`text-sm leading-6 ${bodyClass}`}>
+        <p className={`text-xs leading-5 md:text-sm ${bodyClass}`}>
           We will use these details to coordinate your group and submit the request to Yale.
         </p>
       </div>
 
       {/* Date Details Info Box */}
       {dateDetails && (
-        <div className={`mb-6 overflow-hidden rounded-2xl border shadow-inner ${
+        <div className={`mb-3.5 overflow-hidden rounded-xl border shadow-inner ${
           isLightTheme
             ? 'border-amber-300/50 bg-amber-50/80 shadow-amber-900/5'
             : 'border-amber-100/15 bg-amber-100/[0.07] shadow-amber-950/20'
         }`}>
-          <div className={`border-b px-4 py-4 md:px-5 ${isLightTheme ? 'border-amber-300/40' : 'border-amber-100/10'}`}>
+          <div className={`border-b px-3.5 py-2.5 ${isLightTheme ? 'border-amber-300/40' : 'border-amber-100/10'}`}>
             <p className={`text-[10px] font-bold uppercase tracking-[0.22em] ${isLightTheme ? 'text-amber-700' : 'text-amber-100/55'}`}>Selected Date</p>
-            <h3 className={`heading-font mt-1 text-2xl font-light tracking-[-0.03em] ${titleClass}`}>
+            <h3 className={`heading-font mt-1 text-xl font-light tracking-[-0.03em] ${titleClass}`}>
               {format(selectedDate, 'EEEE, MMMM d')}
             </h3>
           </div>
-          <div className={`space-y-3 px-4 py-4 text-sm md:px-5 ${isLightTheme ? 'text-stone-600' : 'text-stone-300'}`}>
-            <div className="grid grid-cols-2 gap-3">
-              <div className={`rounded-xl border px-3 py-2 ${isLightTheme ? 'border-amber-200/70 bg-white/70' : 'border-white/10 bg-black/15'}`}>
+          <div className={`space-y-2 px-3.5 py-2.5 text-sm ${isLightTheme ? 'text-stone-600' : 'text-stone-300'}`}>
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className={`rounded-xl border px-3 py-1.5 ${isLightTheme ? 'border-amber-200/70 bg-white/70' : 'border-white/10 bg-black/15'}`}>
                 <p className={`text-[10px] uppercase tracking-[0.18em] ${mutedClass}`}>Requests</p>
-                <p className={`mt-1 text-lg font-semibold ${titleClass}`}>{dateDetails.requestCount}</p>
+                <p className={`mt-0.5 text-base font-semibold ${titleClass}`}>{dateDetails.requestCount}</p>
               </div>
-              <div className={`rounded-xl border px-3 py-2 ${isLightTheme ? 'border-amber-200/70 bg-white/70' : 'border-white/10 bg-black/15'}`}>
+              <div className={`rounded-xl border px-3 py-1.5 ${isLightTheme ? 'border-amber-200/70 bg-white/70' : 'border-white/10 bg-black/15'}`}>
                 <p className={`text-[10px] uppercase tracking-[0.18em] ${mutedClass}`}>Guests</p>
-                <p className={`mt-1 text-lg font-semibold ${titleClass}`}>{dateDetails.totalPeople}</p>
+                <p className={`mt-0.5 text-base font-semibold ${titleClass}`}>{dateDetails.totalPeople}</p>
               </div>
             </div>
             {dateDetails.groupsCount > 0 && (
@@ -198,7 +198,7 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
               <button
                 type="button"
                 onClick={() => setShowParticipants(true)}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                   isLightTheme
                     ? 'border-amber-300/60 bg-amber-100 text-amber-800 hover:bg-amber-200/70'
                     : 'border-amber-100/15 bg-amber-100/10 text-amber-50 hover:bg-amber-100/15 hover:text-white'
@@ -214,9 +214,9 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <div className={sectionClass}>
-          <p className={`mb-4 text-[10px] font-bold uppercase tracking-[0.22em] ${mutedClass}`}>Party</p>
+          <p className={`mb-2.5 text-[10px] font-bold uppercase tracking-[0.22em] ${mutedClass}`}>Party</p>
           <label className={labelClass}>
             Party Size
           </label>
@@ -230,14 +230,14 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
             className={inputClass}
             placeholder={`1-${maxGroupSize}`}
           />
-          <p className={`mt-2 text-[10px] ${mutedClass}`}>
+          <p className={`mt-1.5 text-[10px] ${mutedClass}`}>
             Max 15 guests per request
           </p>
         </div>
 
         <div className={sectionClass}>
-          <p className={`mb-4 text-[10px] font-bold uppercase tracking-[0.22em] ${mutedClass}`}>Contact</p>
-          <div className="space-y-4">
+          <p className={`mb-2.5 text-[10px] font-bold uppercase tracking-[0.22em] ${mutedClass}`}>Contact</p>
+          <div className="space-y-2.5">
             <div>
               <label className={labelClass}>
                 Name
@@ -283,8 +283,8 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
         </div>
 
         <div className={sectionClass}>
-          <p className={`mb-4 text-[10px] font-bold uppercase tracking-[0.22em] ${mutedClass}`}>Preferences</p>
-          <div className="space-y-4">
+          <p className={`mb-2.5 text-[10px] font-bold uppercase tracking-[0.22em] ${mutedClass}`}>Preferences</p>
+          <div className="space-y-2.5">
             <div>
               <label className={labelClass}>
                 Preferred Language
@@ -341,7 +341,7 @@ export default function BookingForm({ selectedDate, availableGuides, defaultPref
         <button
           type="submit"
           disabled={loading}
-          className={`w-full rounded-2xl px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] shadow-xl transition-all hover:-translate-y-0.5 hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`w-full rounded-2xl px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] shadow-xl transition-all hover:-translate-y-0.5 hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50 ${
             isLightTheme
               ? 'bg-stone-950 text-[#faf7f0] shadow-stone-300/30 hover:bg-stone-800'
               : 'bg-white text-stone-950 shadow-black/20 hover:bg-stone-100'
