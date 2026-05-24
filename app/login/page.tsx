@@ -2,17 +2,22 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
+  const supabase = createClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setMessage('')
     setLoading(true)
 
     try {
@@ -44,6 +49,32 @@ export default function LoginPage() {
     }
   }
 
+  const handlePasswordReset = async () => {
+    setError('')
+    setMessage('')
+
+    if (!email) {
+      setError('Enter your email address first, then request a password reset.')
+      return
+    }
+
+    setResetLoading(true)
+
+    const redirectTo = `${window.location.origin}/update-password`
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    })
+
+    setResetLoading(false)
+
+    if (resetError) {
+      setError(resetError.message)
+      return
+    }
+
+    setMessage('Check your email for a link to set a new password.')
+  }
+
   return (
     <div className="min-h-screen bg-stone-50 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
@@ -59,6 +90,12 @@ export default function LoginPage() {
             {error && (
               <div className="bg-red-50 border-l-4 border-red-600 p-4">
                 <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
+            {message && (
+              <div className="border-l-4 border-l-emerald-600 bg-emerald-50 p-4">
+                <p className="text-sm text-emerald-800">{message}</p>
               </div>
             )}
 
@@ -96,6 +133,15 @@ export default function LoginPage() {
               className="w-full bg-stone-800 text-white font-semibold py-4 px-6 hover:bg-stone-900 transition-all uppercase tracking-widest text-xs rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Logging in...' : 'Login'}
+            </button>
+
+            <button
+              type="button"
+              onClick={handlePasswordReset}
+              disabled={resetLoading}
+              className="w-full text-sm font-semibold text-stone-600 transition-colors hover:text-stone-900 disabled:opacity-50"
+            >
+              {resetLoading ? 'Sending reset link...' : 'Forgot or need to set your password?'}
             </button>
           </form>
 
