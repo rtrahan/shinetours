@@ -169,6 +169,107 @@ export default function GallerySplatViewer({
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const canTouch = window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 767px)').matches
+    const stage = stageRef.current
+
+    if (prefersReducedMotion || !canTouch || !stage) return
+
+    let isTracking = false
+    let isHorizontalDrag = false
+    let isVerticalScroll = false
+    let startX = 0
+    let startY = 0
+    let startOffsetX = 0
+    let settleFrame = 0
+
+    const clamp = (value: number) => Math.max(-1, Math.min(1, value))
+
+    const applyTouchParallax = (offsetX: number) => {
+      pointerCurrentRef.current = { x: offsetX, y: 0 }
+      setParallaxCamera(-offsetX, 0)
+      applyImageTransform()
+    }
+
+    const settleTouchParallax = () => {
+      const current = pointerCurrentRef.current
+      current.x += (0 - current.x) * 0.16
+      current.y = 0
+
+      setParallaxCamera(-current.x, 0)
+      applyImageTransform()
+
+      if (Math.abs(current.x) > 0.01) {
+        settleFrame = requestAnimationFrame(settleTouchParallax)
+      } else {
+        applyTouchParallax(0)
+      }
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return
+
+      cancelAnimationFrame(settleFrame)
+      isTracking = true
+      isHorizontalDrag = false
+      isVerticalScroll = false
+      startX = event.clientX
+      startY = event.clientY
+      startOffsetX = pointerCurrentRef.current.x
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!isTracking) return
+
+      const deltaX = event.clientX - startX
+      const deltaY = event.clientY - startY
+      const absX = Math.abs(deltaX)
+      const absY = Math.abs(deltaY)
+
+      if (!isHorizontalDrag && !isVerticalScroll) {
+        if (absX < 8 && absY < 8) return
+        if (absY > absX * 1.15) {
+          isVerticalScroll = true
+          return
+        }
+        isHorizontalDrag = true
+      }
+
+      if (!isHorizontalDrag) return
+
+      event.preventDefault()
+      applyTouchParallax(clamp(startOffsetX + deltaX / 160))
+    }
+
+    const handlePointerEnd = () => {
+      if (!isTracking) return
+
+      const shouldSettle = isHorizontalDrag
+      isTracking = false
+      isHorizontalDrag = false
+      isVerticalScroll = false
+
+      if (shouldSettle) {
+        cancelAnimationFrame(settleFrame)
+        settleFrame = requestAnimationFrame(settleTouchParallax)
+      }
+    }
+
+    stage.addEventListener('pointerdown', handlePointerDown)
+    stage.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerEnd)
+    window.addEventListener('pointercancel', handlePointerEnd)
+
+    return () => {
+      cancelAnimationFrame(settleFrame)
+      stage.removeEventListener('pointerdown', handlePointerDown)
+      stage.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerEnd)
+      window.removeEventListener('pointercancel', handlePointerEnd)
+    }
+  }, [])
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion) return
 
     let ticking = false
@@ -344,7 +445,7 @@ export default function GallerySplatViewer({
 
   if (useFallback) {
     return (
-      <div ref={stageRef} className={`relative overflow-hidden ${stageBackgroundClass} ${className}`}>
+      <div ref={stageRef} style={{ touchAction: 'pan-y' }} className={`relative overflow-hidden ${stageBackgroundClass} ${className}`}>
         <img
           ref={imageRef}
           src={fallbackSrc}
@@ -357,7 +458,7 @@ export default function GallerySplatViewer({
   }
 
   return (
-    <div ref={stageRef} className={`relative overflow-hidden ${stageBackgroundClass} ${className}`}>
+    <div ref={stageRef} style={{ touchAction: 'pan-y' }} className={`relative overflow-hidden ${stageBackgroundClass} ${className}`}>
       <div
         ref={containerRef}
         style={{ backgroundColor: viewerBackground }}
