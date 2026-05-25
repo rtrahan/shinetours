@@ -293,7 +293,7 @@ export default function Home() {
         </div>
 
         <header className={`hero-menu absolute inset-x-0 top-4 z-40 px-4 md:top-6 md:px-8 ${heroMenuReady ? 'hero-menu-ready' : ''}`}>
-          <div className="mx-auto flex max-w-[1180px] items-center justify-between gap-4 rounded-full border border-white/15 bg-stone-950/25 px-4 py-3 shadow-2xl shadow-black/20 backdrop-blur-2xl md:px-5">
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 rounded-full border border-white/15 bg-stone-950/25 px-4 py-3 shadow-2xl shadow-black/20 backdrop-blur-2xl md:px-5">
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10">
                 <svg className="w-5 h-5 text-white/90 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 24 24">
@@ -433,7 +433,7 @@ export default function Home() {
           )}
 
           {/* Hero overlay content */}
-          <div className="relative w-full max-w-[1600px] mx-auto text-center">
+          <div className="relative w-full max-w-[1400px] mx-auto text-center">
             <div
               className={`pointer-events-none absolute left-1/2 top-1/2 h-[32rem] w-[58rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl ${
                 isLightTheme
@@ -510,33 +510,47 @@ export default function Home() {
 
       <div
         className={`relative overflow-hidden px-4 transition-colors duration-300 md:px-8 ${
-          isLightTheme ? 'mt-0 bg-[#faf7f0] pt-16 pb-0 md:pt-20 md:pb-0' : 'mt-0 bg-[#050505] pt-16 pb-12 md:pt-20 md:pb-16'
+          isLightTheme ? 'mt-0 bg-[#faf7f0] pt-16 pb-12 md:pt-24 md:pb-20' : 'mt-0 bg-[#050505] pt-16 pb-12 md:pt-24 md:pb-20'
         }`}
       >
         <div className="pointer-events-none absolute left-[-12%] top-48 h-80 w-80 rounded-full bg-amber-200/5 blur-3xl" />
         <div className="pointer-events-none absolute right-[-10%] top-[34rem] h-96 w-96 rounded-full bg-emerald-300/5 blur-3xl" />
-        <div className="relative mx-auto w-full max-w-[1600px]">
+        <div className="relative mx-auto w-full max-w-[1400px]">
           {/* Booking Section */}
-          <div className="mx-auto mb-4 max-w-[1600px] md:mb-5">
+          <div className="mx-auto mb-4 max-w-[1400px] md:mb-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="mb-1.5 inline-flex rounded-full border border-amber-200/15 bg-amber-200/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-amber-100/70">
+                <p className={`mb-1.5 inline-flex rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] ${
+                  isLightTheme
+                    ? 'border-amber-300/40 bg-amber-100/50 text-amber-800'
+                    : 'border-amber-200/15 bg-amber-200/5 text-amber-100/70'
+                }`}>
                   Step 1
                 </p>
-                <h2 className="heading-font text-4xl font-light leading-none tracking-[-0.04em] text-white md:text-[2.5rem]">
+                <h2 className={`heading-font text-4xl font-light leading-none tracking-[-0.04em] md:text-[2.5rem] ${
+                  isLightTheme ? 'text-stone-900' : 'text-white'
+                }`}>
                   Choose a Date
                 </h2>
-                <p className="mt-1.5 max-w-2xl text-sm leading-5 text-stone-400">
+                <p className={`mt-1.5 max-w-2xl text-sm leading-5 ${
+                  isLightTheme ? 'text-stone-600' : 'text-stone-400'
+                }`}>
                   Select an available museum day, then share your party details so we can submit the request to Yale.
                 </p>
               </div>
-              <div className="hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-right md:block">
+              <div className={`hidden rounded-2xl border px-4 py-2.5 text-right md:block ${
+                isLightTheme
+                  ? 'border-stone-200 bg-white/[0.5]'
+                  : 'border-white/10 bg-white/[0.04]'
+              }`}>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">Museum Days</p>
-                <p className="mt-1 text-sm font-medium text-stone-200">Tuesday through Sunday</p>
+                <p className={`mt-1 text-sm font-medium ${
+                  isLightTheme ? 'text-stone-800' : 'text-stone-200'
+                }`}>Tuesday through Sunday</p>
               </div>
             </div>
           </div>
-          <div id="booking-section" className="mx-auto grid max-w-[1600px] scroll-mt-20 grid-cols-1 gap-5 md:grid-cols-5 md:items-start md:gap-5">
+          <div id="booking-section" className="mx-auto grid max-w-[1400px] scroll-mt-20 grid-cols-1 gap-5 md:grid-cols-5 md:items-start md:gap-5">
             {/* Calendar - Takes 3 columns on desktop, full width on mobile */}
             <div className="md:col-span-3">
               <Calendar 
@@ -564,15 +578,27 @@ export default function Home() {
                   onSuccess={handleBookingSuccess}
                 />
               ) : (
-                <div className="flex h-full min-h-[220px] items-center justify-center rounded-3xl border border-white/10 bg-white/[0.055] p-6 shadow-2xl shadow-black/20 backdrop-blur-sm md:min-h-[240px] md:p-7">
+                <div className={`flex h-full min-h-[220px] items-center justify-center rounded-3xl border p-6 shadow-2xl backdrop-blur-sm md:min-h-[240px] md:p-7 ${
+                  isLightTheme
+                    ? 'border-stone-200/80 bg-white/[0.82] shadow-stone-300/30'
+                    : 'border-white/10 bg-white/[0.055] shadow-black/20'
+                }`}>
                   <div className="text-center max-w-sm">
-                    <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/10 text-stone-300">
+                    <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-full border ${
+                      isLightTheme
+                        ? 'border-stone-200 bg-stone-100 text-stone-600'
+                        : 'border-white/10 bg-white/10 text-stone-300'
+                    }`}>
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                       </svg>
                     </div>
-                    <h3 className="heading-font mb-1.5 text-2xl font-light tracking-[-0.03em] text-white md:text-3xl">Select a Date</h3>
-                    <p className="text-sm leading-5 text-stone-400">
+                    <h3 className={`heading-font mb-1.5 text-2xl font-light tracking-[-0.03em] md:text-3xl ${
+                      isLightTheme ? 'text-stone-900' : 'text-white'
+                    }`}>Select a Date</h3>
+                    <p className={`text-sm leading-5 ${
+                      isLightTheme ? 'text-stone-600' : 'text-stone-400'
+                    }`}>
                       Pick an available day from the calendar to open the tour request form.
                     </p>
                   </div>
@@ -583,27 +609,50 @@ export default function Home() {
 
           {/* Visitor Information Section */}
           <div id="visitor-info" className="mt-14 md:mt-20 max-w-[1400px] mx-auto scroll-mt-24">
-            <div className="bg-white/[0.06] border border-white/10 rounded-2xl shadow-2xl shadow-black/20 overflow-hidden backdrop-blur-sm">
+            <div className={`border rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm ${
+              isLightTheme
+                ? 'bg-white/[0.72] border-stone-200/80 shadow-stone-300/20'
+                : 'bg-white/[0.06] border-white/10 shadow-black/20'
+            }`}>
               {/* Header */}
-              <div className="p-6 md:p-8 border-b border-white/10 bg-white/[0.04]">
-                <h2 className="heading-font text-3xl md:text-4xl font-light text-white mb-2">
+              <div className={`p-6 md:p-8 border-b ${
+                isLightTheme
+                  ? 'border-stone-200/80 bg-stone-50/50'
+                  : 'border-white/10 bg-white/[0.04]'
+              }`}>
+                <p className={`text-[10px] font-bold uppercase tracking-[0.24em] mb-1.5 ${
+                  isLightTheme ? 'text-amber-800' : 'text-amber-100/60'
+                }`}>
+                  Plan Your Visit
+                </p>
+                <h2 className={`heading-font text-3xl md:text-4xl font-light mb-1 ${
+                  isLightTheme ? 'text-stone-900' : 'text-white'
+                }`}>
                   Visitor Information
                 </h2>
-                <p className="text-sm md:text-base text-stone-400">Everything you need to know for your tour</p>
+                <p className={`text-sm md:text-base ${
+                  isLightTheme ? 'text-stone-500' : 'text-stone-400'
+                }`}>Everything you need to know for your tour</p>
               </div>
 
               <div className="p-6 md:p-8">
                 {/* How Tour Requests Work */}
-                <div className="mb-6 md:mb-8 bg-sky-400/10 border border-sky-300/15 border-l-4 border-l-sky-300/70 p-4 md:p-5 rounded-xl shadow-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-full bg-sky-300/15 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <div className={`mb-6 md:mb-8 border p-5 rounded-xl shadow-sm ${
+                  isLightTheme
+                    ? 'bg-sky-50/80 border-sky-100/90'
+                    : 'bg-[#0f1b2d]/45 border-sky-500/10'
+                }`}>
+                  <div className="flex items-start gap-4">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      isLightTheme ? 'bg-sky-100/90 text-sky-800' : 'bg-sky-400/10 text-sky-300'
+                    }`}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-bold text-sky-100 mb-2">How Tour Requests Work</h3>
-                      <p className="text-sm text-sky-100/75 leading-relaxed">
+                      <h3 className={`heading-font text-lg font-medium mb-1.5 ${isLightTheme ? 'text-sky-950' : 'text-sky-100'}`}>How Tour Requests Work</h3>
+                      <p className={`text-sm leading-relaxed ${isLightTheme ? 'text-sky-900/90' : 'text-sky-100/75'}`}>
                         When you submit a tour request, you'll be grouped with other visitors requesting the same date (groups of 10-15 people). 
                         We then submit your tour request to Yale University Art Gallery for approval. Once Yale assigns a time slot, 
                         you'll receive a confirmation email with all the details.
@@ -615,131 +664,214 @@ export default function Home() {
                 {/* Info Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {/* Location & Parking */}
-                  <div className="bg-white/[0.05] border border-white/10 rounded-xl p-5 md:p-6 shadow-sm hover:bg-white/[0.07] transition-colors">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-stone-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <div className={`border rounded-xl p-6 md:p-7 shadow-sm transition-colors duration-200 ${
+                    isLightTheme
+                      ? 'bg-white/[0.6] border-stone-200/60 hover:bg-white/[0.85] hover:border-stone-300/80 hover:shadow-md'
+                      : 'bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.06] hover:border-white/15 hover:shadow-md'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                        isLightTheme ? 'bg-stone-100 text-stone-600' : 'bg-white/10 text-stone-200'
+                      }`}>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                       </div>
-                      <h3 className="font-bold text-stone-100 uppercase text-xs tracking-wider">Location & Parking</h3>
+                      <h3 className={`heading-font text-xl font-light ${
+                        isLightTheme ? 'text-stone-900' : 'text-stone-100'
+                      }`}>Location & Parking</h3>
                     </div>
-                    <div className="space-y-3 text-sm">
+                    <div className="space-y-4 text-sm">
                       <div>
-                        <p className="font-semibold text-white">Yale University Art Gallery</p>
-                        <p className="text-stone-400">1111 Chapel St, New Haven, CT</p>
+                        <h4 className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">Museum Address</h4>
+                        <p className={`font-semibold ${isLightTheme ? 'text-stone-900' : 'text-white'}`}>Yale University Art Gallery</p>
+                        <p className={isLightTheme ? 'text-stone-600' : 'text-stone-400'}>1111 Chapel St, New Haven, CT</p>
                       </div>
-                      <div>
-                        <p className="font-semibold text-white">Parking</p>
-                        <p className="text-stone-400">150 York St, New Haven, CT</p>
+                      <div className="pt-3 border-t border-stone-100 dark:border-white/[0.06]">
+                        <h4 className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">Recommended Parking</h4>
+                        <p className={`font-semibold ${isLightTheme ? 'text-stone-900' : 'text-white'}`}>Chapel-York Garage</p>
+                        <p className={isLightTheme ? 'text-stone-600' : 'text-stone-400'}>150 York St, New Haven, CT</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Museum & Attractions */}
-                  <div className="bg-amber-300/10 border border-amber-200/15 rounded-xl p-5 md:p-6 shadow-sm hover:bg-amber-300/15 transition-colors">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-9 h-9 rounded-full bg-amber-200/15 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-amber-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                  <div className={`border rounded-xl p-6 md:p-7 shadow-sm transition-colors duration-200 ${
+                    isLightTheme
+                      ? 'bg-amber-50/40 border-amber-200/60 hover:bg-amber-50/70 hover:border-amber-300 hover:shadow-md'
+                      : 'bg-amber-950/[0.12] border-amber-500/[0.12] hover:bg-amber-950/[0.18] hover:border-amber-500/25 hover:shadow-md'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                        isLightTheme ? 'bg-amber-100 text-amber-800' : 'bg-amber-200/15 text-amber-100'
+                      }`}>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
                       </div>
-                      <h3 className="font-bold text-amber-100 uppercase text-xs tracking-wider">Museum & Attractions</h3>
+                      <h3 className={`heading-font text-xl font-light ${
+                        isLightTheme ? 'text-amber-900' : 'text-amber-100'
+                      }`}>Museum & Attractions</h3>
                     </div>
-                    <p className="text-sm text-amber-50/75 mb-3 leading-relaxed">
-                      Explore world-class collections spanning centuries of artistic achievement. New Haven offers 
-                      excellent dining and cultural attractions within walking distance.
-                    </p>
-                    <a 
-                      href="https://artgallery.yale.edu" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-amber-100 hover:text-white"
-                    >
-                      Visit Gallery Website
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                      </svg>
-                    </a>
+                    <div className="space-y-4">
+                      <p className={`text-sm leading-relaxed ${
+                        isLightTheme ? 'text-stone-700' : 'text-amber-50/70'
+                      }`}>
+                        Explore world-class collections spanning centuries of artistic achievement. New Haven offers 
+                        excellent dining and cultural attractions within walking distance.
+                      </p>
+                      <div className="pt-2">
+                        <a 
+                          href="https://artgallery.yale.edu" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`inline-flex items-center gap-2 text-sm font-semibold group transition-all ${
+                            isLightTheme ? 'text-amber-800 hover:text-amber-950' : 'text-amber-100 hover:text-white'
+                          }`}
+                        >
+                          <span>Visit Gallery Website</span>
+                          <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Tour Details */}
-                  <div className="bg-white/[0.05] border border-white/10 rounded-xl p-5 md:p-6 shadow-sm hover:bg-white/[0.07] transition-colors">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-stone-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  <div className={`border rounded-xl p-6 md:p-7 shadow-sm transition-colors duration-200 ${
+                    isLightTheme
+                      ? 'bg-white/[0.6] border-stone-200/60 hover:bg-white/[0.85] hover:border-stone-300/80 hover:shadow-md'
+                      : 'bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.06] hover:border-white/15 hover:shadow-md'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                        isLightTheme ? 'bg-stone-100 text-stone-600' : 'bg-white/10 text-stone-200'
+                      }`}>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                       </div>
-                      <h3 className="font-bold text-stone-100 uppercase text-xs tracking-wider">Tour Details</h3>
+                      <h3 className={`heading-font text-xl font-light ${
+                        isLightTheme ? 'text-stone-900' : 'text-stone-100'
+                      }`}>Tour Details</h3>
                     </div>
-                    <div className="space-y-2.5 text-sm">
-                      <div className="flex justify-between gap-4 border-b border-white/10 pb-2">
-                        <span className="text-stone-400">Duration:</span>
-                        <span className="font-semibold text-white">1.5 hours</span>
+                    <div className="space-y-3.5 text-sm">
+                      <div className={`flex justify-between gap-4 border-b pb-2.5 ${
+                        isLightTheme ? 'border-stone-100' : 'border-white/[0.06]'
+                      }`}>
+                        <span className="font-semibold uppercase tracking-wider text-[10px] text-stone-400 dark:text-stone-500">Duration</span>
+                        <span className={`font-semibold ${isLightTheme ? 'text-stone-900' : 'text-white'}`}>1.5 hours</span>
                       </div>
-                      <div className="flex justify-between gap-4 border-b border-white/10 pb-2">
-                        <span className="text-stone-400">Group Size:</span>
-                        <span className="font-semibold text-white">Maximum 15 people</span>
+                      <div className={`flex justify-between gap-4 border-b pb-2.5 ${
+                        isLightTheme ? 'border-stone-100' : 'border-white/[0.06]'
+                      }`}>
+                        <span className="font-semibold uppercase tracking-wider text-[10px] text-stone-400 dark:text-stone-500">Group Size</span>
+                        <span className={`font-semibold ${isLightTheme ? 'text-stone-900' : 'text-white'}`}>Maximum 15 people</span>
                       </div>
-                      <div className="flex justify-between gap-4 border-b border-white/10 pb-2">
-                        <span className="text-stone-400">Availability:</span>
-                        <span className="font-semibold text-white">Museum open Tue-Sun</span>
+                      <div className={`flex justify-between gap-4 border-b pb-2.5 ${
+                        isLightTheme ? 'border-stone-100' : 'border-white/[0.06]'
+                      }`}>
+                        <span className="font-semibold uppercase tracking-wider text-[10px] text-stone-400 dark:text-stone-500">Availability</span>
+                        <span className={`font-semibold ${isLightTheme ? 'text-stone-900' : 'text-white'}`}>Museum open Tue-Sun</span>
                       </div>
                       <div className="flex justify-between gap-4">
-                        <span className="text-stone-400">Approval:</span>
-                        <span className="font-semibold text-white">By Yale</span>
+                        <span className="font-semibold uppercase tracking-wider text-[10px] text-stone-400 dark:text-stone-500">Approval</span>
+                        <span className={`font-semibold ${isLightTheme ? 'text-stone-900' : 'text-white'}`}>By Yale University</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Visitor Guidelines */}
-                  <div className="bg-white/[0.05] border border-white/10 rounded-xl p-5 md:p-6 shadow-sm hover:bg-white/[0.07] transition-colors">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-stone-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  <div className={`border rounded-xl p-6 md:p-7 shadow-sm transition-colors duration-200 ${
+                    isLightTheme
+                      ? 'bg-white/[0.6] border-stone-200/60 hover:bg-white/[0.85] hover:border-stone-300/80 hover:shadow-md'
+                      : 'bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.06] hover:border-white/15 hover:shadow-md'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                        isLightTheme ? 'bg-stone-100 text-stone-600' : 'bg-white/10 text-stone-200'
+                      }`}>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                       </div>
-                      <h3 className="font-bold text-stone-100 uppercase text-xs tracking-wider">Visitor Guidelines</h3>
+                      <h3 className={`heading-font text-xl font-light ${
+                        isLightTheme ? 'text-stone-800' : 'text-stone-100'
+                      }`}>Visitor Guidelines</h3>
                     </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        <span className="text-stone-300">FREE admission</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mt-0.5">
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`font-semibold leading-tight ${isLightTheme ? 'text-stone-800' : 'text-stone-200'}`}>FREE admission</p>
+                          <p className={`text-[11px] mt-0.5 leading-tight ${isLightTheme ? 'text-stone-500' : 'text-stone-400'}`}>No tickets or reservations required</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        <span className="text-stone-300">Wheelchair accessible</span>
+
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mt-0.5">
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`font-semibold leading-tight ${isLightTheme ? 'text-stone-800' : 'text-stone-200'}`}>Wheelchair accessible</p>
+                          <p className={`text-[11px] mt-0.5 leading-tight ${isLightTheme ? 'text-stone-500' : 'text-stone-400'}`}>Full access via Chapel St elevator</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        <span className="text-stone-300">Casual dress</span>
+
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mt-0.5">
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`font-semibold leading-tight ${isLightTheme ? 'text-stone-800' : 'text-stone-200'}`}>Casual dress</p>
+                          <p className={`text-[11px] mt-0.5 leading-tight ${isLightTheme ? 'text-stone-500' : 'text-stone-400'}`}>Comfortable walking shoes recommended</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                        <span className="text-stone-300">No large bags</span>
+
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 mt-0.5">
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`font-semibold leading-tight ${isLightTheme ? 'text-stone-800' : 'text-stone-200'}`}>No large bags</p>
+                          <p className={`text-[11px] mt-0.5 leading-tight ${isLightTheme ? 'text-stone-500' : 'text-stone-400'}`}>Backpacks & bags &gt; 11" x 15" must be checked</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                        <span className="text-stone-300">No food/drink</span>
+
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 mt-0.5">
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`font-semibold leading-tight ${isLightTheme ? 'text-stone-800' : 'text-stone-200'}`}>No food/drink</p>
+                          <p className={`text-[11px] mt-0.5 leading-tight ${isLightTheme ? 'text-stone-500' : 'text-stone-400'}`}>Not permitted in gallery spaces</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                        <span className="text-stone-300">Don't touch art</span>
+
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 mt-0.5">
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`font-semibold leading-tight ${isLightTheme ? 'text-stone-800' : 'text-stone-200'}`}>Don't touch art</p>
+                          <p className={`text-[11px] mt-0.5 leading-tight ${isLightTheme ? 'text-stone-500' : 'text-stone-400'}`}>Please maintain a safe 3-foot distance</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -754,18 +886,24 @@ export default function Home() {
             <button
               type="button"
               onClick={handleStaffLogin}
-              className="inline-block px-8 py-3 bg-white/10 text-white text-sm font-semibold rounded-full border border-white/10 hover:bg-white/15 transition-colors shadow-md hover:shadow-lg"
+              className={`inline-block px-8 py-3 text-sm font-semibold rounded-full border transition-all shadow-md hover:shadow-lg ${
+                isLightTheme
+                  ? 'bg-stone-900 text-[#faf7f0] border-stone-900 hover:bg-stone-800'
+                  : 'bg-white/10 text-white border-white/10 hover:bg-white/15'
+              }`}
             >
               Staff Login →
             </button>
-            <p className="text-xs text-stone-400 mt-3">Admins and guides login here</p>
+            <p className={`text-xs mt-3 ${
+              isLightTheme ? 'text-stone-500' : 'text-stone-400'
+            }`}>Admins and guides login here</p>
           </div>
         </div>
       </div>
 
       {/* Footer */}
       <footer className={`mt-10 border-t transition-colors duration-300 md:mt-12 ${isLightTheme ? 'border-stone-900/10 bg-white/65' : 'border-white/10 bg-black/20'}`}>
-        <div className="mx-auto max-w-[1800px] px-4 py-8 md:px-8">
+        <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-8">
           <div className="flex flex-col items-center justify-between gap-5 text-center md:flex-row md:text-left">
             <p className={`text-sm ${isLightTheme ? 'text-stone-600' : 'text-stone-500'}`}>© 2025 Shine Tours. All rights reserved.</p>
             <div className="flex flex-col items-center gap-2 md:items-end">
