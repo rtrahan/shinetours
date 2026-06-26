@@ -1,4 +1,4 @@
-# ShineTours - Next.js + Supabase + Vercel
+# Light & Truth - Next.js + Supabase + Vercel
 
 **Status:** 🚧 In Progress - Converting from ASP.NET Core to Next.js
 

@@ -24,7 +24,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white/95 px-6 py-4 backdrop-blur">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-stone-400">Shine Tours</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-stone-400">Light & Truth</p>
             <h3 className="heading-font text-3xl font-light tracking-[-0.04em] text-stone-900">{title}</h3>
           </div>
           <button 

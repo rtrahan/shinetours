@@ -81,7 +81,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="heading-font text-4xl font-light text-stone-800 mb-2">Staff Login</h1>
-          <p className="text-stone-600 text-sm">Shine Tours</p>
+          <p className="text-stone-600 text-sm">Light & Truth</p>
         </div>
 
         {/* Login Form */}

@@ -201,7 +201,7 @@ export default function UsersPage() {
       <div className="flex min-h-screen items-center justify-center bg-[#050505]">
         <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-6 py-5 text-center shadow-2xl shadow-black/30">
           <p className="heading-font text-2xl font-light text-white">Loading users...</p>
-          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">Shine Tours</p>
+          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">Light & Truth</p>
         </div>
       </div>
     )

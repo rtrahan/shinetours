@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     const result = await sendEmail({
       to: email,
-      subject: 'Tour Request Received - Shine Tours',
+      subject: 'Tour Request Received - Light & Truth',
       html: bookingConfirmationEmail({
         contactName: name,
         tourDate: formattedDate,

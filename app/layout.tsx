@@ -16,18 +16,18 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Shine Tours - Yale Art Gallery Tours",
-    template: "%s | Shine Tours",
+    default: "Light & Truth - Yale Art Gallery Tours",
+    template: "%s | Light & Truth",
   },
   description: "Book a guided Yale University Art Gallery tour exploring art, history, archaeology, and the world of the Bible.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Shine Tours - Yale Art Gallery Tours",
+    title: "Light & Truth - Yale Art Gallery Tours",
     description: "Book a guided Yale University Art Gallery tour exploring art, history, archaeology, and the world of the Bible.",
     url: "/",
-    siteName: "Shine Tours",
+    siteName: "Light & Truth",
     images: [
       {
         url: "/20240917_yale.jpg",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Shine Tours - Yale Art Gallery Tours",
+    title: "Light & Truth - Yale Art Gallery Tours",
     description: "Book a guided Yale University Art Gallery tour exploring art, history, archaeology, and the world of the Bible.",
     images: ["/20240917_yale.jpg"],
   },

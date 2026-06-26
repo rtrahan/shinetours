@@ -30,7 +30,7 @@ export async function sendEmail({ to, subject, html, from, fromName }: EmailPara
           {
             From: {
               Email: from || process.env.FROM_EMAIL || 'noreply@shinetours.com',
-              Name: fromName || 'Shine Tours - Yale Art Gallery'
+              Name: fromName || 'Light & Truth - Yale Art Gallery'
             },
             To: [
               {
@@ -52,7 +52,7 @@ export async function sendEmail({ to, subject, html, from, fromName }: EmailPara
 
 // Email templates
 
-const BRAND_NAME = 'Shine Tours'
+const BRAND_NAME = 'Light & Truth'
 const BRAND_SUBTITLE = 'Yale University Art Gallery Tours'
 const LOCATION = 'New Haven, Connecticut'
 const DEFAULT_CONTACT_EMAIL = 'tours@shinetours.com'
@@ -261,7 +261,7 @@ export function bookingConfirmationEmail(params: {
     subtitle: 'We will review the date, group the request if needed, and submit it to Yale for approval.',
     body: `
       ${paragraph(`Dear ${contactName},`)}
-      ${paragraph('Thank you for requesting a guided visit with Shine Tours. We have received your request and will handle the next steps with care.')}
+      ${paragraph(`Thank you for requesting a guided visit with ${BRAND_NAME}. We have received your request and will handle the next steps with care.`)}
       ${detailCard('Request Details', [
         { label: 'Date', value: tourDate },
         { label: 'Party Size', value: escapeHtml(peopleLabel(params.groupSize)) },
@@ -369,7 +369,7 @@ export function adminNewRequestEmail(params: {
     title: 'New Tour Request',
     subtitle: 'A visitor has submitted a new request that may need grouping or guide assignment.',
     body: `
-      ${paragraph('A new tour request has been submitted through the Shine Tours booking form.')}
+      ${paragraph(`A new tour request has been submitted through the ${BRAND_NAME} booking form.`)}
       ${detailCard('Request Details', details)}
       ${notice(
         'Date Summary',

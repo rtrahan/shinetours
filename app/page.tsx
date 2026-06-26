@@ -16,55 +16,15 @@ const GallerySplatViewer = dynamic(() => import('@/components/GallerySplatViewer
 type ThemePreference = 'system' | 'light' | 'dark'
 type ResolvedTheme = 'light' | 'dark'
 
-const THEME_STORAGE_KEY = 'shine-tours-theme-preference'
+const THEME_STORAGE_KEY = 'light-truth-theme-preference'
 const THEME_OPTIONS: Array<{ value: ThemePreference; label: string }> = [
   { value: 'system', label: 'System' },
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
 ]
 
-const HERO_IMAGES = [
-  {
-    id: 'yale-interior',
-    label: 'Gallery Interior',
-    description: 'A guided look at how art, archaeology, and the ancient world illuminate the Scriptures.',
-    src: '/20240917_yale.jpg',
-    splatUrl: '/gaussians/20240917_yale.ksplat',
-    sceneScale: 1,
-    hasSplat: true,
-  },
-  {
-    id: 'gallery-exterior',
-    label: 'Gallery Exterior',
-    description: 'Step outside to appreciate the stunning modernist architecture and elegant facades.',
-    src: '/Yale_University_Art_Gallery_exterior.jpg',
-    splatUrl: '/gaussians/Yale_University_Art_Gallery_exterior.ksplat',
-    sceneScale: 0.18,
-    hasSplat: true,
-  },
-  {
-    id: 'sculpture-hall',
-    label: 'Sculpture Hall',
-    description: 'Explore the majestic sculptures, classical geometry, and striking architectural spaces.',
-    src: '/Sculpture_Hall_Yale_University_Art_Gallery_1.JPG',
-    splatUrl: '/gaussians/Sculpture_Hall_Yale_University_Art_Gallery_1.ksplat',
-    sceneScale: 1.0842305421933263,
-    hasSplat: true,
-  },
-  {
-    id: 'gerasa-mosaic',
-    label: 'Gerasa Mosaic',
-    description: 'Examine the ancient, meticulously preserved Gerasa mosaic and trace its world context.',
-    src: '/20240917_gerasa.jpg',
-    splatUrl: '/gaussians/20240917_gerasa.ksplat',
-    sceneScale: 1.377101478043426,
-    hasSplat: true,
-  },
-]
-
 export default function Home() {
   const supabase = createClient()
-  const [selectedHeroImage, setSelectedHeroImage] = useState(HERO_IMAGES[0])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [availableGuides, setAvailableGuides] = useState<any[]>([])
   const [selectedGuideIds, setSelectedGuideIds] = useState<string[]>([])
@@ -306,9 +266,6 @@ export default function Home() {
           <GallerySplatViewer
             className={`${isLightTheme ? 'hero-viewer-fade-light' : 'hero-viewer-fade'} h-full w-full`}
             theme={resolvedTheme}
-            splatUrl={selectedHeroImage.splatUrl}
-            fallbackSrc={selectedHeroImage.src}
-            sceneScale={selectedHeroImage.sceneScale}
             onReady={handleHeroVisualReady}
           />
         </div>
@@ -344,7 +301,7 @@ export default function Home() {
               </svg>
               </div>
               <div className="min-w-0">
-                <p className="heading-font text-xl md:text-[1.6rem] font-medium text-white leading-none tracking-[-0.03em]">Shine Tours</p>
+                <p className="heading-font text-xl md:text-[1.6rem] font-medium text-white leading-none tracking-[-0.03em]">Light & Truth</p>
                 <p className="text-[9px] md:text-[10px] text-white/55 uppercase tracking-[0.24em] truncate">Yale Art Gallery</p>
               </div>
             </div>
@@ -521,47 +478,10 @@ export default function Home() {
               </p>
 
               <div
-                className={`hero-reveal mx-auto mt-7 max-w-2xl text-sm leading-7 md:mt-8 md:text-base transition-all duration-500 ${isLightTheme ? 'text-[#fffaf0]/80' : 'text-white/65'}`}
+                className={`hero-reveal mx-auto mt-7 max-w-2xl text-sm leading-7 md:mt-8 md:text-base ${isLightTheme ? 'text-[#fffaf0]/80' : 'text-white/65'}`}
                 style={{ '--hero-delay': '700ms' } as CSSProperties}
               >
-                {selectedHeroImage.description}
-              </div>
-
-              <div 
-                aria-label="Choose hero image"
-                className="hero-reveal mx-auto mt-8 flex max-w-[92vw] items-center justify-center gap-3 sm:gap-4"
-                style={{ '--hero-delay': '800ms' } as CSSProperties}
-              >
-                {HERO_IMAGES.map((image) => {
-                  const isSelected = selectedHeroImage.id === image.id
-
-                  return (
-                    <button
-                      key={image.id}
-                      type="button"
-                      aria-label={`Show ${image.label}`}
-                      aria-pressed={isSelected}
-                      onClick={() => setSelectedHeroImage(image)}
-                      className={`group relative h-14 w-14 overflow-hidden rounded-full border transition-all duration-300 sm:h-16 sm:w-16 md:h-[4.5rem] md:w-[4.5rem] ${
-                        isSelected
-                          ? 'scale-110 border-white bg-white shadow-2xl shadow-black/40 ring-2 ring-white ring-offset-2 ring-offset-black/30'
-                          : 'border-white/35 bg-black/15 opacity-80 shadow-xl shadow-black/25 hover:scale-105 hover:border-white hover:opacity-100'
-                      }`}
-                    >
-                      <img 
-                        src={image.src} 
-                        alt=""
-                        aria-hidden="true"
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <span className={`pointer-events-none absolute inset-0 rounded-full transition-opacity ${
-                        isSelected
-                          ? 'bg-[radial-gradient(circle_at_center,rgba(255,255,255,0)_45%,rgba(255,255,255,0.35)_100%)] opacity-100'
-                          : 'bg-black/10 opacity-0 group-hover:opacity-100'
-                      }`} />
-                    </button>
-                  )
-                })}
+                A guided look at how art, archaeology, and the ancient world illuminate the Scriptures.
               </div>
 
               <button
@@ -569,7 +489,7 @@ export default function Home() {
                   document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' })
                 }}
                 className="hero-reveal group mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-stone-950 shadow-xl transition-all hover:-translate-y-0.5 hover:bg-stone-100 hover:shadow-2xl md:mt-10 md:px-9 md:py-4 md:text-base"
-                style={{ '--hero-delay': '900ms' } as CSSProperties}
+                style={{ '--hero-delay': '840ms' } as CSSProperties}
               >
                 Book a Tour
                 <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -985,7 +905,7 @@ export default function Home() {
       <footer className={`mt-10 border-t transition-colors duration-300 md:mt-12 ${isLightTheme ? 'border-stone-900/10 bg-white/65' : 'border-white/10 bg-black/20'}`}>
         <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-8">
           <div className="flex flex-col items-center justify-between gap-5 text-center md:flex-row md:text-left">
-            <p className={`text-sm ${isLightTheme ? 'text-stone-600' : 'text-stone-500'}`}>© 2025 Shine Tours. All rights reserved.</p>
+            <p className={`text-sm ${isLightTheme ? 'text-stone-600' : 'text-stone-500'}`}>© 2025 Light & Truth. All rights reserved.</p>
             <div className="flex flex-col items-center gap-2 md:items-end">
               <p className={`text-[10px] font-bold uppercase tracking-[0.22em] ${isLightTheme ? 'text-stone-500' : 'text-stone-500'}`}>
                 Theme

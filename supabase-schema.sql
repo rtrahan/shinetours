@@ -1,4 +1,4 @@
--- Supabase Database Schema for ShineTours
+-- Supabase Database Schema for Light & Truth
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

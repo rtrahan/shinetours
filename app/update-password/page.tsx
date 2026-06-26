@@ -113,7 +113,7 @@ export default function UpdatePasswordPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="heading-font mb-2 text-4xl font-light text-stone-800">Set New Password</h1>
-          <p className="text-sm text-stone-600">Shine Tours staff access</p>
+          <p className="text-sm text-stone-600">Light & Truth staff access</p>
         </div>
 
         <div className="rounded-xl border border-stone-200 bg-white p-8 shadow-sm">

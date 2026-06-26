@@ -6,7 +6,6 @@ interface GallerySplatViewerProps {
   className?: string
   splatUrl?: string
   fallbackSrc?: string
-  sceneScale?: number
   theme?: 'light' | 'dark'
   onReady?: () => void
 }
@@ -20,7 +19,6 @@ export default function GallerySplatViewer({
   className = '',
   splatUrl = '/gaussians/20240917_yale.ksplat',
   fallbackSrc = '/20240917_yale.jpg',
-  sceneScale = 1,
   theme = 'dark',
   onReady,
 }: GallerySplatViewerProps) {
@@ -402,7 +400,7 @@ export default function GallerySplatViewer({
             showLoadingUI: false,
             progressiveLoad: isMobile,
             position: [0, 0, 0],
-            scale: [sceneScale, sceneScale, sceneScale],
+            scale: [1, 1, 1],
           })
           .catch((err: unknown) => {
             if (!disposed) throw err
@@ -447,7 +445,7 @@ export default function GallerySplatViewer({
         viewerRef.current = null
       }
     }
-  }, [splatUrl, sceneScale])
+  }, [splatUrl])
 
   if (useFallback) {
     return (

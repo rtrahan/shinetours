@@ -30,7 +30,7 @@ export function StaffHeader({ role, active }: StaffHeaderProps) {
           </div>
           <div className="min-w-0">
             <p className="heading-font text-xl font-medium leading-none tracking-[-0.03em] text-white md:text-[1.6rem]">
-              Shine Tours
+              Light & Truth
             </p>
             <p className="truncate text-[9px] uppercase tracking-[0.24em] text-white/55 md:text-[10px]">
               Yale Art Gallery
@@ -60,7 +60,7 @@ export function StaffFooter() {
   return (
     <footer className="border-t border-white/10 bg-black/20">
       <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-3 px-4 py-5 text-xs text-stone-500 md:px-8">
-        <span>Shine Tours staff area</span>
+        <span>Light & Truth staff area</span>
         <button
           onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
           className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-stone-300 transition-colors hover:bg-white/[0.08] hover:text-white"

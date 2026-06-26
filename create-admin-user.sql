@@ -1,4 +1,4 @@
--- Create first admin user for ShineTours
+-- Create first admin user for Light & Truth
 -- Run this in Supabase SQL Editor after running supabase-schema.sql
 
 INSERT INTO guides (
